@@ -1,0 +1,40 @@
+raw_value,standardized,is_null
+N/A,,TRUE
+n/a,,TRUE
+na,,TRUE
+NA,,TRUE
+no,,TRUE
+No,,TRUE
+NO,,TRUE
+None,,TRUE
+none,,TRUE
+NONE,,TRUE
+English,,TRUE
+english,,TRUE
+ENGLISH,,TRUE
+"$21,216",,TRUE
+$21216,,TRUE
+Spanish,Spanish,FALSE
+spanish,Spanish,FALSE
+French,French,FALSE
+french,French,FALSE
+German,German,FALSE
+Arabic,Arabic,FALSE
+Arabic Language,Arabic,FALSE
+Vietnamese,Vietnamese,FALSE
+Sign Language,Sign Language,FALSE
+ASL,Sign Language,FALSE
+American Sign Language,Sign Language,FALSE
+Hindi,Hindi,FALSE
+hindi,Hindi,FALSE
+Urdu,Urdu,FALSE
+Kannada,Kannada,FALSE
+Greek,Greek,FALSE
+Romanian,Romanian,FALSE
+Filipino,Filipino,FALSE
+Tagalog,Filipino,FALSE
+Portuguese,Portuguese,FALSE
+Korean,Korean,FALSE
+Chinese,Chinese,FALSE
+Japanese,Japanese,FALSE
+Swahili,Swahili,FALSE

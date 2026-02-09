@@ -1,0 +1,126 @@
+raw_column,standard_name,type,notes
+Classroom Name,classroom_name,id,
+School Year,school_year,id,
+Classroom Code Static,classroom_code,id,
+Classroom Code Formula,classroom_code_formula,admin,New format only
+Seat Count,seat_count,school_char,New format only
+Region,region,admin,
+County #,county_num,admin,
+Delivery Type,delivery_type,admin,
+Program Code,program_code,admin,
+Site #,site_num,admin,
+Class #,class_num,admin,
+Title I,title_i,school_char,String Y/N/NA
+Turnaround School,turnaround_school,school_char,
+Class Type,class_type,school_char,
+Year First Funded,year_first_funded,school_char,
+Description,description,school_char,
+Gold Curriculum Type,gold_curriculum_type,school_char,New format only
+Gold Class Level,gold_class_level,school_char,New format only
+Fund Source,fund_source,school_char,New format only
+Classroom Grant Amount,classroom_grant,grant,
+Enhancement Grant Amount,enhancement_grant,grant,
+Salary Enhancement Grant Amount,salary_enhancement_grant,grant,
+Equity Grant Amount,equity_grant,grant,
+Total Grant Amount,total_grant,grant,
+Vendor Code,vendor_code,admin,
+Address Code,address_code,admin,
+Program Name,program_name,location,
+Program Street Address,program_street,location,
+Program City,program_city,location,
+Program State,program_state,location,
+Program Zip Code,program_zip,location,
+GOLD Country ID,gold_country_id,admin,
+Program Phone,program_phone,contact,
+Site Name,site_name,location,
+Site Code Static,site_code,id,
+Site Code Formula,site_code_formula,admin,New format only
+County Name,county_name,admin,
+Site Street Address,site_street,location,
+Site City,site_city,location,
+Site State,site_state,location,
+Site Zip Code,site_zip,location,
+Latitude,latitude,location,
+Longitude,longitude,location,
+Site Phone,site_phone,contact,
+Senate District,senate_dist,admin,
+House District,house_dist,admin,
+Site Affiliation ID,site_affiliation_id,admin,New format only
+RD First Name,rd_fname,staff,
+RD Last Name,rd_lname,staff,
+RD Email,rd_email,staff,
+Director FName,director_fname,staff,
+Director LName,director_lname,staff,
+Director Date of Birth,director_dob,staff_pii,New format only
+Director UserName,director_username,staff_pii,New format only
+Director Email,director_email,staff,
+Administrator FName,admin_fname,staff,
+Administrator LName,admin_lname,staff,
+Administrator Date of Birth,admin_dob,staff_pii,New format only
+Administrator UserName,admin_username,staff_pii,New format only
+Administrator Email,admin_email,staff,
+Principal FName,principal_fname,staff,
+Principal LName,principal_lname,staff,
+Principal Date of Birth,principal_dob,staff_pii,New format only
+Principal UserName,principal_username,staff_pii,New format only
+Principal Email,principal_email,staff,
+Assistant Principal FName,asst_principal_fname,staff,
+Assistant Principal LName,asst_principal_lname,staff,Double space before Principal in raw
+Assistant Principal Date of Birth,asst_principal_dob,staff_pii,New format only; double space
+Assistant Principal UserName,asst_principal_username,staff_pii,New format only; double space
+Assistant Principal Email,asst_principal_email,staff,Double space before Principal in raw
+CFO FName,cfo_fname,staff,
+CFO LName,cfo_lname,staff,
+CFO Date of Birth,cfo_dob,staff_pii,New format only
+CFO UserName,cfo_username,staff_pii,New format only
+CFO Email,cfo_email,staff,
+Registrar FName,registrar_fname,staff,
+Registrar LName,registrar_lname,staff,
+Registrar Date of Birth,registrar_dob,staff_pii,New format only
+Registrar UserName,registrar_username,staff_pii,New format only
+Registrar Email,registrar_email,staff,
+Lead Teacher TCert Num,lead_tch_cert_num,teacher_lead,
+Lead Teacher FName,lead_tch_fname,teacher_lead,
+Lead Teacher LName,lead_tch_lname,teacher_lead,
+Lead Teacher Date of Birth,lead_tch_dob,teacher_pii,New format only
+Lead Teacher UserName,lead_tch_username,teacher_pii,New format only
+Lead Teacher Email,lead_tch_email,teacher_lead,
+Lead Teacher Degree/Credential,lead_tch_degree_raw,teacher_lead,Free text field
+Lead Teacher Years OSR Exp,lead_tch_osr_exp,teacher_lead,
+Lead Teacher Total Years Exp,lead_tch_total_exp,teacher_lead,Double space in raw name
+Lead Teacher Race,lead_tch_race_raw,teacher_lead,
+Lead Teacher Ethnicity,lead_tch_ethnicity_raw,teacher_lead,
+Lead Teacher Gender,lead_tch_gender_raw,teacher_lead,
+Lead Teacher Other Fluent Language,lead_tch_fluent_lang_raw,teacher_lead,
+Aux Teacher TCert Num,aux_tch_cert_num,teacher_aux,
+Aux Teacher FName,aux_tch_fname,teacher_aux,
+Aux Teacher LName,aux_tch_lname,teacher_aux,
+Aux Teacher Date of Birth,aux_tch_dob,teacher_pii,New format only
+Aux Teacher User Name,aux_tch_username,teacher_pii,New format only; note space in User Name
+Aux Teacher Email,aux_tch_email,teacher_aux,
+Aux Teacher Degree/Credential,aux_tch_degree_raw,teacher_aux,Free text field
+Aux Teacher Years OSR Exp,aux_tch_osr_exp,teacher_aux,
+Aux Teacher Total Years Exp,aux_tch_total_exp,teacher_aux,
+Aux Teacher Race,aux_tch_race_raw,teacher_aux,
+Aux. Teacher Ethnicity,aux_tch_ethnicity_raw,teacher_aux,Period after Aux in raw name
+Aux Teacher Gender,aux_tch_gender_raw,teacher_aux,
+Aux Teacher Other Fluent Language,aux_tch_fluent_lang_raw,teacher_aux,
+2nd Aux Teacher TCert Num,second_aux_cert_num,teacher_second_aux,
+2nd Aux Teacher FName,second_aux_fname,teacher_second_aux,
+2nd Aux Teacher LName,second_aux_lname,teacher_second_aux,
+2nd Aux Teacher Date of Birth,second_aux_dob,teacher_pii,New format only
+2nd Aux Teacher User Name,second_aux_username,teacher_pii,New format only; note space in User Name
+2nd Aux Teacher Email,second_aux_email,teacher_second_aux,
+2nd Aux Teacher Degree/Credential,second_aux_degree_raw,teacher_second_aux,Free text field
+2nd Aux Teacher Years OSR Exp,second_aux_osr_exp,teacher_second_aux,
+2nd Aux Teacher Total Years Exp,second_aux_total_exp,teacher_second_aux,
+2nd Aux Teacher Race,second_aux_race_raw,teacher_second_aux,
+2nd Aux Teacher Ethnicity,second_aux_ethnicity_raw,teacher_second_aux,
+2nd Aux Teacher Gender,second_aux_gender_raw,teacher_second_aux,
+2nd Aux Teacher Other Fluent Language,second_aux_fluent_lang_raw,teacher_second_aux,
+Monitor FName,monitor_fname,staff,
+Monitor LName,monitor_lname,staff,
+Monitor Email,monitor_email,staff,
+Coach FName,coach_fname,staff,
+Coach LName,coach_lname,staff,
+Coach Email,coach_email,staff,

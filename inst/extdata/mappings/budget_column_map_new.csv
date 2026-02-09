@@ -1,0 +1,13 @@
+raw_column,standard_name,type,notes
+Classroom Name,classroom_name,id,
+Classroom Code,classroom_code,id,
+Budget Version,budget_version,id,Regex match: ^Budget Version
+Total,total_expenditure,total,Total expenditures (after proration)
+OSR Grant Amount,osr_grant_amount,total,Base OSR grant amount
+Proration Total,proration_total,total,Reduction applied to base OSR grant
+"Federal Funds used for Other Funds Expenditures",other_federal,total,
+"Local Funds used for Other Funds Expenditures",other_local,total,
+"Other Funds used for Other Funds Expenditures",other_other,total,
+"Total Federal, Local, and Other Funds used for Other Funds Expenditures",total_other_expenditure,total,
+Total Additional OSR Funds,total_additional_osr_funds,total,
+Total of ALL OSR Grants,total_osr_grants,total,

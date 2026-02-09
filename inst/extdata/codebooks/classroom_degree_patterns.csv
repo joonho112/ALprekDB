@@ -1,0 +1,28 @@
+pattern_type,regex,result,priority,teacher_role,notes
+degree_level,(?i)waiver|wavier,Waiver,100,all,Catches waiver and common misspelling wavier
+degree_level,(?i)doctorate|ph\.?d|ed\.?d,Doctoral degree,90,all,Ph.D. and Ed.D. variants
+degree_level,"(?i)ed\.?\s*s\.?|education specialist",Ed.S.,80,all,EdS Ed.S. Ed. S. variants
+degree_level,"(?i)master|(?i)\bm\.?a\.?t\.?\b",Master's degree,70,all,Includes MAT (Master of Arts in Teaching)
+degree_level,"(?i)bachelor|bachlor|achelor|b\.?s\.?\b|b\.?a\.?\b|interdisciplinary studies|\bdegree\b|(?i)^stc|sciences\b|studies\b|social work\b|\bp.?3\b|consumer science\b|human development",Bachelor's degree,60,all,"Catches 'degree', STC certificates, P-3 cert, named disciplines without explicit level"
+degree_level,"(?i)coursewo|working toward|working on|enrolled|registered|currently|high school|in process|in progress|in the process|in school|obtaining|9 hours|9\s*hrs|credit hours|technical education|pending|diploma|some college|work keys|none\b|will complete|\byrs?\b.*college|\bcollege\b",College Coursework,55,all,"In-progress credentials; includes 'in the process', 'yrs of college', 'will complete'"
+degree_level,"(?i)associate|\bcda\b|child development associate|\baa\b|short.?cert",Associate degree,50,all,"CDA, AA degree, short certificate counted as associate"
+degree_area,"(?i)elementary education.*early childhood|early childhood.*elementary",Elementary Education with ECE Coursework,90,all,Both terms present
+degree_area,"(?i)early childhood education|early childhood ed\.?|\bece\b|p.?3.*early childhood|infant.*toddler|early childhood special edu",Early Childhood Education,80,all,"Includes P-3/P3, infant/toddler, early childhood special ed"
+degree_area,"(?i)elementary education|certified early childhood and elementary",Elementary Education,70,all,
+degree_area,"(?i)child development|human development.*family|human development",Child Development,60,all,Includes Human Development and Family Studies with CD focus
+degree_area,"(?i)special education",Special Education,50,all,
+degree_area,(?i)curriculum.*instruction,Curriculum and Instruction,40,all,
+degree_area,"(?i)family.*(life)?.*studies|consumer science|family.*consumer|social work",Family Studies,30,all,"Includes social work, family/consumer science variants"
+degree_area,(?i)psychology,Psychology,20,all,
+degree_area,"(?i)\benglish\b",English,10,all,English degree
+degree_area_consolidation,Early Childhood Education,Early Childhood Education,1,all,
+degree_area_consolidation,Elementary Education with ECE Coursework,Elementary Education,2,all,
+degree_area_consolidation,Elementary Education,Elementary Education,2,all,
+degree_area_consolidation,Child Development,Child Development,3,all,
+degree_area_consolidation,Psychology,Child Development,3,all,Psychology consolidated into Child Dev
+degree_area_consolidation,Special Education,Special Education,4,all,
+degree_area_consolidation,Curriculum and Instruction,Other,5,all,
+degree_area_consolidation,Family Studies,Other,5,all,
+degree_area_consolidation,English,Other,5,all,
+degree_area_consolidation,Other,Other,5,all,Catch-all
+degree_area_consolidation,Waiver,Waiver,6,all,

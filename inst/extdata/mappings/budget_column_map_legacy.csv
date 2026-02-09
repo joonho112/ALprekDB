@@ -1,0 +1,7 @@
+raw_column,standard_name,type,notes
+Classroom Name,classroom_name,id,
+Classroom Code,classroom_code,id,
+Budget Version,budget_version,id,Regex match: ^Budget Version
+Total From OSR Funds,total_osr_reported,total,
+Total From Additional Sources,total_other_reported,total,
+Grand Total,total_grand_reported,total,

@@ -1,0 +1,247 @@
+---
+title: "Cross-Module Linkage and Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cross-Module Linkage and Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_duckdb <- requireNamespace("duckdb", quietly = TRUE) &&
+              requireNamespace("DBI", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+The Linkage module joins Budget, Classroom, and Student panels into master
+datasets for analysis. This vignette demonstrates the full linkage pipeline
+including student aggregation, derived variables, and DuckDB integration.
+
+```{r load}
+library(ALprekDB)
+```
+
+## Generate Linked Synthetic Data
+
+All three generators share classroom codes when called with the same seed:
+
+```{r synthetic}
+seed <- 42
+nc <- 15
+
+budget <- alprek_synthetic_budget(n_classrooms = nc, n_years = 2, seed = seed)
+classroom <- alprek_synthetic_classroom(n_classrooms = nc, n_years = 2, seed = seed)
+student <- alprek_synthetic_student(n_students = 80, n_classrooms = nc,
+                                     n_years = 2, seed = seed)
+```
+
+Verify shared classroom codes:
+
+```{r verify-codes}
+b_codes <- unique(budget$data$classroom_code)
+c_codes <- unique(classroom$data$classroom_code)
+s_codes <- unique(student$data$classroom_code)
+
+cat("Budget classrooms:", length(b_codes), "\n")
+cat("Classroom classrooms:", length(c_codes), "\n")
+cat("Student classrooms:", length(unique(s_codes)), "\n")
+cat("All student classrooms in classroom panel:",
+    all(s_codes %in% c_codes), "\n")
+```
+
+## Creating the Master Dataset
+
+`linkage_create_master()` performs all joins in one step:
+
+```{r master}
+master <- linkage_create_master(budget, classroom, student)
+master
+```
+
+The master object contains two levels:
+
+- **`classroom_level`**: One row per classroom-year with budget, classroom
+  characteristics, and aggregated student demographics
+- **`student_level`**: One row per student-year with all student data plus
+  classroom and budget attributes
+
+```{r master-dims}
+cat("Classroom-level:", nrow(master$classroom_level), "rows x",
+    ncol(master$classroom_level), "cols\n")
+cat("Student-level:", nrow(master$student_level), "rows x",
+    ncol(master$student_level), "cols\n")
+```
+
+## Classroom-Level Analysis
+
+The classroom-level master includes per-child budget and student aggregates:
+
+```{r classroom-level}
+cl <- master$classroom_level
+
+# Per-child budget (where available)
+if ("per_child_budget" %in% names(cl)) {
+  summary(cl$per_child_budget)
+}
+
+# Student aggregates
+agg_cols <- c("n_children", "pct_male", "pct_poverty", "mean_age")
+agg_available <- intersect(agg_cols, names(cl))
+if (length(agg_available) > 0) {
+  head(cl[, c("school_year", "classroom_code", agg_available)])
+}
+```
+
+## Student-Level Analysis
+
+The student-level master adds classroom attributes to each student:
+
+```{r student-level}
+sl <- master$student_level
+
+# Student now has classroom-level attributes
+if ("total_grant" %in% names(sl)) {
+  cat("Grant amount range: $",
+      format(min(sl$total_grant, na.rm = TRUE), big.mark = ","),
+      " - $",
+      format(max(sl$total_grant, na.rm = TRUE), big.mark = ","),
+      "\n")
+}
+
+# Cross-module analysis: GOLD scores by delivery type
+if (all(c("gold_literacy_gain_raw", "delivery_type") %in% names(sl))) {
+  gain_by_dt <- tapply(sl$gold_literacy_gain_raw, sl$delivery_type,
+                        mean, na.rm = TRUE)
+  gain_by_dt <- gain_by_dt[!is.na(gain_by_dt)]
+  if (length(gain_by_dt) > 0) {
+    cat("\nMean GOLD Literacy Gain by Delivery Type:\n")
+    print(round(gain_by_dt, 1))
+  }
+}
+```
+
+## Join Diagnostics
+
+The master object includes diagnostic information about each join:
+
+```{r diagnostics}
+diag <- master$diagnostics
+cat("Classroom-Budget match rate:",
+    round(diag$classroom_budget$match_rate * 100, 1), "%\n")
+cat("Student-Classroom match rate:",
+    round(diag$student_classroom$match_rate * 100, 1), "%\n")
+```
+
+## Transform Enrichment
+
+The student panel includes derived variables from `student_transform()`:
+
+```{r transform}
+if ("chronic_absence" %in% names(sl)) {
+  cat("Chronic absence rate:",
+      round(mean(sl$chronic_absence, na.rm = TRUE) * 100, 1), "%\n")
+}
+
+if ("risk_index" %in% names(sl)) {
+  cat("\nRisk index distribution:\n")
+  print(table(sl$risk_index))
+}
+```
+
+## Student Aggregation
+
+`linkage_aggregate_students()` creates classroom-level summaries from student
+data:
+
+```{r aggregation}
+agg <- linkage_aggregate_students(student)
+head(agg[, c("school_year", "classroom_code", "n_children")])
+```
+
+## DuckDB Integration
+
+```{r duckdb-section, eval = has_duckdb}
+# Store processed data in DuckDB for efficient querying
+db_path <- tempfile(fileext = ".duckdb")
+conn <- db_init(db_path)
+
+# Write all panels
+db_write_panel(conn, budget)
+db_write_panel(conn, classroom)
+db_write_panel(conn, student)
+
+# Write master
+db_write_master(conn, master)
+
+# List tables
+db_list_tables(conn)
+```
+
+### SQL Queries
+
+```{r duckdb-query, eval = has_duckdb}
+# Budget trends by year
+db_query(conn, "
+  SELECT school_year, COUNT(*) as n,
+         ROUND(AVG(grand_total), 0) as mean_budget
+  FROM budget_panel
+  GROUP BY school_year
+  ORDER BY school_year
+")
+```
+
+```{r duckdb-query2, eval = has_duckdb}
+# Student demographics by year
+db_query(conn, "
+  SELECT school_year, COUNT(*) as n,
+         ROUND(AVG(CASE WHEN gender='Male' THEN 1.0 ELSE 0.0 END)*100, 1) as pct_male,
+         ROUND(AVG(poverty_dum)*100, 1) as pct_poverty
+  FROM student_panel
+  GROUP BY school_year
+  ORDER BY school_year
+")
+```
+
+```{r duckdb-query3, eval = has_duckdb}
+# Table metadata
+db_table_info(conn, "student_panel")[1:10, ]
+```
+
+```{r duckdb-close, eval = has_duckdb}
+db_close(conn)
+unlink(db_path)
+```
+
+```{r duckdb-note, eval = !has_duckdb, echo = FALSE, results = "asis"}
+cat("*Note: DuckDB examples skipped because the `duckdb` package is not installed.*
+Install it with `install.packages('duckdb')` to enable database features.")
+```
+
+## Export
+
+Export master datasets to multiple formats:
+
+```{r export, eval = FALSE}
+# CSV
+linkage_export_csv(master, "output/linkage/")
+
+# RDS (preserves S3 classes and factor levels)
+linkage_export_rds(master, "output/linkage/linkage_master.rds")
+
+# Stata
+linkage_export_stata(master, "output/linkage/")
+```
+
+## Next Steps
+
+- **Architecture**: See `vignette("reference-architecture")` for the full S3
+  class hierarchy and data dictionary
+- **Panel Construction**: See `vignette("panel-construction")` for details on
+  individual module pipelines

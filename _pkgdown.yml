@@ -1,0 +1,165 @@
+url: https://joonho112.github.io/ALprekDB/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    pkgdown-nav-height: 80px
+
+home:
+  sidebar:
+    structure: [links, license, community, authors, dev]
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fa-github
+      href: https://github.com/joonho112/ALprekDB
+      aria-label: GitHub
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
+
+authors:
+  JoonHo Lee:
+    href: https://orcid.org/0009-0006-4019-8703
+
+articles:
+  - title: Guides
+    contents:
+    - getting-started
+    - panel-construction
+    - linkage-and-analysis
+    - reference-architecture
+
+reference:
+  - title: Budget Module
+    desc: Per-classroom funding data processing
+    contents:
+    - budget_read
+    - budget_detect_format
+    - budget_clean
+    - budget_to_long
+    - budget_validate
+    - budget_transform
+    - budget_bind_years
+    - budget_process
+    - budget_process_years
+    - budget_config
+    - budget_track_classrooms
+    - budget_yoy_summary
+    - budget_summary_stats
+    - budget_export_csv
+    - budget_export_excel
+    - budget_export_parquet
+    - budget_export_rds
+    - budget_export_stata
+
+  - title: Classroom Module
+    desc: Classroom characteristics, teacher demographics, geography
+    contents:
+    - classroom_read
+    - classroom_detect_format
+    - classroom_clean
+    - classroom_validate
+    - classroom_bind_years
+    - classroom_process
+    - classroom_process_years
+    - classroom_config
+    - classroom_track
+    - classroom_summary_stats
+    - classroom_export_csv
+    - classroom_export_excel
+    - classroom_export_parquet
+    - classroom_export_rds
+    - classroom_export_stata
+
+  - title: Student Module
+    desc: Student demographics, assessments, services
+    contents:
+    - student_read
+    - student_detect_format
+    - student_clean
+    - student_validate
+    - student_transform
+    - student_bind_years
+    - student_process
+    - student_process_years
+    - student_config
+    - student_track
+    - student_summary_stats
+    - student_export_csv
+    - student_export_excel
+    - student_export_parquet
+    - student_export_rds
+    - student_export_stata
+
+  - title: Linkage Module
+    desc: Cross-module joins and master datasets
+    contents:
+    - linkage_classroom_budget
+    - linkage_student_classroom
+    - linkage_aggregate_students
+    - linkage_create_master
+    - linkage_validate
+    - linkage_summary_stats
+    - linkage_export_csv
+    - linkage_export_excel
+    - linkage_export_parquet
+    - linkage_export_rds
+    - linkage_export_stata
+
+  - title: Database Module
+    desc: DuckDB persistent storage and SQL queries
+    contents:
+    - db_init
+    - db_close
+    - db_write_panel
+    - db_write_master
+    - db_write_year
+    - db_read_panel
+    - db_read_master
+    - db_list_tables
+    - db_table_info
+    - db_query
+
+  - title: Codebooks & Mappings
+    desc: Data-driven reference tables
+    contents:
+    - alprek_category_groups
+    - alprek_delivery_types
+    - alprek_county_codes
+    - alprek_degree_patterns
+    - alprek_race_mapping
+    - alprek_language_mapping
+    - alprek_student_race_mapping
+    - alprek_student_delivery_mapping
+
+  - title: Synthetic Data
+    desc: Generators for examples and vignettes
+    contents:
+    - alprek_synthetic_budget
+    - alprek_synthetic_classroom
+    - alprek_synthetic_student
+
+  - title: Utilities
+    desc: Classroom code parsing and helpers
+    contents:
+    - parse_classroom_code
+    - parse_classroom_codes
+    - alprek_infer_school_year
+    - alprek_school_year_to_start
+
+  - title: S3 Print Methods
+    desc: Display methods for ALprekDB objects
+    contents:
+    - starts_with("print.alprek_")
+
+  - title: internal
+    contents:
+    - synthetic-data

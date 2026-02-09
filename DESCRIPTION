@@ -1,0 +1,52 @@
+Package: ALprekDB
+Type: Package
+Title: Alabama Pre-K Administrative Data Processing and Database Management
+Version: 0.5.0
+Authors@R: person("JoonHo", "Lee",
+                  email = "jlee296@ua.edu",
+                  role = c("aut", "cre"),
+                  comment = c(ORCID = "0009-0006-4019-8703"))
+Description: A modular toolkit for processing, cleaning, validating, and
+    managing Alabama First Class Pre-K (FCPK) administrative records. This
+    package standardizes annual data processing workflows for budget, classroom,
+    and student data files received from ADECE (Alabama Department of Early
+    Childhood Education). Features include: data-driven column mapping via
+    external codebooks, pattern-based format detection across file versions,
+    reconciliation diagnostics, derived variable creation, multi-year panel
+    construction, cross-module linkage with join diagnostics, classroom-level
+    student aggregation, DuckDB-based persistent storage with SQL query
+    support, and multiple export formats.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+URL: https://joonho112.github.io/ALprekDB/,
+    https://github.com/joonho112/ALprekDB
+BugReports: https://github.com/joonho112/ALprekDB/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    dplyr (>= 1.1.0),
+    tidyr (>= 1.3.0),
+    readxl (>= 1.4.0),
+    stringr (>= 1.5.0),
+    cli (>= 3.6.0),
+    rlang (>= 1.1.0),
+    glue (>= 1.6.0),
+    purrr (>= 1.0.0),
+    tibble (>= 3.2.0),
+    lubridate (>= 1.9.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    arrow,
+    openxlsx,
+    haven,
+    withr,
+    duckdb (>= 1.0.0),
+    DBI (>= 1.2.0),
+    pkgdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr

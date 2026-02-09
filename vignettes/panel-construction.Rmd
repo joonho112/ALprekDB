@@ -1,0 +1,230 @@
+---
+title: "Building Multi-Year Panel Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Building Multi-Year Panel Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB processes 4 years of ADECE Pre-K administrative data (2021-22 through
+2024-25) into longitudinal panel datasets. This vignette demonstrates the
+multi-year processing pipeline using synthetic data.
+
+```{r load}
+library(ALprekDB)
+```
+
+## Creating Synthetic Panel Data
+
+```{r synthetic}
+# Generate 3-year panel data for all modules
+budget <- alprek_synthetic_budget(n_classrooms = 15, n_years = 3, seed = 42)
+classroom <- alprek_synthetic_classroom(n_classrooms = 15, n_years = 3, seed = 42)
+student <- alprek_synthetic_student(n_students = 60, n_classrooms = 15,
+                                     n_years = 3, seed = 42)
+```
+
+## Budget Panel
+
+### Structure
+
+The budget panel contains per-classroom funding data across years:
+
+```{r budget-panel}
+budget
+str(budget$data[, 1:10], give.attr = FALSE)
+```
+
+Each row represents one classroom-year with `r ncol(budget$data)` columns
+spanning OSR and Other funding sources.
+
+### Year-over-Year Trends
+
+```{r budget-trends}
+budget_stats <- budget_summary_stats(budget)
+budget_stats[, c("school_year", "n", "grand_total_mean",
+                  "grand_total_median", "share_osr_mean")]
+```
+
+### Tracking Classrooms Across Years
+
+```{r budget-track}
+tracking <- budget_track_classrooms(budget)
+head(tracking)
+```
+
+## Classroom Panel
+
+### Structure
+
+The classroom panel includes classroom characteristics, teacher demographics,
+and geographic coordinates:
+
+```{r classroom-panel}
+classroom
+```
+
+Key column groups:
+
+- **Identifiers**: `classroom_code`, `school_year`, `region`, `county_code`
+- **Delivery**: `delivery_type` (7 categories)
+- **Geography**: `latitude`, `longitude`
+- **Teacher Demographics**: `lead_tch_race`, `lead_tch_gender`, credentials
+- **Funding**: `total_grant`, `enhancement_grant`
+
+### Format Detection
+
+ADECE changed the Excel format in 2024-25. ALprekDB auto-detects the format:
+
+```{r format-detection, eval = FALSE}
+# Legacy format (2021-2024): ~100 columns
+# New format (2024-2025): ~125 columns with additional staff DOBs, seat counts
+raw <- classroom_read("FCPK_Classroom_24-25.xlsx")
+raw$meta$format  # "new"
+```
+
+### Imputation
+
+The classroom panel applies forward-fill imputation for geographic coordinates
+and `year_first_funded` within site groups. The imputation log records every
+change:
+
+```{r imputation}
+classroom$imputation_log
+```
+
+## Student Panel
+
+### Structure
+
+The student panel is the largest dataset with `r ncol(student$data)` columns
+per student-year:
+
+```{r student-panel}
+student
+```
+
+### Demographic Distribution
+
+```{r demographics}
+# Gender distribution
+table(student$data$gender)
+
+# Race distribution
+table(student$data$race)
+
+# Poverty rate by year
+tapply(student$data$poverty_dum, student$data$school_year, mean, na.rm = TRUE)
+```
+
+### Assessment Scores (GOLD)
+
+GOLD assessments cover 6 developmental domains, each measured in fall and spring:
+
+```{r gold-overview}
+gold_cols <- grep("^gold_literacy", names(student$data), value = TRUE)
+gold_cols
+```
+
+```{r gold-scores}
+# Literacy fall vs spring raw scores
+summary(student$data$gold_literacy_fall_raw)
+summary(student$data$gold_literacy_spring_raw)
+```
+
+### Derived Variables
+
+The student panel includes derived variables from `student_transform()`:
+
+```{r derived}
+# GOLD gain scores
+summary(student$data$gold_literacy_gain_raw)
+
+# Chronic absence rate
+mean(student$data$chronic_absence, na.rm = TRUE)
+
+# Service density
+summary(student$data$n_services)
+
+# Risk index
+table(student$data$risk_index)
+```
+
+## Real Data Pipeline
+
+With actual ADECE files, the multi-year processing uses the `config` +
+`process_years` pattern:
+
+```{r real-pipeline, eval = FALSE}
+# Budget: 4-year pipeline
+budget_configs <- list(
+  budget_config("2021-2022", "Budget_21-22.xlsx"),
+  budget_config("2022-2023", "Budget_22-23.xlsx"),
+  budget_config("2023-2024", "Budget_23-24.xlsx"),
+  budget_config("2024-2025", "Budget_24-25.xlsx")
+)
+budget_result <- budget_process_years(budget_configs)
+budget_panel <- budget_result$panel  # 5,867 rows x 53 cols
+
+# Classroom: 4-year pipeline
+classroom_configs <- list(
+  classroom_config("2021-2022", "Classroom_21-22.xlsx"),
+  classroom_config("2022-2023", "Classroom_22-23.xlsx"),
+  classroom_config("2023-2024", "Classroom_23-24.xlsx"),
+  classroom_config("2024-2025", "Classroom_24-25.xlsx")
+)
+classroom_result <- classroom_process_years(classroom_configs)
+classroom_panel <- classroom_result$panel  # 5,888 rows x 125 cols
+
+# Student: 4-year pipeline + transform
+student_configs <- list(
+  student_config("2021-2022", "Student_21-22.xlsx"),
+  student_config("2022-2023", "Student_22-23.xlsx"),
+  student_config("2023-2024", "Student_23-24.xlsx"),
+  student_config("2024-2025", "Student_24-25.xlsx")
+)
+student_result <- student_process_years(student_configs)
+student_panel <- student_result$panel  # 92,507 rows x 261 cols
+
+# Apply transform enrichment (27 derived variables)
+enriched_panel <- student_transform(student_panel)
+# 92,507 rows x 288 cols
+```
+
+## Validation Framework
+
+Each module has a validation step with multiple checks:
+
+| Module | # Checks | Key Checks |
+|--------|----------|------------|
+| Budget | 7 | Reconciliation, totals, share bounds |
+| Classroom | 10 | Coordinates, credentials, delivery types |
+| Student | 12 | Demographics, assessments, attendance |
+| Linkage | 8 | Match rates, orphans, key uniqueness |
+
+```{r validation-example, eval = FALSE}
+# Validation returns check-level results
+validation <- student_validate(clean_obj, strict = FALSE)
+validation$checks  # tibble of check results
+validation$n_errors
+validation$n_warnings
+```
+
+## Next Steps
+
+- **Linkage**: See `vignette("linkage-and-analysis")` for joining these three
+  panels into master datasets
+- **Architecture**: See `vignette("reference-architecture")` for S3 class
+  details

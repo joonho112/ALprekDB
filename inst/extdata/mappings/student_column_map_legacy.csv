@@ -1,0 +1,203 @@
+raw_column,standard_name,type,notes
+School Year,school_year,id,
+Classroom Code,classroom_code,id,
+Classroom Name,classroom_name,id,
+Region #,region_num,id,
+Site Code,site_code,id,
+Site Name,site_name,id,
+Program Code,program_code,id,
+Program Name,program_name,id,
+ADECE ID,adece_id,id,Anonymized student ID
+Gender,gender,demographics,M/F
+Race,race,demographics,Multiple raw variants across years
+Ethnicity,ethnicity,demographics,Hispanic/Non-Hispanic
+State Student ID,state_student_id,demographics,Legacy only - alphanumeric
+DOB,dob,demographics,Date of birth (PII)
+Poverty Indicator,poverty_ind,family,Yes/No
+Delivery Type,delivery_type,family,7 types with mixed capitalization
+Title One,title_one,family,Y/N
+Language,language,family,Primary language
+Lives With,lives_with,family,Both/Parent/guardian 1/Parent/guardian 2
+Number In House,num_in_house,family,Numeric or text words in 2021-22
+Gross Income,gross_income,family,Income ranges - different format by year
+Poverty Level Percentage,pov_lvl_pct,family,Categorical ranges - 65% NA
+Monthly Fees,monthly_fees,family,Numeric
+Childcare Subsidy,childcare_subsidy,services,Yes/No
+TANF,tanf,services,Yes/No
+WIC,wic,services,Yes/No
+Free Reduced Lunch,free_reduced_lunch,services,Yes/No
+SNAP,snap,services,Yes/No
+IEP,iep,services,Yes/No
+School System Providing Services,school_svc,services,100% NA all years
+Head Start,head_start,services,No/Yes duration levels
+Center Based Childcare,center_childcare,services,No/Yes duration levels
+Home Based Childcare,home_childcare,services,No/Yes duration levels
+Home Visiting,home_visiting,services,No/Yes duration levels
+Foster Care,foster_care,services,Yes/No
+Homeless,homeless,services,Yes/No
+Allergies / Medical,allergies_medical,services,Free text
+School Services,school_services,services,100% NA
+Intervention Services,intervention_svc,services,Yes/No
+Behavior Support Requested,behavior_support,services,Numeric
+Class Level ID,class_lvl_id,services,Constant 5
+Days Absent Semester 1,days_absent_sem1,attendance,Numeric - may have negatives
+Days Absent Semester 2,days_absent_sem2,attendance,Numeric
+Days Tardy Semester 1,days_tardy_sem1,attendance,Numeric - may have negatives
+Days Tardy Semester 2,days_tardy_sem2,attendance,Numeric
+Family Hours,family_hrs_total,attendance,Nearly always NA
+August Family Hours,aug_family_hrs,attendance,Monthly - mostly empty
+September Family Hours,sept_family_hrs,attendance,Monthly - mostly empty
+October Family Hours,oct_family_hrs,attendance,Monthly - mostly empty
+November Family Hours,nov_family_hrs,attendance,Monthly - mostly empty
+December Family Hours,dec_family_hrs,attendance,Monthly - mostly empty
+Semester 1 Family Hours,sem1_family_hrs,attendance,~100% populated
+January Family Hours,jan_family_hrs,attendance,Monthly - mostly empty
+February Family Hours,feb_family_hrs,attendance,Monthly - mostly empty
+March Family Hours,mar_family_hrs,attendance,Monthly - mostly empty
+April Family Hours,apr_family_hrs,attendance,Monthly - mostly empty
+May Family Hours,may_family_hrs,attendance,Monthly - mostly empty
+Semester 2 Family Hours,sem2_family_hrs,attendance,~100% populated
+IEP Referral Date,iep_ref_date,iep_referral,Date
+IEP Referral Outcome,iep_ref_outcome,iep_referral,Free text - many variants
+Reason for Referral,ref_reason,iep_referral,Free text
+Part B Entry Date,part_b_date,iep_referral,Date
+Part B Entry Tool,part_b_tool,iep_referral,Text
+Enrolled Date,enrolled_date,enrollment,Date
+Migrant Family,migrant_family,demographic_flags,Yes/No mixed case
+Resides on Indian Lands,indian_lands,demographic_flags,Yes/No mixed case
+Military-connected Family,military_family,demographic_flags,Yes/No mixed case
+GOLD Literacy Fall Raw Score,gold_literacy_fall_raw,gold,Numeric
+GOLD Literacy Fall Scale Score,gold_literacy_fall_scale,gold,Numeric
+GOLD Literacy Fall WHE Status,gold_literacy_fall_whe,gold,Below/Meet/Exceed
+GOLD Literacy Fall NN Status,gold_literacy_fall_nn,gold,Below/Meet/Exceed
+GOLD Literacy Fall K-Readiness,gold_literacy_fall_kready,gold,Emerging/Accomplished
+GOLD Literacy Spring Raw Score,gold_literacy_spring_raw,gold,Numeric
+GOLD Literacy Spring Scale Score,gold_literacy_spring_scale,gold,Numeric
+GOLD Literacy Spring WHE Status,gold_literacy_spring_whe,gold,Below/Meet/Exceed
+GOLD Literacy Spring NN Status,gold_literacy_spring_nn,gold,Below/Meet/Exceed
+GOLD Literacy Spring K-Readiness,gold_literacy_spring_kready,gold,Emerging/Accomplished
+GOLD Math Fall Raw Score,gold_math_fall_raw,gold,Numeric
+GOLD Math Fall Scale Score,gold_math_fall_scale,gold,Numeric
+GOLD Math Fall WHE Status,gold_math_fall_whe,gold,Below/Meet/Exceed
+GOLD Math Fall NN Status,gold_math_fall_nn,gold,Below/Meet/Exceed
+GOLD Math Fall K-Readiness,gold_math_fall_kready,gold,Emerging/Accomplished
+GOLD Math Spring Raw Score,gold_math_spring_raw,gold,Numeric
+GOLD Math Spring Scale Score,gold_math_spring_scale,gold,Numeric
+GOLD Math Spring WHE Status,gold_math_spring_whe,gold,Below/Meet/Exceed
+GOLD Math Spring NN Status,gold_math_spring_nn,gold,Below/Meet/Exceed
+GOLD Math Spring K-Readiness,gold_math_spring_kready,gold,Emerging/Accomplished
+GOLD Social-Emotional Fall Raw Score,gold_se_fall_raw,gold,Numeric
+GOLD Social-Emotional Fall Scale Score,gold_se_fall_scale,gold,Numeric
+GOLD Social-Emotional Fall WHE Status,gold_se_fall_whe,gold,Below/Meet/Exceed
+GOLD Social-Emotional Fall NN Status,gold_se_fall_nn,gold,Below/Meet/Exceed
+GOLD Social-Emotional Fall K-Readiness,gold_se_fall_kready,gold,Emerging/Accomplished
+GOLD Social-Emotional Spring Raw Score,gold_se_spring_raw,gold,Numeric
+GOLD Social-Emotional Spring Scale Score,gold_se_spring_scale,gold,Numeric
+GOLD Social-Emotional Spring WHE Status,gold_se_spring_whe,gold,Below/Meet/Exceed
+GOLD Social-Emotional Spring NN Status,gold_se_spring_nn,gold,Below/Meet/Exceed
+GOLD Social-Emotional Spring K-Readiness,gold_se_spring_kready,gold,Emerging/Accomplished
+GOLD Physical Fall Raw Score,gold_physical_fall_raw,gold,Numeric
+GOLD Physical Fall Scale Score,gold_physical_fall_scale,gold,Numeric
+GOLD Physical Fall WHE Status,gold_physical_fall_whe,gold,Below/Meet/Exceed
+GOLD Physical Fall NN Status,gold_physical_fall_nn,gold,Below/Meet/Exceed
+GOLD Physical Fall K-Readiness,gold_physical_fall_kready,gold,Emerging/Accomplished
+GOLD Physical Spring Raw Score,gold_physical_spring_raw,gold,Numeric
+GOLD Physical Spring Scale Score,gold_physical_spring_scale,gold,Numeric
+GOLD Physical Spring WHE Status,gold_physical_spring_whe,gold,Below/Meet/Exceed
+GOLD Physical Spring NN Status,gold_physical_spring_nn,gold,Below/Meet/Exceed
+GOLD Physical Spring K-Readiness,gold_physical_spring_kready,gold,Emerging/Accomplished
+GOLD Cognitive Fall Raw Score,gold_cognitive_fall_raw,gold,Numeric
+GOLD Cognitive Fall Scale Score,gold_cognitive_fall_scale,gold,Numeric
+GOLD Cognitive Fall WHE Status,gold_cognitive_fall_whe,gold,Below/Meet/Exceed
+GOLD Cognitive Fall NN Status,gold_cognitive_fall_nn,gold,Below/Meet/Exceed
+GOLD Cognitive Fall K-Readiness,gold_cognitive_fall_kready,gold,Emerging/Accomplished
+GOLD Cognitive Spring Raw Score,gold_cognitive_spring_raw,gold,Numeric
+GOLD Cognitive Spring Scale Score,gold_cognitive_spring_scale,gold,Numeric
+GOLD Cognitive Spring WHE Status,gold_cognitive_spring_whe,gold,Below/Meet/Exceed
+GOLD Cognitive Spring NN Status,gold_cognitive_spring_nn,gold,Below/Meet/Exceed
+GOLD Cognitive Spring K-Readiness,gold_cognitive_spring_kready,gold,Emerging/Accomplished
+GOLD Language Fall Raw Score,gold_language_fall_raw,gold,Numeric
+GOLD Language Fall Scale Score,gold_language_fall_scale,gold,Numeric
+GOLD Language Fall WHE Status,gold_language_fall_whe,gold,Below/Meet/Exceed
+GOLD Language Fall NN Status,gold_language_fall_nn,gold,Below/Meet/Exceed
+GOLD Language Fall K-Readiness,gold_language_fall_kready,gold,Emerging/Accomplished
+GOLD Language Spring Raw Score,gold_language_spring_raw,gold,Numeric
+GOLD Language Spring Scale Score,gold_language_spring_scale,gold,Numeric
+GOLD Language Spring WHE Status,gold_language_spring_whe,gold,Below/Meet/Exceed
+GOLD Language Spring NN Status,gold_language_spring_nn,gold,Below/Meet/Exceed
+GOLD Language Spring K-Readiness,gold_language_spring_kready,gold,Emerging/Accomplished
+PPVT Fall Standard Score,ppvt_fall_standard,ppvt,Numeric
+PPVT Spring Standard Score,ppvt_spring_standard,ppvt,Numeric
+PPVT Fall Percentile Rank,ppvt_fall_percentile,ppvt,Numeric
+PPVT Spring Percentile Rank,ppvt_spring_percentile,ppvt,Numeric
+PPVT Fall Stanine,ppvt_fall_stanine,ppvt,Numeric
+PPVT Spring Stanine,ppvt_spring_stanine,ppvt,Numeric
+PPVT Fall GSV,ppvt_fall_gsv,ppvt,Numeric
+PPVT Spring GSV,ppvt_spring_gsv,ppvt,Numeric
+PPVT Category,ppvt_category,ppvt,Text
+eDECA Entry Date (Pre),edeca_pre_entry_date,edeca_pre,Date
+eDECA Rater Type (Pre),edeca_pre_rater_type,edeca_pre,T/P
+eDECA Rater Description (Pre),edeca_pre_rater_desc,edeca_pre,Text
+eDECA Rating Status (Pre),edeca_pre_rating_status,edeca_pre,Text
+eDECA Rating Date (Pre),edeca_pre_rating_date,edeca_pre,Date
+eDECA Rating Period (Pre),edeca_pre_rating_period,edeca_pre,Text
+eDECA Initiative Raw Score (Pre),edeca_pre_initiative_raw,edeca_pre,Numeric
+eDECA Initiative TScore (Pre),edeca_pre_initiative_tscore,edeca_pre,Numeric
+eDECA Initiative Percentile (Pre),edeca_pre_initiative_pctile,edeca_pre,Numeric
+eDECA Initiative Description (Pre),edeca_pre_initiative_desc,edeca_pre,Text
+eDECA Self Regulation Raw Score (Pre),edeca_pre_self_reg_raw,edeca_pre,Numeric
+eDECA Self Regulation TScore (Pre),edeca_pre_self_reg_tscore,edeca_pre,Numeric
+eDECA Self Regulation Percentile (Pre),edeca_pre_self_reg_pctile,edeca_pre,Numeric
+eDECA Self Regulation Description (Pre),edeca_pre_self_reg_desc,edeca_pre,Text
+eDECA Attachment Raw Score (Pre),edeca_pre_attachment_raw,edeca_pre,Numeric
+eDECA Attachment TScore (Pre),edeca_pre_attachment_tscore,edeca_pre,Numeric
+eDECA Attachment Percentile (Pre),edeca_pre_attachment_pctile,edeca_pre,Numeric
+eDECA Attachment Description (Pre),edeca_pre_attachment_desc,edeca_pre,Text
+eDECA Total Protective Factors Raw Score (Pre),edeca_pre_tpf_raw,edeca_pre,Numeric
+eDECA Total Protective Factors TScore (Pre),edeca_pre_tpf_tscore,edeca_pre,Numeric
+eDECA Total Protective Factors Percentile (Pre),edeca_pre_tpf_pctile,edeca_pre,Numeric
+eDECA Total Protective Factors Description (Pre),edeca_pre_tpf_desc,edeca_pre,Text
+eDECA Behavior Concerns Raw Score (Pre),edeca_pre_behavior_raw,edeca_pre,Numeric
+eDECA Behavior Concerns TScore (Pre),edeca_pre_behavior_tscore,edeca_pre,Numeric
+eDECA Behavior Concerns Percentile (Pre),edeca_pre_behavior_pctile,edeca_pre,Numeric
+eDECA Behavior Concerns Description (Pre),edeca_pre_behavior_desc,edeca_pre,Text
+eDECA Entry Date (Post),edeca_post_entry_date,edeca_post,Date
+eDECA Rater Type (Post),edeca_post_rater_type,edeca_post,T/P
+eDECA Rater Description (Post),edeca_post_rater_desc,edeca_post,Text
+eDECA Rating Status (Post),edeca_post_rating_status,edeca_post,Text
+eDECA Rating Date (Post),edeca_post_rating_date,edeca_post,Date
+eDECA Rating Period (Post),edeca_post_rating_period,edeca_post,Text
+eDECA Initiative Raw Score (Post),edeca_post_initiative_raw,edeca_post,Numeric
+eDECA Initiative TScore (Post),edeca_post_initiative_tscore,edeca_post,Numeric
+eDECA Initiative Percentile (Post),edeca_post_initiative_pctile,edeca_post,Numeric
+eDECA Initiative Description (Post),edeca_post_initiative_desc,edeca_post,Text
+eDECA Self Regulation Raw Score (Post),edeca_post_self_reg_raw,edeca_post,Numeric
+eDECA Self Regulation TScore (Post),edeca_post_self_reg_tscore,edeca_post,Numeric
+eDECA Self Regulation Percentile (Post),edeca_post_self_reg_pctile,edeca_post,Numeric
+eDECA Self Regulation Description (Post),edeca_post_self_reg_desc,edeca_post,Text
+eDECA Attachment Raw Score (Post),edeca_post_attachment_raw,edeca_post,Numeric
+eDECA Attachment TScore (Post),edeca_post_attachment_tscore,edeca_post,Numeric
+eDECA Attachment Percentile (Post),edeca_post_attachment_pctile,edeca_post,Numeric
+eDECA Attachment Description (Post),edeca_post_attachment_desc,edeca_post,Text
+eDECA Total Protective Factors Raw Score (Post),edeca_post_tpf_raw,edeca_post,Numeric
+eDECA Total Protective Factors TScore (Post),edeca_post_tpf_tscore,edeca_post,Numeric
+eDECA Total Protective Factors Percentile (Post),edeca_post_tpf_pctile,edeca_post,Numeric
+eDECA Total Protective Factors Desc (Post),edeca_post_tpf_desc,edeca_post,Text - truncated name in raw data
+eDECA Behavior Concerns Raw Score (Post),edeca_post_behavior_raw,edeca_post,Numeric
+eDECA Behavior Concerns TScore (Post),edeca_post_behavior_tscore,edeca_post,Numeric
+eDECA Behavior Concerns Percentile (Post),edeca_post_behavior_pctile,edeca_post,Numeric
+eDECA Behavior Concerns Description (Post),edeca_post_behavior_desc,edeca_post,Text
+ASQ ID,asq_id,asq,Text
+ASQ Provider,asq_provider,asq,Text
+ASQ Interval,asq_interval,asq,Text
+ASQ Type,asq_type,asq,Text
+ASQ Screening Date,asq_screening_date,asq,Date
+ASQ Entry Date,asq_entry_date,asq,Date
+ASQ Completed By,asq_completed_by,asq,Text
+ASQ Communication Results,asq_comm_results,asq,Below/Monitoring/Above
+ASQ Gross Motor Results,asq_gross_motor_results,asq,Below/Monitoring/Above
+ASQ Fine Motor Results,asq_fine_motor_results,asq,Below/Monitoring/Above
+ASQ Problem Solving Results,asq_prob_solving_results,asq,Below/Monitoring/Above
+ASQ Personal Social Results,asq_personal_social_results,asq,Below/Monitoring/Above
+ASQ Overall Concern Count,asq_concern_count,asq,Numeric
+ASQ Overall No Concern Count,asq_no_concern_count,asq,Numeric

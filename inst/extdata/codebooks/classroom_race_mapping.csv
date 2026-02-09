@@ -1,0 +1,17 @@
+raw_value,standardized,factor_order
+White,White,1
+Black or African American,Black,2
+Black/African American,Black,2
+Latino,Latino/Hispanic,3
+Hispanic,Latino/Hispanic,3
+Asian,Asian,4
+Filipino,Asian,4
+Mixed Heritage,Mixed,5
+Mixed heritage,Mixed,5
+Alaska Native,Other,6
+American Indian,Other,6
+Native Hawaiian or Other Pacific Islander,Other,6
+Native Hawaiian or other Pacific Islander,Other,6
+Unknown,Unknown,7
+Decline to answer,Unknown,7
+No Response,Unknown,7

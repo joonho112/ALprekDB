@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^\.github$
+^output$
+^run_integration_test\.R$
+^run_classroom_integration_test\.R$
+^run_student_integration_test\.R$
+^run_linkage_integration_test\.R$
+^run_transform_integration_test\.R$
+^run_db_integration_test\.R$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
