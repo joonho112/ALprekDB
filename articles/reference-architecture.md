@@ -1,0 +1,259 @@
+# Package Architecture and Data Dictionary
+
+``` r
+library(ALprekDB)
+```
+
+## S3 Class Hierarchy
+
+ALprekDB uses S3 classes to represent data at each processing stage.
+Each class carries both the data and metadata (school year, format,
+processing timestamps).
+
+### Budget Pipeline
+
+    budget_read()           --> alprek_budget_raw
+    budget_clean()          --> alprek_budget_long
+    budget_transform()      --> alprek_budget_master
+    budget_validate()       --> alprek_budget_validation
+    budget_bind_years()     --> alprek_budget_panel
+
+### Classroom Pipeline
+
+    classroom_read()        --> alprek_classroom_raw
+    classroom_clean()       --> alprek_classroom_clean
+    classroom_validate()    --> alprek_classroom_validation
+    classroom_bind_years()  --> alprek_classroom_panel
+
+### Student Pipeline
+
+    student_read()          --> alprek_student_raw
+    student_clean()         --> alprek_student_clean
+    student_validate()      --> alprek_student_validation
+    student_bind_years()    --> alprek_student_panel
+    student_transform()     --> alprek_student_panel (enriched, same class)
+
+### Linkage Pipeline
+
+    linkage_classroom_budget()   --> alprek_linkage_classroom
+    linkage_student_classroom()  --> alprek_linkage_student
+    linkage_create_master()      --> alprek_linkage_master
+    linkage_validate()           --> alprek_linkage_validation
+
+### Database Layer
+
+    db_init()           --> DBI connection
+    db_write_panel()    --> writes to DuckDB
+    db_write_master()   --> writes to DuckDB
+    db_read_panel()     --> reconstructs S3 panel object
+    db_read_master()    --> reconstructs alprek_linkage_master
+
+## S3 Object Structure
+
+All panel objects share a common structure:
+
+``` r
+budget <- alprek_synthetic_budget(n_classrooms = 5, n_years = 2, seed = 1)
+names(budget)
+#> [1] "data"    "years"   "n_years" "by_year"
+cat("$data: tibble with", nrow(budget$data), "rows x",
+    ncol(budget$data), "cols\n")
+#> $data: tibble with 10 rows x 38 cols
+cat("$years:", paste(budget$years, collapse = ", "), "\n")
+#> $years: 2021-2022, 2022-2023
+cat("$n_years:", budget$n_years, "\n")
+#> $n_years: 2
+cat("$by_year: list with per-year metadata\n")
+#> $by_year: list with per-year metadata
+```
+
+The `alprek_linkage_master` has a special two-level structure:
+
+``` r
+# master$classroom_level   -- tibble (classroom-year level)
+# master$student_level     -- tibble (student-year level)
+# master$diagnostics       -- list of join diagnostics
+# master$meta              -- years, counts, timestamps
+```
+
+## Format Detection
+
+ADECE changed file formats in 2024-25. ALprekDB auto-detects the format:
+
+| Module    | Legacy (2021-2024)                   | New (2024-2025)                        | Detection Method                     |
+|-----------|--------------------------------------|----------------------------------------|--------------------------------------|
+| Budget    | ~176 columns, “Additional Funds 1/2” | ~28 columns, “OSR/Other”               | Column count + name pattern          |
+| Classroom | ~100 columns                         | ~125 columns (seat count, DOBs)        | Column count + “Seat Count” presence |
+| Student   | 202 columns                          | 270 columns (child names, GOLD Growth) | Column count + “Child First Name”    |
+
+Format-specific differences are handled transparently by the cleaning
+functions.
+
+## Data Dictionary
+
+### Budget Panel Columns (53)
+
+| Column Group      | Example Columns                                               | Type             |
+|-------------------|---------------------------------------------------------------|------------------|
+| **Identifiers**   | `school_year`, `classroom_code`, `classroom_name`             | factor/character |
+| **OSR Amounts**   | `osr_lead_teacher_salary`, `osr_aux_teacher_benefits`, …      | numeric          |
+| **Other Amounts** | `other_lead_teacher_salary`, `other_equipment`, …             | numeric          |
+| **Totals**        | `osr_total`, `other_total`, `grand_total`                     | numeric          |
+| **Shares**        | `share_osr`, `share_lt_salary`, `share_teacher_compensation`  | numeric (0-1)    |
+| **Delivery**      | `delivery_type`, `delivery_type_binary`, `delivery_type_3way` | factor           |
+
+### Classroom Panel Columns (125)
+
+| Column Group       | Example Columns                                                                   | Type                     |
+|--------------------|-----------------------------------------------------------------------------------|--------------------------|
+| **Identifiers**    | `classroom_code`, `school_year`, `region`, `county_code`                          | factor/character/integer |
+| **Delivery**       | `delivery_type` (7-level factor)                                                  | factor                   |
+| **Geography**      | `latitude`, `longitude`, `senate_dist`, `house_dist`                              | numeric/integer          |
+| **Funding**        | `total_grant`, `enhancement_grant`                                                | numeric                  |
+| **Lead Teacher**   | `lead_tch_degree_level`, `lead_tch_race`, `lead_tch_gender`, `lead_tch_total_exp` | factor/integer           |
+| **Aux Teacher**    | `aux_tch_degree_raw`, `aux_tch_race`, `aux_tch_gender`                            | factor/character         |
+| **Staff Contacts** | `monitor_name`, `monitor_email`, `coach_name`                                     | character                |
+
+### Student Panel Columns (288, with transform)
+
+| Column Group           | Count | Example Columns                                                            |
+|------------------------|-------|----------------------------------------------------------------------------|
+| **Identifiers**        | 11    | `adece_id`, `classroom_code`, `school_year`                                |
+| **Demographics**       | 8     | `gender`, `race`, `ethnicity`, `dob`, `age`                                |
+| **Family/Income**      | 10    | `poverty_dum`, `english_learner`, `single_parent`, `gross_income_midpoint` |
+| **Service Indicators** | 15    | `childcare_subsidy`, `tanf`, `wic`, `snap`, `iep`, `iep2`                  |
+| **Attendance**         | 6     | `days_absent_total`, `days_tardy_total`                                    |
+| **GOLD (6 domains)**   | 60    | `gold_literacy_fall_raw`, `gold_math_spring_scale`, `gold_se_fall_kready`  |
+| **GOLD Gains**         | 18    | `gold_literacy_gain_raw`, `gold_math_kready_improved`                      |
+| **eDECA Pre/Post**     | 10+   | `edeca_initiative_pre_tscore`, `edeca_tpf_gain`                            |
+| **Chronic Absence**    | 2     | `chronic_absence`, `chronic_absence_pct`                                   |
+| **Service Density**    | 2     | `n_services`, `risk_index`                                                 |
+
+### Factor Level Reference
+
+``` r
+student <- alprek_synthetic_student(n_students = 10, n_classrooms = 5,
+                                     n_years = 1, seed = 1)
+cat("gender:", paste(levels(student$data$gender), collapse = ", "), "\n")
+#> gender: Male, Female
+cat("race:", paste(levels(student$data$race), collapse = ", "), "\n")
+#> race: White, Black, Latino/Hispanic, Asian, Mixed, Other, Unknown
+cat("delivery_type:", paste(levels(student$data$delivery_type), collapse = ", "), "\n")
+#> delivery_type: Public School, Private Child Care, Head Start, Community Organization, Faith-Based Organization, University Operated, Private School
+cat("GOLD WHE:", paste(levels(student$data$gold_literacy_fall_whe), collapse = ", "), "\n")
+#> GOLD WHE: Below, Meet, Exceed
+cat("GOLD K-Ready:", paste(levels(student$data$gold_literacy_fall_kready), collapse = ", "), "\n")
+#> GOLD K-Ready: Emerging, Accomplished
+```
+
+## Column Naming Conventions
+
+ALprekDB follows consistent naming patterns:
+
+| Pattern                    | Meaning                     | Example                         |
+|----------------------------|-----------------------------|---------------------------------|
+| `osr_*`                    | OSR (state) funding amount  | `osr_lead_teacher_salary`       |
+| `other_*`                  | Other (non-state) funding   | `other_equipment`               |
+| `share_*`                  | Proportion of grand total   | `share_osr`                     |
+| `gold_[domain]_[season]_*` | GOLD assessment             | `gold_literacy_fall_raw`        |
+| `gold_[domain]_gain_*`     | Fall-to-spring change       | `gold_literacy_gain_scale`      |
+| `edeca_[construct]_*`      | eDECA assessment            | `edeca_initiative_pre_tscore`   |
+| `lead_tch_*`               | Lead teacher attribute      | `lead_tch_degree_level`         |
+| `aux_tch_*`                | Auxiliary teacher attribute | `aux_tch_race`                  |
+| `*_dum`                    | Binary dummy (0/1)          | `poverty_dum`, `head_start_dum` |
+
+## Validation Check Reference
+
+### Budget Validation (7 checks)
+
+1.  `required_columns` - Core columns exist
+2.  `classroom_code_format` - Valid classroom code format
+3.  `positive_totals` - Grand totals \> 0
+4.  `share_bounds` - Shares between 0 and 1
+5.  `total_reconciliation` - OSR + Other = Grand Total (within \$1)
+6.  `delivery_type_valid` - Known delivery types
+7.  `school_year_consistent` - All rows same school year
+
+### Classroom Validation (10 checks)
+
+1.  `required_columns` - Core columns exist
+2.  `classroom_code_format` - Valid format
+3.  `coordinate_range` - Alabama lat/lon bounds
+4.  `delivery_type_valid` - Known delivery types
+5.  `credential_valid` - Degree levels recognized
+6.  `experience_range` - Teaching years \[0, 50\]
+7.  `grant_positive` - Grant amounts \> 0
+8.  `region_valid` - Regions 1-11
+9.  `year_first_funded_range` - \[1995, current year\]
+10. `school_year_consistent` - Same school year
+
+### Student Validation (12 checks)
+
+1.  `required_columns` - Core columns exist
+2.  `adece_id_format` - ADECE IDs not all NA
+3.  `student_unique` - No duplicate ADECE IDs
+4.  `delivery_type_coverage` - All 7 types represented
+5.  `gender_distribution` - Male/Female 40-60% range
+6.  `missing_rates` - Key variables below thresholds
+7.  `age_range` - Pre-K age \[3, 7\]
+8.  `attendance_range` - \[0, 180\] days
+9.  `income_parse_rate` - Income parsed \>= 70%
+10. `gold_completeness` - GOLD fall/spring \>= 80%
+11. `assessment_consistency` - Scale scores non-negative
+12. `school_year_consistent` - Same school year
+
+### Linkage Validation (8 checks)
+
+1.  `required_columns` - Join keys exist
+2.  `key_uniqueness` - No duplicate keys at classroom level
+3.  `match_rate` - Join coverage \>= 95%
+4.  `orphan_count` - Unmatched rows reported
+5.  `na_introduced` - Unexpected NAs from join
+6.  `year_coverage` - All expected years present
+7.  `row_count_consistency` - Row counts as expected
+8.  `region_consistency` - Region values match across modules
+
+## Extending the Package
+
+### Adding a New Year’s Data
+
+``` r
+# 1. Process the new year
+config_2526 <- student_config("2025-2026", "Student_25-26.xlsx")
+result_2526 <- student_process(config_2526)
+
+# 2. Add to existing DuckDB database
+conn <- db_init("output/alprekdb.duckdb")
+db_write_year(conn, result_2526$clean, table = "student_panel")
+db_close(conn)
+```
+
+### Classroom Code Structure
+
+Classroom codes encode organizational structure. Use
+[`parse_classroom_codes()`](https://joonho112.github.io/ALprekDB/reference/parse_classroom_codes.md)
+for analysis:
+
+``` r
+codes <- c("001P12345.01", "067H54321.02", "033C98765.03")
+result <- parse_classroom_codes(codes)
+result
+#> # A tibble: 3 × 5
+#>   county_code delivery_type_code program_code class_num delivery_type     
+#>   <chr>       <chr>              <chr>        <chr>     <chr>             
+#> 1 001         P                  12345        01        Public School     
+#> 2 067         H                  54321        02        Head Start        
+#> 3 033         C                  98765        03        Private Child Care
+```
+
+The delivery type code maps to:
+
+| Code | Delivery Type            |
+|------|--------------------------|
+| P    | Public School            |
+| C    | Community Organization   |
+| H    | Head Start               |
+| O    | Faith-Based Organization |
+| F    | University Operated      |
+| U    | Private School           |
+| S    | Private Child Care       |
