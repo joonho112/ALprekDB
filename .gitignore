@@ -1,3 +1,4 @@
+# R project
 .Rproj.user
 .Rhistory
 .RData
@@ -5,3 +6,20 @@
 *.o
 *.so
 *.dll
+
+# Package build artifacts
+*.tar.gz
+*.Rcheck/
+
+# pkgdown site (rebuilt by GitHub Actions)
+docs/
+
+# Output data (NEVER commit - contains PII)
+output/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Integration test scripts (hardcoded local paths)
+run_*.R
