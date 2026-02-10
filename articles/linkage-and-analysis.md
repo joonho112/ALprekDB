@@ -222,7 +222,7 @@ head(agg[, c("school_year", "classroom_code", "n_children")])
 # Store processed data in DuckDB for efficient querying
 db_path <- tempfile(fileext = ".duckdb")
 conn <- db_init(db_path)
-#> ✔ Created new ALprekDB database: /tmp/RtmpQra3qX/file25e11c67d3a4.duckdb
+#> ✔ Created new ALprekDB database: /tmp/RtmpHxxqgj/file25df41f3a42a.duckdb
 
 # Write all panels
 db_write_panel(conn, budget)
