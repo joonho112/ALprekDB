@@ -32,6 +32,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
+<li class="nav-item"><a class="nav-link" href="../manuscript.pdf"><span class="fa fa-file-pdf"></span> Paper</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -276,7 +277,7 @@ summaries from student data:</p>
 <code class="sourceCode R"><span><span class="co"># Store processed data in DuckDB for efficient querying</span></span>
 <span><span class="va">db_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".duckdb"</span><span class="op">)</span></span>
 <span><span class="va">conn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/db_init.html">db_init</a></span><span class="op">(</span><span class="va">db_path</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created new ALprekDB database: /tmp/RtmpCb1Kxp/file270831c68650.duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Created new ALprekDB database: /tmp/RtmpQra3qX/file25e11c67d3a4.duckdb</span></span>
 <span></span>
 <span><span class="co"># Write all panels</span></span>
 <span><span class="fu"><a href="../reference/db_write_panel.html">db_write_panel</a></span><span class="op">(</span><span class="va">conn</span>, <span class="va">budget</span><span class="op">)</span></span>
