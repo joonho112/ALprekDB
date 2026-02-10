@@ -43,6 +43,15 @@ jobs:
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
+      - name: Copy manuscript PDF to site
+        run: |
+          if [ -f pkgdown/extra/manuscript.pdf ]; then
+            cp pkgdown/extra/manuscript.pdf docs/manuscript.pdf
+            echo "manuscript.pdf copied to docs/"
+          else
+            echo "pkgdown/extra/manuscript.pdf not found, skipping"
+          fi
+
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.7.3
