@@ -23,3 +23,6 @@ Thumbs.db
 
 # Integration test scripts (hardcoded local paths)
 run_*.R
+
+# Development files (manuscripts, logs, working docs)
+dev/
