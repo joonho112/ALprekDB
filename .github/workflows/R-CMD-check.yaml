@@ -25,7 +25,7 @@ jobs:
       ALPREKDB_RUN_REALDATA: "0"
       ALPREKDB_DATA_DIR: ""
       ALPREKDB_WRITE_OUTPUTS: "0"
-      ALPREKDB_OUTPUT_DIR: ${{ runner.temp }}/alprekdb-output
+      ALPREKDB_OUTPUT_DIR: /tmp/alprekdb-output
     steps:
       - uses: actions/checkout@v4
         with:
