@@ -73,7 +73,6 @@
 <!-- badges: end -->
 <p><strong>ALprekDB turns Alabama First Class Pre-K administrative files into validated, analysis-ready panel datasets while keeping raw data out of public code.</strong></p>
 <p>ALprekDB is a modular R package for ADECE budget, classroom, and student records. It handles file-format detection, data-driven codebooks, validation diagnostics, derived student variables, cross-module linkage, DuckDB storage, and export helpers. Public examples use fully synthetic data. Real ADECE data workflows are opt-in, local-only, and designed for private analysis projects.</p>
-<p><img src="reference/figures/figure_01_readme.png" alt="ALprekDB public synthetic examples and private real-data workflow" width="100%"></p>
 <div class="section level2">
 <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a>
 </h2>
@@ -239,27 +238,8 @@
 <div class="section level2">
 <h2 id="pipeline-architecture">Pipeline Architecture<a class="anchor" aria-label="anchor" href="#pipeline-architecture"></a>
 </h2>
-<pre class="text"><code>Public examples
-  synthetic data generators
-        |
-        v
-  runnable examples, tests, vignettes, and pkgdown
-
-Private analysis project
-  local ADECE Excel files
-        |
-        v
-  *_read()        -&gt; alprek_*_raw
-  *_clean()       -&gt; alprek_*_clean
-  *_validate()    -&gt; alprek_*_validation
-  *_bind_years()  -&gt; alprek_*_panel
-  student_transform()
-        |
-        v
-  linkage_create_master()
-        |
-        v
-  aggregate diagnostics, local exports, and optional DuckDB storage</code></pre>
+<p><img src="reference/figures/figure_01_readme.png" alt="ALprekDB public synthetic examples and private real-data workflow" width="100%"></p>
+<p>The diagram separates the public package surface from the private analysis workflow: public examples, tests, vignettes, and pkgdown are driven by synthetic data, while local ADECE Excel files remain opt-in inputs for private validation, linkage, aggregate diagnostics, exports, and optional DuckDB storage.</p>
 </div>
 <div class="section level2">
 <h2 id="privacy-and-provenance-guardrails">Privacy and Provenance Guardrails<a class="anchor" aria-label="anchor" href="#privacy-and-provenance-guardrails"></a>
@@ -313,7 +293,7 @@ Private analysis project
 <code>NN</code> = classroom number within site.</li>
 </ul>
 <p>The example below uses fake <code>9xx</code> prefixes and <code>9xxxxx</code> program codes for public documentation.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/parse_classroom_codes.html">parse_classroom_codes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"901P900001.01"</span>, <span class="st">"967H900002.02"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Delivery type codes are defined by <code><a href="reference/alprek_delivery_types.html">alprek_delivery_types()</a></code>:</p>
 <table class="table">
