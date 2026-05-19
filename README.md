@@ -13,12 +13,6 @@ diagnostics, derived student variables, cross-module linkage, DuckDB storage,
 and export helpers. Public examples use fully synthetic data. Real ADECE data
 workflows are opt-in, local-only, and designed for private analysis projects.
 
-<img
-  src="man/figures/figure_01_readme.png"
-  alt="ALprekDB public synthetic examples and private real-data workflow"
-  width="100%"
-/>
-
 ## Author
 
 JoonHo Lee, Ph.D.<br>
@@ -149,29 +143,16 @@ export ALPREKDB_WRITE_OUTPUTS=1
 
 ## Pipeline Architecture
 
-```text
-Public examples
-  synthetic data generators
-        |
-        v
-  runnable examples, tests, vignettes, and pkgdown
+<img
+  src="man/figures/figure_01_readme.png"
+  alt="ALprekDB public synthetic examples and private real-data workflow"
+  width="100%"
+/>
 
-Private analysis project
-  local ADECE Excel files
-        |
-        v
-  *_read()        -> alprek_*_raw
-  *_clean()       -> alprek_*_clean
-  *_validate()    -> alprek_*_validation
-  *_bind_years()  -> alprek_*_panel
-  student_transform()
-        |
-        v
-  linkage_create_master()
-        |
-        v
-  aggregate diagnostics, local exports, and optional DuckDB storage
-```
+The diagram separates the public package surface from the private analysis
+workflow: public examples, tests, vignettes, and pkgdown are driven by synthetic
+data, while local ADECE Excel files remain opt-in inputs for private validation,
+linkage, aggregate diagnostics, exports, and optional DuckDB storage.
 
 ## Privacy and Provenance Guardrails
 
