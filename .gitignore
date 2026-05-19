@@ -23,6 +23,7 @@ log/
 .claude/
 _targets/
 _targets.R
+!inst/templates/targets/_targets.R
 _targets.yaml
 .env
 .env.*
