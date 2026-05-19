@@ -334,21 +334,10 @@ print.alprek_student_clean <- function(x, ...) {
     raw_nih <- as.character(df$num_in_house)
 
     # Track text conversions
-    text_words <- c("four", "Four", "Three", "three", "Six", "six",
-                     "Seven", "seven", "Five", "five")
-    n_text_converted <- sum(raw_nih %in% text_words, na.rm = TRUE)
+    text_words <- c("three", "four", "five", "six", "seven")
+    n_text_converted <- sum(tolower(raw_nih) %in% text_words, na.rm = TRUE)
 
-    df$num_in_house <- dplyr::case_when(
-      tolower(raw_nih) == "four" ~ 4,
-      tolower(raw_nih) == "three" ~ 3,
-      tolower(raw_nih) == "six" ~ 6,
-      tolower(raw_nih) == "seven" ~ 7,
-      tolower(raw_nih) == "five" ~ 5,
-      raw_nih == ";" ~ NA_real_,
-      grepl("^\\d+$", raw_nih) ~ as.numeric(raw_nih),
-      grepl("\\d", raw_nih) ~ as.numeric(gsub("[^0-9]", "", raw_nih)),
-      TRUE ~ NA_real_
-    )
+    df$num_in_house <- .parse_num_in_house(raw_nih)
   }
 
   # --- Gross income parsing ---
@@ -375,6 +364,30 @@ print.alprek_student_clean <- function(x, ...) {
   }
 
   list(data = df, n_parsed = n_parsed, n_text_converted = n_text_converted)
+}
+
+
+#' Parse household-size values without noisy coercion warnings
+#' @keywords internal
+.parse_num_in_house <- function(x) {
+  raw <- as.character(x)
+  out <- rep(NA_real_, length(raw))
+  raw_trim <- stringr::str_trim(raw)
+  raw_lower <- tolower(raw_trim)
+
+  word_lookup <- c(three = 3, four = 4, five = 5, six = 6, seven = 7)
+  word_idx <- raw_lower %in% names(word_lookup)
+  out[word_idx] <- unname(word_lookup[raw_lower[word_idx]])
+
+  digit_idx <- is.na(out) & grepl("^\\d+$", raw_trim)
+  out[digit_idx] <- as.numeric(raw_trim[digit_idx])
+
+  embedded_digit_idx <- is.na(out) & grepl("\\d", raw_trim)
+  out[embedded_digit_idx] <- suppressWarnings(
+    as.numeric(gsub("[^0-9]", "", raw_trim[embedded_digit_idx]))
+  )
+
+  out
 }
 
 

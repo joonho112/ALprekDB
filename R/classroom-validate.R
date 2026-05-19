@@ -51,7 +51,7 @@ classroom_validate <- function(clean_obj, strict = FALSE) {
 
   # 2. Classroom code format
   check_idx <- check_idx + 1L
-  code_pattern <- "^\\d{3}[A-Z]\\d{5}\\.\\d{2}$"
+  code_pattern <- "^\\d{3}[PCHOFUS]\\d{6}\\.\\d{2}$"
   if ("classroom_code" %in% names(df)) {
     valid_codes <- grepl(code_pattern, df$classroom_code)
     n_invalid <- sum(!valid_codes & !is.na(df$classroom_code))

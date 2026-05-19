@@ -13,7 +13,7 @@ test_that("classroom_detect_format identifies new format", {
 test_that("classroom_detect_format uses Fund Source as new marker", {
   # Create a minimal df with Fund Source column
   df <- tibble::tibble(
-    `Classroom Code Static` = "001P00001.01",
+    `Classroom Code Static` = "901P900001.01",
     `Fund Source` = "State"
   )
   # Add enough columns to avoid legacy default

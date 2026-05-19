@@ -100,6 +100,42 @@ print.alprek_budget_long <- function(x, ...) {
 }
 
 
+#' Parse budget amount values without base coercion warnings
+#' @keywords internal
+.parse_budget_amount <- function(x) {
+  if (is.numeric(x)) {
+    return(as.numeric(x))
+  }
+
+  raw <- as.character(x)
+  clean <- trimws(raw)
+  lower <- tolower(clean)
+  expected_missing <- is.na(raw) |
+    lower %in% c("", "na", "n/a", "not available", "none", "null", "-", "--")
+
+  is_parenthetical <- grepl("^\\(.*\\)$", clean)
+  clean <- gsub("^\\((.*)\\)$", "\\1", clean)
+  clean <- gsub("[$,]", "", clean)
+  clean <- gsub("\\s+", "", clean)
+
+  out <- suppressWarnings(as.numeric(clean))
+  out[expected_missing] <- NA_real_
+  out[is_parenthetical & !is.na(out)] <- -abs(out[is_parenthetical & !is.na(out)])
+  out
+}
+
+
+#' Normalize budget amount columns before reshaping
+#' @keywords internal
+.normalize_budget_amount_columns <- function(df, cols) {
+  existing <- intersect(cols, names(df))
+  for (col in existing) {
+    df[[col]] <- .parse_budget_amount(df[[col]])
+  }
+  df
+}
+
+
 # ============================================================================
 # LEGACY FORMAT CLEANING (2021-2024)
 # ============================================================================
@@ -146,6 +182,14 @@ print.alprek_budget_long <- function(x, ...) {
   osr_cols <- grep("From OSR Funds$", names(df), value = TRUE)
   # Exclude the total column
   osr_cols <- setdiff(osr_cols, "total_osr_reported")
+  add_fund_cols <- grep("From Additional Funds [12]$", names(df), value = TRUE)
+  add_src_cols <- grep("Additional Source [12]$", names(df), value = TRUE)
+
+  df <- .normalize_budget_amount_columns(
+    df,
+    c(osr_cols, add_fund_cols, "total_osr_reported",
+      "total_other_reported", "total_grand_reported")
+  )
 
   osr_long <- df |>
     dplyr::select(dplyr::all_of(c(key_cols, osr_cols))) |>
@@ -158,13 +202,10 @@ print.alprek_budget_long <- function(x, ...) {
       category_detail = stringr::str_remove(.data$category_detail, " From OSR Funds$"),
       source_type = "osr",
       source_detail = "osr",
-      amount = dplyr::coalesce(as.numeric(.data$amount), 0)
+      amount = dplyr::coalesce(.parse_budget_amount(.data$amount), 0)
     )
 
   # --- Additional Funds line items ---
-  add_fund_cols <- grep("From Additional Funds [12]$", names(df), value = TRUE)
-  add_src_cols <- grep("Additional Source [12]$", names(df), value = TRUE)
-
   if (length(add_fund_cols) > 0) {
     add_long <- df |>
       dplyr::select(dplyr::all_of(c(key_cols, add_fund_cols))) |>
@@ -174,7 +215,7 @@ print.alprek_budget_long <- function(x, ...) {
         values_to = "amount"
       ) |>
       dplyr::mutate(
-        amount = dplyr::coalesce(as.numeric(.data$amount), 0),
+        amount = dplyr::coalesce(.parse_budget_amount(.data$amount), 0),
         # Parse: "{Category} From Additional Funds {slot}"
         slot = as.integer(stringr::str_extract(.data$raw_name, "[12]$")),
         category_detail = stringr::str_remove(.data$raw_name, " From Additional Funds [12]$")
@@ -325,6 +366,11 @@ print.alprek_budget_long <- function(x, ...) {
       !(all_cols %in% c(key_cols, total_cols))
   ]
 
+  df <- .normalize_budget_amount_columns(
+    df,
+    c(total_cols, osr_cat_cols, other_cat_cols)
+  )
+
   # Normalize category name: strip "(including Payroll Taxes)", then "OSR"/"Other"
   # ORDER MATTERS: must remove parenthetical FIRST so "OSR$" regex can match
   normalize_cat <- function(x) {
@@ -347,7 +393,7 @@ print.alprek_budget_long <- function(x, ...) {
       category_detail = normalize_cat(.data$category_detail),
       source_type = "osr",
       source_detail = "osr",
-      amount = dplyr::coalesce(as.numeric(.data$amount), 0)
+      amount = dplyr::coalesce(.parse_budget_amount(.data$amount), 0)
     )
 
   # --- Other categories to long ---
@@ -362,7 +408,7 @@ print.alprek_budget_long <- function(x, ...) {
       category_detail = normalize_cat(.data$category_detail),
       source_type = "other",
       source_detail = "other",
-      amount = dplyr::coalesce(as.numeric(.data$amount), 0)
+      amount = dplyr::coalesce(.parse_budget_amount(.data$amount), 0)
     )
 
   # --- Combine ---
@@ -431,10 +477,10 @@ print.alprek_budget_long <- function(x, ...) {
   sums |>
     dplyr::left_join(reported, by = key_cols) |>
     dplyr::mutate(
-      osr_diff = .data$osr_line_sum - as.numeric(.data$total_osr_reported),
-      other_diff = .data$other_line_sum - as.numeric(.data$total_other_reported),
+      osr_diff = .data$osr_line_sum - .parse_budget_amount(.data$total_osr_reported),
+      other_diff = .data$other_line_sum - .parse_budget_amount(.data$total_other_reported),
       grand_diff = (.data$osr_line_sum + .data$other_line_sum) -
-        as.numeric(.data$total_grand_reported),
+        .parse_budget_amount(.data$total_grand_reported),
       flag_total_mismatch = abs(.data$grand_diff) > tolerance,
       flag_osr_mismatch = abs(.data$osr_diff) > tolerance,
       flag_other_mismatch = abs(.data$other_diff) > tolerance
@@ -471,9 +517,9 @@ print.alprek_budget_long <- function(x, ...) {
     dplyr::left_join(reported, by = key_cols) |>
     dplyr::mutate(
       computed_grand = .data$osr_expenditure_sum + .data$other_expenditure_sum,
-      grand_diff = .data$computed_grand - as.numeric(.data$total_expenditure),
+      grand_diff = .data$computed_grand - .parse_budget_amount(.data$total_expenditure),
       other_diff = .data$other_expenditure_sum -
-        as.numeric(.data$total_other_expenditure),
+        .parse_budget_amount(.data$total_other_expenditure),
       flag_total_mismatch = abs(.data$grand_diff) > tolerance,
       flag_other_mismatch = abs(.data$other_diff) > tolerance
     )

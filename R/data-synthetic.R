@@ -1,9 +1,10 @@
 #' Generate Synthetic ALprekDB Data for Demonstrations
 #'
-#' @description These functions create realistic synthetic datasets that mirror
-#'   the structure and types of real ADECE Pre-K administrative data. They are
-#'   useful for demonstrations, vignettes, and testing without requiring access
-#'   to confidential data files.
+#' @description These functions create synthetic datasets that mirror the
+#'   structure and types of real ADECE Pre-K administrative data without using
+#'   real row-level values. Classroom identifiers use fake `9xx` county prefixes
+#'   and `9xxxxx` program codes so public examples cannot be confused with
+#'   confidential source records.
 #'
 #'   All three generators share classroom codes when called with the same
 #'   `seed` and compatible `n_classrooms`, enabling cross-module linkage.
@@ -15,13 +16,14 @@ NULL
 # Internal: Generate shared classroom codes
 #
 # Creates deterministic classroom codes for all 3 generators to share.
-# Format: "CCCDNNNNN.NN" where CCC=county, D=delivery code, NNNNN=program, NN=class.
+# Format: "CCCDNNNNNN.NN" where CCC=fake 9xx county prefix,
+# D=delivery code, NNNNNN=fake 9xxxxx program, NN=class.
 .alprek_synthetic_codes <- function(n, seed = 42) {
   withr::with_seed(seed, {
     paste0(
-      sprintf("%03d", sample(1:67, n, replace = TRUE)),
+      sprintf("%03d", sample(900:999, n, replace = TRUE)),
       sample(c("P", "C", "H", "O", "F", "U", "S"), n, replace = TRUE),
-      sprintf("%05d", sample(10000:99999, n)),
+      sprintf("%06d", sample(900000:999999, n, replace = n > 100000)),
       ".",
       sprintf("%02d", sample(1:3, n, replace = TRUE))
     )
@@ -115,8 +117,8 @@ alprek_synthetic_budget <- function(n_classrooms = 20, n_years = 2, seed = 42) {
                  ifelse(dt == "Head Start", "Head Start", "Private")),
           levels = c("Public", "Private", "Head Start")
         ),
-        program_code = substr(codes, 5, 9),
-        class_num = substr(codes, 11, 12),
+        program_code = substr(codes, 5, 10),
+        class_num = substr(codes, 12, 13),
         delivery_type_code = substr(codes, 4, 4),
         osr_lead_teacher_salary = lt_sal,
         osr_lead_teacher_benefits = lt_ben,
@@ -217,13 +219,12 @@ alprek_synthetic_classroom <- function(n_classrooms = 20, n_years = 2, seed = 42
         year = rep(yr, n),
         region = sample(1:11, n, replace = TRUE),
         county_code = substr(codes, 1, 3),
-        county_name = sample(c("Jefferson", "Montgomery", "Tuscaloosa", "Madison",
-                                "Mobile", "Baldwin"), n, replace = TRUE),
+        county_name = paste0("Synthetic County ", substr(codes, 1, 3)),
         delivery_type = factor(dt_vals, levels = delivery_types),
-        program_code = substr(codes, 5, 9),
+        program_code = substr(codes, 5, 10),
         site_name = paste0("Site ", seq_len(n)),
         site_code = substr(codes, 1, nchar(codes) - 3),
-        class_num = substr(codes, 11, 12),
+        class_num = substr(codes, 12, 13),
         title_i = sample(c("Y", "N", NA), n, replace = TRUE, prob = c(0.4, 0.5, 0.1)),
         title_i_numeric = NA_real_,
         total_grant = round(runif(n, 85000, 155000), 0),

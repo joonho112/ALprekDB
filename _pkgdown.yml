@@ -7,14 +7,55 @@ template:
     pkgdown-nav-height: 80px
 
 home:
+  title: ALprekDB
+  description: >
+    Processing engine for Alabama First Class Pre-K administrative data:
+    validated budget, classroom, and student panels; cross-module linkage;
+    DuckDB storage; and privacy-conscious synthetic and private real-data
+    workflows.
   sidebar:
     structure: [links, license, community, authors, dev]
+  links:
+  - text: Synthetic quick start
+    href: articles/a1-getting-started.html
+  - text: Private targets workflow
+    href: articles/a5-targets-workflow.html
+  - text: Privacy and provenance
+    href: articles/m4-privacy-provenance.html
+  - text: Function reference
+    href: reference/index.html
 
 navbar:
   structure:
     left: [intro, reference, articles, news, paper]
     right: [search, github]
   components:
+    intro:
+      text: Get started
+      href: articles/a1-getting-started.html
+    articles:
+      text: Vignettes
+      menu:
+      - text: '--- Applied Track ---'
+      - text: A1 - Getting started
+        href: articles/a1-getting-started.html
+      - text: A2 - Build panels
+        href: articles/a2-build-panels.html
+      - text: A3 - Linkage analysis
+        href: articles/a3-linkage-analysis.html
+      - text: A4 - DuckDB and SQL
+        href: articles/a4-duckdb-sql.html
+      - text: A5 - Targets workflow
+        href: articles/a5-targets-workflow.html
+      - text: '--- Methodological Track ---'
+      - text: M1 - Architecture trilemma
+        href: articles/m1-architecture-trilemma.html
+      - text: M2 - Validation framework
+        href: articles/m2-validation-framework.html
+      - text: M3 - Codebooks and mappings
+        href: articles/m3-codebooks-mappings.html
+      - text: M4 - Privacy and provenance
+        href: articles/m4-privacy-provenance.html
     paper:
       text: "Paper"
       icon: fa-file-pdf
@@ -34,27 +75,45 @@ authors:
     href: https://orcid.org/0009-0006-4019-8703
 
 articles:
-  - title: Guides
+  - title: Applied Track
+    desc: >
+      Workflow-oriented guides for installing the package, building panels,
+      linking modules, querying DuckDB outputs, and running the companion
+      targets workflow with synthetic examples and private real-data recipes.
+    navbar: ~
     contents:
-    - getting-started
-    - panel-construction
-    - linkage-and-analysis
-    - reference-architecture
+    - a1-getting-started
+    - a2-build-panels
+    - a3-linkage-analysis
+    - a4-duckdb-sql
+    - a5-targets-workflow
+
+  - title: Methodological Track
+    desc: >
+      Technical and design-oriented articles about the package architecture,
+      validation framework, codebook and mapping contracts, privacy controls,
+      provenance, and reproducibility posture.
+    navbar: ~
+    contents:
+    - m1-architecture-trilemma
+    - m2-validation-framework
+    - m3-codebooks-mappings
+    - m4-privacy-provenance
 
 reference:
   - title: Budget Module
-    desc: Per-classroom funding data processing
+    desc: Reading, cleaning, validation, transformation, panels, diagnostics, and exports
     contents:
+    - budget_config
     - budget_read
     - budget_detect_format
     - budget_clean
-    - budget_to_long
     - budget_validate
     - budget_transform
+    - budget_to_long
     - budget_bind_years
     - budget_process
     - budget_process_years
-    - budget_config
     - budget_track_classrooms
     - budget_yoy_summary
     - budget_summary_stats
@@ -65,8 +124,9 @@ reference:
     - budget_export_stata
 
   - title: Classroom Module
-    desc: Classroom characteristics, teacher demographics, geography
+    desc: Reading, cleaning, validation, panels, tracking, summaries, and exports
     contents:
+    - classroom_config
     - classroom_read
     - classroom_detect_format
     - classroom_clean
@@ -74,7 +134,6 @@ reference:
     - classroom_bind_years
     - classroom_process
     - classroom_process_years
-    - classroom_config
     - classroom_track
     - classroom_summary_stats
     - classroom_export_csv
@@ -84,8 +143,9 @@ reference:
     - classroom_export_stata
 
   - title: Student Module
-    desc: Student demographics, assessments, services
+    desc: Reading, cleaning, validation, analytic transforms, panels, summaries, and exports
     contents:
+    - student_config
     - student_read
     - student_detect_format
     - student_clean
@@ -94,7 +154,6 @@ reference:
     - student_bind_years
     - student_process
     - student_process_years
-    - student_config
     - student_track
     - student_summary_stats
     - student_export_csv
@@ -103,26 +162,33 @@ reference:
     - student_export_rds
     - student_export_stata
 
-  - title: Linkage Module
-    desc: Cross-module joins and master datasets
+  - title: Linkage Construction
+    desc: Cross-module joins, student aggregation, and master dataset creation
     contents:
     - linkage_classroom_budget
     - linkage_student_classroom
     - linkage_aggregate_students
     - linkage_create_master
+
+  - title: Linkage Diagnostics
+    desc: Coverage-aware validation and summary diagnostics
+    contents:
     - linkage_validate
     - linkage_summary_stats
+
+  - title: Linkage Export
+    desc: Export helpers for linked and master datasets
+    contents:
     - linkage_export_csv
     - linkage_export_excel
     - linkage_export_parquet
     - linkage_export_rds
     - linkage_export_stata
 
-  - title: Database Module
+  - title: DuckDB Database Module
     desc: DuckDB persistent storage and SQL queries
     contents:
     - db_init
-    - db_close
     - db_write_panel
     - db_write_master
     - db_write_year
@@ -131,6 +197,7 @@ reference:
     - db_list_tables
     - db_table_info
     - db_query
+    - db_close
 
   - title: Codebooks & Mappings
     desc: Data-driven reference tables
@@ -145,8 +212,9 @@ reference:
     - alprek_student_delivery_mapping
 
   - title: Synthetic Data
-    desc: Generators for examples and vignettes
+    desc: Overview and generators for examples, vignettes, and tests
     contents:
+    - synthetic-data
     - alprek_synthetic_budget
     - alprek_synthetic_classroom
     - alprek_synthetic_student
@@ -159,11 +227,7 @@ reference:
     - alprek_infer_school_year
     - alprek_school_year_to_start
 
-  - title: S3 Print Methods
+  - title: Display Methods
     desc: Display methods for ALprekDB objects
     contents:
     - starts_with("print.alprek_")
-
-  - title: internal
-    contents:
-    - synthetic-data

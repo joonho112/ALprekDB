@@ -35,6 +35,7 @@ linkage_create_master <- function(budget, classroom, student) {
   }
 
   msg_info("Creating master linked dataset")
+  coverage <- .linkage_master_coverage(budget, classroom, student)
 
   # Step 1: Classroom + Budget
   msg_step(1, 4, "Joining classroom + budget")
@@ -100,6 +101,7 @@ linkage_create_master <- function(budget, classroom, student) {
   diagnostics <- list(
     classroom_budget = cb$diagnostics,
     student_classroom = sc$diagnostics,
+    coverage = coverage,
     n_classroom_level = nrow(classroom_level),
     n_student_level = nrow(student_level),
     n_classroom_cols = ncol(classroom_level),
@@ -110,6 +112,7 @@ linkage_create_master <- function(budget, classroom, student) {
   years <- sort(unique(c(cb$meta$years, sc$meta$years)))
   meta <- list(
     years = years,
+    coverage = coverage,
     n_classroom_rows = nrow(classroom_level),
     n_student_rows = nrow(student_level),
     n_classroom_cols = ncol(classroom_level),
@@ -130,6 +133,10 @@ linkage_create_master <- function(budget, classroom, student) {
   msg_success("Master dataset created:")
   msg_info("  Classroom-level: {nrow(classroom_level)} rows x {ncol(classroom_level)} cols")
   msg_info("  Student-level: {nrow(student_level)} rows x {ncol(student_level)} cols")
+  if (length(coverage$missing_budget_years) > 0) {
+    missing_years <- paste(coverage$missing_budget_years, collapse = ", ")
+    msg_info("  Budget coverage unavailable for year(s): {missing_years}; budget-derived fields remain NA for those years")
+  }
 
   result
 }
@@ -148,10 +155,24 @@ print.alprek_linkage_master <- function(x, ...) {
       ncol(x$student_level), "cols\n")
   d <- x$diagnostics
   if (!is.null(d$classroom_budget)) {
-    cat("  Budget match:", round(d$classroom_budget$match_rate * 100, 1), "%\n")
+    cb <- d$classroom_budget
+    if (!is.null(cb$match_rate_overlap_years) && !is.na(cb$match_rate_overlap_years) &&
+        length(cb$missing_budget_years) > 0) {
+      cat("  Budget overlap match:", round(cb$match_rate_overlap_years * 100, 1), "%\n")
+      cat("  Budget all-year match:", round(cb$match_rate * 100, 1), "%\n")
+    } else {
+      cat("  Budget match:", round(cb$match_rate * 100, 1), "%\n")
+    }
   }
   if (!is.null(d$student_classroom)) {
-    cat("  Classroom match:", round(d$student_classroom$match_rate * 100, 1), "%\n")
+    sc <- d$student_classroom
+    if (!is.null(sc$match_rate_overlap_years) && !is.na(sc$match_rate_overlap_years) &&
+        length(sc$missing_classroom_years) > 0) {
+      cat("  Classroom overlap match:", round(sc$match_rate_overlap_years * 100, 1), "%\n")
+      cat("  Classroom all-year match:", round(sc$match_rate * 100, 1), "%\n")
+    } else {
+      cat("  Classroom match:", round(sc$match_rate * 100, 1), "%\n")
+    }
   }
   invisible(x)
 }
@@ -184,15 +205,15 @@ linkage_summary_stats <- function(x, by = "school_year") {
     n_rows <- nrow(d)
 
     mean_grand_total <- if ("grand_total" %in% names(d)) {
-      mean(d$grand_total, na.rm = TRUE)
+      .linkage_mean_or_na(d$grand_total)
     } else NA_real_
 
     mean_per_child <- if ("per_child_budget" %in% names(d)) {
-      mean(d$per_child_budget, na.rm = TRUE)
+      .linkage_mean_or_na(d$per_child_budget)
     } else NA_real_
 
     mean_n_children <- if ("n_children" %in% names(d)) {
-      mean(d$n_children, na.rm = TRUE)
+      .linkage_mean_or_na(d$n_children)
     } else NA_real_
 
     pct_with_budget <- if ("grand_total" %in% names(d)) {
@@ -223,4 +244,14 @@ linkage_summary_stats <- function(x, by = "school_year") {
   }
 
   stats
+}
+
+
+#' Mean helper that returns NA rather than NaN for all-missing groups
+#' @keywords internal
+.linkage_mean_or_na <- function(x) {
+  if (all(is.na(x))) {
+    return(NA_real_)
+  }
+  mean(x, na.rm = TRUE)
 }

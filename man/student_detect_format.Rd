@@ -19,9 +19,12 @@ Determines whether a student data frame uses the legacy
 \details{
 Detection logic:
 \itemize{
+\item \strong{Reject partial exports}: fewer than 190 columns is too narrow for a
+canonical Student/Child Details file.
 \item \strong{New}: Contains "Child First Name" or "Modified Schedule" or "Student ID"
 (without "State") or ncol >= 250.
-\item \strong{Legacy}: ncol <= 210 and no new-format marker columns present.
+\item \strong{Legacy}: roughly 190-210 columns and no new-format marker columns
+present.
 }
 }
 \examples{

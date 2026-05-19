@@ -45,6 +45,15 @@ test_that("alprek_synthetic_budget is reproducible with seed", {
   expect_identical(b1$data$classroom_code, b2$data$classroom_code)
 })
 
+test_that("synthetic classroom identifiers use fake sentinel values", {
+  budget <- alprek_synthetic_budget(n_classrooms = 10, n_years = 1, seed = 42)
+
+  expect_true(all(grepl("^9\\d{2}[PCHOFUS]9\\d{5}\\.\\d{2}$", budget$data$classroom_code)))
+  expect_false(any(budget$data$county_code %in% sprintf("%03d", 1:67)))
+  expect_equal(budget$data$program_code, substr(budget$data$classroom_code, 5, 10))
+  expect_equal(budget$data$class_num, substr(budget$data$classroom_code, 12, 13))
+})
+
 
 # ==========================================================================
 # Classroom Synthetic
@@ -82,6 +91,15 @@ test_that("alprek_synthetic_classroom factor columns are correct", {
   expect_true(is.factor(cr$data$lead_tch_race))
   expect_true(is.factor(cr$data$lead_tch_gender))
   expect_true(is.factor(cr$data$lead_tch_degree_level))
+})
+
+test_that("synthetic classroom geography labels are visibly fake", {
+  cr <- alprek_synthetic_classroom(n_classrooms = 5, n_years = 1, seed = 42)
+
+  expect_true(all(grepl("^Synthetic County 9\\d{2}$", cr$data$county_name)))
+  expect_false(any(cr$data$county_code %in% sprintf("%03d", 1:67)))
+  expect_equal(cr$data$program_code, substr(cr$data$classroom_code, 5, 10))
+  expect_equal(cr$data$class_num, substr(cr$data$classroom_code, 12, 13))
 })
 
 

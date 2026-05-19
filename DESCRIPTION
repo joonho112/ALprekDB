@@ -1,24 +1,24 @@
 Package: ALprekDB
 Type: Package
 Title: Alabama Pre-K Administrative Data Processing and Database Management
-Version: 0.5.0
+Version: 0.6.0
 Authors@R: person("JoonHo", "Lee",
                   email = "jlee296@ua.edu",
                   role = c("aut", "cre"),
                   comment = c(ORCID = "0009-0006-4019-8703"))
-Description: A modular toolkit for processing, cleaning, validating, and
-    managing Alabama First Class Pre-K (FCPK) administrative records. This
-    package standardizes annual data processing workflows for budget, classroom,
-    and student data files received from ADECE (Alabama Department of Early
-    Childhood Education). Features include: data-driven column mapping via
-    external codebooks, pattern-based format detection across file versions,
+Description: A modular toolkit for processing, cleaning, validating, linking,
+    and managing Alabama First Class Pre-K (FCPK) administrative records. This
+    package standardizes annual workflows for budget, classroom, and student
+    data files received from ADECE (Alabama Department of Early Childhood
+    Education). Features include data-driven column mapping via external
+    codebooks, pattern-based format detection across file versions,
     reconciliation diagnostics, derived variable creation, multi-year panel
-    construction, cross-module linkage with join diagnostics, classroom-level
-    student aggregation, DuckDB-based persistent storage with SQL query
-    support, and multiple export formats.
+    construction, coverage-aware cross-module linkage, classroom-level student
+    aggregation, DuckDB-based persistent storage with SQL query support,
+    synthetic demonstration data, and privacy-conscious private workflow
+    templates.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 URL: https://joonho112.github.io/ALprekDB/,
@@ -41,6 +41,7 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
+    targets,
     arrow,
     openxlsx,
     haven,

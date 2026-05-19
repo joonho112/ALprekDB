@@ -417,6 +417,75 @@ test_that("db_read_master reconstructs linkage master S3 class", {
   expect_s3_class(result, "alprek_linkage_master")
   expect_equal(nrow(result$classroom_level), nrow(master$classroom_level))
   expect_equal(nrow(result$student_level), nrow(master$student_level))
+  expect_true("classroom_budget" %in% names(result$diagnostics))
+  expect_true("student_classroom" %in% names(result$diagnostics))
+  expect_true("coverage" %in% names(result$diagnostics))
+  expect_true(is.data.frame(result$meta$coverage$by_year))
+})
+
+
+test_that("db_read_master reconstructs coverage-aware diagnostics", {
+  skip_if_no_duckdb()
+  tmp <- tempfile(fileext = ".duckdb")
+  on.exit(unlink(tmp), add = TRUE)
+
+  fixtures <- make_asymmetric_linkage_fixtures(n_classrooms = 20)
+  conn <- db_init(tmp)
+  on.exit(db_close(conn), add = TRUE)
+
+  master <- linkage_create_master(
+    fixtures$budget_panel,
+    fixtures$classroom_panel,
+    fixtures$student_panel
+  )
+  db_write_master(conn, master)
+
+  result <- db_read_master(conn)
+  validation <- linkage_validate(result)
+  checks <- validation$checks
+  budget_missing <- checks[checks$check_name == "budget_missing_coverage", ]
+  budget_orphans <- checks[checks$check_name == "budget_overlap_orphans", ]
+
+  expect_equal(result$meta$coverage$missing_budget_years, fixtures$extra_year)
+  expect_equal(result$diagnostics$classroom_budget$missing_budget_years,
+               fixtures$extra_year)
+  expect_equal(result$diagnostics$classroom_budget$n_left_orphan_missing_budget_years,
+               sum(result$classroom_level$school_year == fixtures$extra_year))
+  expect_true(validation$passed)
+  expect_equal(budget_missing$status, "INFO")
+  expect_equal(budget_orphans$status, "WARN")
+})
+
+
+test_that("db_read_master validates missing-budget-only year filters", {
+  skip_if_no_duckdb()
+  tmp <- tempfile(fileext = ".duckdb")
+  on.exit(unlink(tmp), add = TRUE)
+
+  fixtures <- make_asymmetric_linkage_fixtures(n_classrooms = 20)
+  conn <- db_init(tmp)
+  on.exit(db_close(conn), add = TRUE)
+
+  master <- linkage_create_master(
+    fixtures$budget_panel,
+    fixtures$classroom_panel,
+    fixtures$student_panel
+  )
+  db_write_master(conn, master)
+
+  result <- db_read_master(conn, years = fixtures$extra_year)
+  validation <- linkage_validate(result)
+  checks <- validation$checks
+  match_rate <- checks[checks$check_name == "match_rate", ]
+  budget_orphans <- checks[checks$check_name == "budget_overlap_orphans", ]
+  budget_missing <- checks[checks$check_name == "budget_missing_coverage", ]
+
+  expect_true(validation$passed)
+  expect_equal(validation$n_errors, 0L)
+  expect_equal(match_rate$status, "PASS")
+  expect_equal(budget_orphans$status, "PASS")
+  expect_equal(budget_missing$status, "INFO")
+  expect_equal(result$meta$coverage$missing_budget_years, fixtures$extra_year)
 })
 
 
@@ -489,6 +558,30 @@ test_that("Date columns survive write-read round trip", {
     expect_true(inherits(result$data$dob, "Date"))
     expect_equal(result$data$dob, original$data$dob)
   }
+})
+
+
+test_that("POSIXct columns survive write-read round trip", {
+  skip_if_no_duckdb()
+  tmp <- tempfile(fileext = ".duckdb")
+  on.exit(unlink(tmp), add = TRUE)
+
+  fixtures <- make_linkage_fixtures(n_classrooms = 5, n_students_per = 3)
+  conn <- db_init(tmp)
+  on.exit(db_close(conn), add = TRUE)
+
+  original <- fixtures$classroom_panel
+  original$data$db_created_at <- as.POSIXct(
+    "2026-05-19 12:00:00",
+    tz = "UTC"
+  ) + seq_len(nrow(original$data))
+
+  db_write_panel(conn, original)
+  result <- db_read_panel(conn, "classroom")
+
+  expect_true(inherits(result$data$db_created_at, "POSIXct"))
+  expect_equal(as.numeric(result$data$db_created_at),
+               as.numeric(original$data$db_created_at))
 })
 
 

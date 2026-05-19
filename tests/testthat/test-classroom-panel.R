@@ -27,21 +27,21 @@ test_that("imputation fills lat/lon within site groups", {
   c1 <- make_classroom_clean("legacy", 2)
   c1$data$school_year <- "2022-2023"
   c1$meta$school_year <- "2022-2023"
-  c1$data$site_code <- c("001P00001", "001P00001")
+  c1$data$site_code <- c("901P900001", "901P900001")
   c1$data$latitude <- c(32.5, NA)
   c1$data$longitude <- c(-86.5, NA)
 
   c2 <- make_classroom_clean("legacy", 2)
   c2$data$school_year <- "2023-2024"
   c2$meta$school_year <- "2023-2024"
-  c2$data$site_code <- c("001P00001", "002C00002")
+  c2$data$site_code <- c("901P900001", "902C900002")
   c2$data$latitude <- c(NA, 33.0)
   c2$data$longitude <- c(NA, -87.0)
 
   panel <- classroom_bind_years(clean_list = list(c1, c2))
 
   # Check that lat/lon were imputed for same site_code
-  site1_rows <- panel$data[panel$data$site_code == "001P00001", ]
+  site1_rows <- panel$data[panel$data$site_code == "901P900001", ]
   expect_true(all(!is.na(site1_rows$latitude)))
   expect_true(all(!is.na(site1_rows$longitude)))
 })
@@ -50,14 +50,14 @@ test_that("imputation logs track imputed values", {
   c1 <- make_classroom_clean("legacy", 1)
   c1$data$school_year <- "2022-2023"
   c1$meta$school_year <- "2022-2023"
-  c1$data$site_code <- "001P00001"
+  c1$data$site_code <- "901P900001"
   c1$data$latitude <- 32.5
   c1$data$longitude <- -86.5
 
   c2 <- make_classroom_clean("legacy", 1)
   c2$data$school_year <- "2023-2024"
   c2$meta$school_year <- "2023-2024"
-  c2$data$site_code <- "001P00001"
+  c2$data$site_code <- "901P900001"
   c2$data$latitude <- NA_real_
   c2$data$longitude <- NA_real_
 
@@ -72,12 +72,12 @@ test_that("classroom_track creates presence matrix", {
   c1 <- make_classroom_clean("legacy", 2)
   c1$data$school_year <- "2022-2023"
   c1$meta$school_year <- "2022-2023"
-  c1$data$classroom_code <- c("001P00001.01", "002C00002.01")
+  c1$data$classroom_code <- c("901P900001.01", "902C900002.01")
 
   c2 <- make_classroom_clean("legacy", 2)
   c2$data$school_year <- "2023-2024"
   c2$meta$school_year <- "2023-2024"
-  c2$data$classroom_code <- c("001P00001.01", "003H00003.01")
+  c2$data$classroom_code <- c("901P900001.01", "903H900003.01")
 
   panel <- classroom_bind_years(clean_list = list(c1, c2))
   track <- classroom_track(panel)
@@ -87,13 +87,13 @@ test_that("classroom_track creates presence matrix", {
   expect_true("2022-2023" %in% names(track))
   expect_true("2023-2024" %in% names(track))
 
-  # 001P00001.01 should be present in both years
-  row1 <- track[track$classroom_code == "001P00001.01", ]
+  # 901P900001.01 should be present in both years
+  row1 <- track[track$classroom_code == "901P900001.01", ]
   expect_true(row1[["2022-2023"]])
   expect_true(row1[["2023-2024"]])
 
-  # 002C00002.01 should only be in first year
-  row2 <- track[track$classroom_code == "002C00002.01", ]
+  # 902C900002.01 should only be in first year
+  row2 <- track[track$classroom_code == "902C900002.01", ]
   expect_true(row2[["2022-2023"]])
   expect_false(row2[["2023-2024"]])
 })
@@ -122,13 +122,13 @@ test_that("year_first_funded imputation works", {
   c1 <- make_classroom_clean("legacy", 1)
   c1$data$school_year <- "2022-2023"
   c1$meta$school_year <- "2022-2023"
-  c1$data$classroom_code <- "001P00001.01"
+  c1$data$classroom_code <- "901P900001.01"
   c1$data$year_first_funded <- 2015L
 
   c2 <- make_classroom_clean("legacy", 1)
   c2$data$school_year <- "2023-2024"
   c2$meta$school_year <- "2023-2024"
-  c2$data$classroom_code <- "001P00001.01"
+  c2$data$classroom_code <- "901P900001.01"
   c2$data$year_first_funded <- NA_integer_
 
   panel <- classroom_bind_years(clean_list = list(c1, c2))

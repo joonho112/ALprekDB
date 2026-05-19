@@ -266,7 +266,7 @@ make_classroom_legacy_raw_df <- function(n = 5) {
   codes <- paste0(
     sprintf("%03d", sample(1:67, n, replace = TRUE)),
     sample(c("P", "C", "H", "O", "F", "U", "S"), n, replace = TRUE),
-    sprintf("%05d", sample(10000:99999, n)),
+    sprintf("%06d", sample(100000:999999, n)),
     ".",
     sprintf("%02d", sample(1:5, n, replace = TRUE))
   )
@@ -274,7 +274,7 @@ make_classroom_legacy_raw_df <- function(n = 5) {
   site_codes <- paste0(
     sprintf("%03d", sample(1:67, n, replace = TRUE)),
     sample(c("P", "C", "H", "O", "F", "U", "S"), n, replace = TRUE),
-    sprintf("%05d", sample(10000:99999, n))
+    sprintf("%06d", sample(100000:999999, n))
   )
 
   delivery_types <- sample(c("Public School", "Private Child Care", "Head Start",
@@ -296,7 +296,7 @@ make_classroom_legacy_raw_df <- function(n = 5) {
     `Region` = sample(1:11, n, replace = TRUE),
     `County #` = sprintf("%03d", sample(1:67, n, replace = TRUE)),
     `Delivery Type` = delivery_types,
-    `Program Code` = sprintf("%05d", sample(10000:99999, n)),
+    `Program Code` = sprintf("%06d", sample(100000:999999, n)),
     `Site #` = sprintf("%02d", sample(1:10, n, replace = TRUE)),
     `Class #` = sprintf("%02d", sample(1:5, n, replace = TRUE)),
     `Title I` = sample(c("Y", "N", "NA"), n, replace = TRUE),
@@ -419,7 +419,7 @@ make_classroom_new_raw_df <- function(n = 5) {
   df$`Gold Curriculum Type` <- sample(c("TS GOLD", "Other"), n, replace = TRUE)
   df$`Gold Class Level` <- sample(c("Pre-K", "Infant/Toddler"), n, replace = TRUE)
   df$`Fund Source` <- sample(c("State", "Federal", "Mixed"), n, replace = TRUE)
-  df$`Site Code Formula` <- paste0(substr(df$`Classroom Code Static`, 1, 9))
+  df$`Site Code Formula` <- paste0(substr(df$`Classroom Code Static`, 1, 10))
   df$`Site Affiliation ID` <- sprintf("SA%04d", sample(1000:9999, n))
 
   # Add DOB and UserName columns for staff and teachers
@@ -496,7 +496,7 @@ make_classroom_clean <- function(format = "legacy", n = 5) {
   codes <- paste0(
     sprintf("%03d", sample(1:67, n, replace = TRUE)),
     sample(c("P", "C", "H", "O", "F", "U", "S"), n, replace = TRUE),
-    sprintf("%05d", sample(10000:99999, n)),
+    sprintf("%06d", sample(100000:999999, n)),
     ".",
     sprintf("%02d", sample(1:5, n, replace = TRUE))
   )
@@ -1317,6 +1317,115 @@ make_linkage_fixtures <- function(n_classrooms = 5, n_students_per = 3) {
     student_panel = student_panel,
     shared_codes = shared_codes
   )
+}
+
+
+make_asymmetric_linkage_fixtures <- function(n_classrooms = 5,
+                                             n_students_per = 3,
+                                             extra_year = "2024-2025") {
+  fixtures <- make_linkage_fixtures(
+    n_classrooms = n_classrooms,
+    n_students_per = n_students_per
+  )
+
+  extra_start <- alprek_school_year_to_start(extra_year)
+
+  classroom_extra <- fixtures$classroom_panel$data
+  classroom_extra$school_year <- extra_year
+  classroom_extra$year <- extra_start
+
+  classroom_panel <- fixtures$classroom_panel
+  classroom_panel$data <- dplyr::bind_rows(
+    classroom_panel$data,
+    classroom_extra
+  )
+  classroom_panel$years <- sort(unique(as.character(classroom_panel$data$school_year)))
+  classroom_panel$n_total <- nrow(classroom_panel$data)
+  classroom_panel$by_year[[extra_year]] <- list(
+    school_year = extra_year,
+    format = "legacy",
+    n_classrooms = nrow(classroom_extra)
+  )
+
+  student_extra <- fixtures$student_panel$data
+  student_extra$school_year <- extra_year
+  student_extra$year <- extra_start
+  student_extra$adece_id <- paste0(student_extra$adece_id, "_", extra_start)
+
+  student_panel <- fixtures$student_panel
+  student_panel$data <- dplyr::bind_rows(
+    student_panel$data,
+    student_extra
+  )
+  student_panel$years <- sort(unique(as.character(student_panel$data$school_year)))
+  student_panel$n_total <- nrow(student_panel$data)
+  student_panel$n_unique_students <- length(unique(student_panel$data$adece_id))
+  student_panel$by_year[[extra_year]] <- list(
+    school_year = extra_year,
+    format = "legacy",
+    n_students = nrow(student_extra),
+    n_cols = ncol(student_extra)
+  )
+
+  list(
+    budget_panel = fixtures$budget_panel,
+    classroom_panel = classroom_panel,
+    student_panel = student_panel,
+    shared_codes = fixtures$shared_codes,
+    extra_year = extra_year
+  )
+}
+
+
+make_student_classroom_coverage_fixtures <- function(n_classrooms = 5,
+                                                     n_students_per = 3,
+                                                     extra_year = "2024-2025",
+                                                     extra_side = c("student", "classroom")) {
+  extra_side <- match.arg(extra_side)
+  fixtures <- make_linkage_fixtures(
+    n_classrooms = n_classrooms,
+    n_students_per = n_students_per
+  )
+  extra_start <- alprek_school_year_to_start(extra_year)
+
+  if (identical(extra_side, "student")) {
+    student_extra <- fixtures$student_panel$data
+    student_extra$school_year <- extra_year
+    student_extra$year <- extra_start
+    student_extra$adece_id <- paste0(student_extra$adece_id, "_", extra_start)
+
+    student_panel <- fixtures$student_panel
+    student_panel$data <- dplyr::bind_rows(student_panel$data, student_extra)
+    student_panel$years <- sort(unique(as.character(student_panel$data$school_year)))
+    student_panel$n_total <- nrow(student_panel$data)
+    student_panel$n_unique_students <- length(unique(student_panel$data$adece_id))
+    student_panel$by_year[[extra_year]] <- list(
+      school_year = extra_year,
+      format = "legacy",
+      n_students = nrow(student_extra),
+      n_cols = ncol(student_extra)
+    )
+    fixtures$student_panel <- student_panel
+  } else {
+    classroom_extra <- fixtures$classroom_panel$data
+    classroom_extra$school_year <- extra_year
+    classroom_extra$year <- extra_start
+
+    classroom_panel <- fixtures$classroom_panel
+    classroom_panel$data <- dplyr::bind_rows(classroom_panel$data, classroom_extra)
+    classroom_panel$years <- sort(unique(as.character(classroom_panel$data$school_year)))
+    classroom_panel$n_total <- nrow(classroom_panel$data)
+    classroom_panel$by_year[[extra_year]] <- list(
+      school_year = extra_year,
+      format = "legacy",
+      n_classrooms = nrow(classroom_extra)
+    )
+    fixtures$classroom_panel <- classroom_panel
+  }
+
+  fixtures$extra_year <- extra_year
+  fixtures$extra_side <- extra_side
+  fixtures
 }
 
 

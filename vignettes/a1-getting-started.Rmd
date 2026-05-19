@@ -1,0 +1,284 @@
+---
+title: "A1 - Getting started with ALprekDB"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A1 - Getting started with ALprekDB}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB is a public R package for private Alabama First Class Pre-K
+administrative data workflows. It turns annual ADECE budget, classroom, and
+student files into validated panels, linked master datasets, and optional
+DuckDB outputs.
+
+Public examples in the package use synthetic data. Real ADECE files and
+row-level outputs should stay in private local projects.
+
+The v0.6.0 real-data scope is asymmetric:
+
+| Module | Covered school years | Notes |
+|--------|----------------------|-------|
+| Budget | 2021-22 through 2024-25 | 2025-26 budget data are not inferred or zero-filled. |
+| Classroom | 2021-22 through 2025-26 | Classroom codes use six-digit program codes. |
+| Student | 2021-22 through 2025-26 | Student PII is excluded by default in private workflows. |
+
+## Installation
+
+```{r install, eval = FALSE}
+# install.packages("remotes")
+remotes::install_github("joonho112/ALprekDB")
+```
+
+```{r load}
+library(ALprekDB)
+```
+
+## Classroom Codes
+
+Budget, classroom, and student records are linked by classroom code. The
+current contract is `CCCDNNNNNN.NN`:
+
+- `CCC` is a three-digit county code;
+- `D` is the delivery type code;
+- `NNNNNN` is a six-digit program code;
+- `NN` is the classroom number within site.
+
+The examples below use fake `9xx` prefixes and `9xxxxx` program codes for
+public documentation.
+
+```{r parse-classroom-codes}
+codes <- c("901P900001.01", "967H900002.02", "933C900003.01")
+parse_classroom_codes(codes)
+```
+
+Delivery type labels are data-driven:
+
+```{r delivery-types}
+alprek_delivery_types()
+```
+
+## Codebooks and Mappings
+
+ALprekDB uses CSV codebooks stored in `inst/extdata/` for column mappings,
+budget categories, delivery types, race/ethnicity mappings, and other
+standardization rules. The helpers expose those mappings as ordinary tibbles.
+
+```{r category-groups}
+head(alprek_category_groups(), 10)
+```
+
+## Synthetic Quick Start
+
+The synthetic generators create panel objects directly. When the same
+`n_classrooms`, `n_years`, and seed are used, the generated budget, classroom,
+and student panels share classroom codes that can be linked. Public synthetic
+outputs intentionally use fake `9xx` classroom-code prefixes and synthetic
+county labels so printed rows cannot be mistaken for confidential ADECE
+records.
+
+```{r synthetic-panels}
+budget <- alprek_synthetic_budget(
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
+)
+
+classroom <- alprek_synthetic_classroom(
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
+)
+
+student <- alprek_synthetic_student(
+  n_students = 100,
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
+)
+
+budget
+classroom
+student
+```
+
+A quick look at the classroom panel shows the shared keys that make linkage
+possible:
+
+```{r inspect-classroom-panel}
+head(classroom$data[c(
+  "school_year",
+  "classroom_code",
+  "county_code",
+  "delivery_type",
+  "site_name"
+)])
+```
+
+## Link the Modules
+
+`linkage_create_master()` creates a two-level master object:
+
+- `classroom_level`: one row per classroom-year, with budget fields and
+  classroom-level student aggregates;
+- `student_level`: one row per student-year, with classroom and budget
+  attributes attached.
+
+```{r create-master}
+master <- linkage_create_master(
+  budget = budget,
+  classroom = classroom,
+  student = student
+)
+
+master
+```
+
+The linkage object carries validation and coverage diagnostics:
+
+```{r validate-master}
+linkage_validate(master)
+```
+
+```{r linkage-summary}
+linkage_summary_stats(master)
+```
+
+```{r coverage-summary}
+master$meta$coverage$by_year[c(
+  "school_year",
+  "has_budget",
+  "has_classroom",
+  "has_student",
+  "n_budget_rows",
+  "n_classroom_rows",
+  "n_student_rows"
+)]
+```
+
+The classroom-level master is the usual starting point for classroom or
+site-level descriptive analysis:
+
+```{r classroom-master-preview}
+head(master$classroom_level[c(
+  "school_year",
+  "classroom_code",
+  "delivery_type",
+  "n_children",
+  "grand_total",
+  "per_child_budget",
+  "per_seat_budget"
+)])
+```
+
+## First Private Real-Data Recipe
+
+Real-data examples should be run only in a private project. Keep paths in
+environment variables, keep row-level outputs out of GitHub, and keep student
+PII/date-of-birth fields excluded unless a controlled analysis explicitly
+requires them.
+
+```{r real-data-config, eval = FALSE}
+data_dir <- Sys.getenv("ALPREKDB_DATA_DIR")
+
+budget_cfg <- budget_config(
+  school_year = "2024-2025",
+  budget_path = file.path(data_dir, "budget_2024_2025.xlsx")
+)
+
+classroom_cfg <- classroom_config(
+  school_year = "2024-2025",
+  classroom_path = file.path(data_dir, "classroom_2024_2025.xlsx"),
+  include_dob = FALSE
+)
+
+student_cfg <- student_config(
+  school_year = "2024-2025",
+  path = file.path(data_dir, "student_2024_2025.xlsx"),
+  include_pii = FALSE
+)
+```
+
+Process one module first, inspect its validation object, and then expand to the
+full multi-module workflow:
+
+```{r real-data-process-one-year, eval = FALSE}
+budget_result <- budget_process(budget_cfg, export = FALSE)
+budget_result$validation
+budget_result$long
+budget_result$master
+
+classroom_result <- classroom_process(classroom_cfg, export = FALSE)
+classroom_result$validation
+
+student_result <- student_process(student_cfg, export = FALSE)
+student_result$validation
+```
+
+For linked private analysis, use the multi-year processing helpers even when
+starting with a single year. That keeps the object classes consistent with
+larger panel workflows.
+
+```{r real-data-link-one-year, eval = FALSE}
+budget_panel <- budget_process_years(list(budget_cfg), export = FALSE)$panel
+classroom_panel <- classroom_process_years(list(classroom_cfg), export = FALSE)$panel
+student_panel <- student_process_years(list(student_cfg), export = FALSE)$panel
+
+master <- linkage_create_master(
+  budget = budget_panel,
+  classroom = classroom_panel,
+  student = student_panel
+)
+
+linkage_validate(master)
+linkage_summary_stats(master)
+```
+
+## Private Targets Workflow
+
+For repeated real-data processing, start from the package's `targets` template
+in a private project directory:
+
+```{r copy-targets-template, eval = FALSE}
+template_dir <- system.file("templates", "targets", package = "ALprekDB")
+
+dir.create("alprekdb-private-workflow", showWarnings = FALSE)
+file.copy(
+  list.files(template_dir, full.names = TRUE, all.files = TRUE, no.. = TRUE),
+  "alprekdb-private-workflow",
+  recursive = TRUE
+)
+```
+
+Then configure the private workflow outside the package repository:
+
+```sh
+export ALPREKDB_RUN_REALDATA=1
+export ALPREKDB_DATA_DIR="/path/to/local/ADECE/source/files"
+export ALPREKDB_OUTPUT_DIR="output/alprekdb"
+```
+
+Row-level RDS outputs and DuckDB writes require an explicit local opt-in:
+
+```sh
+export ALPREKDB_WRITE_OUTPUTS=1
+```
+
+## Where to Go Next
+
+- A2 - Build panels: budget, classroom, and student panel construction.
+- A3 - Linkage analysis: orphan diagnostics and derived measures.
+- A4 - DuckDB and SQL: persistent local database workflows.
+- A5 - Targets workflow: reproducible private processing.
+- M4 - Privacy and provenance: guardrails for private source data and outputs.

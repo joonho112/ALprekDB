@@ -4,10 +4,11 @@
 \alias{synthetic-data}
 \title{Generate Synthetic ALprekDB Data for Demonstrations}
 \description{
-These functions create realistic synthetic datasets that mirror
-the structure and types of real ADECE Pre-K administrative data. They are
-useful for demonstrations, vignettes, and testing without requiring access
-to confidential data files.
+These functions create synthetic datasets that mirror the
+structure and types of real ADECE Pre-K administrative data without using
+real row-level values. Classroom identifiers use fake \verb{9xx} county prefixes
+and \verb{9xxxxx} program codes so public examples cannot be confused with
+confidential source records.
 
 All three generators share classroom codes when called with the same
 \code{seed} and compatible \code{n_classrooms}, enabling cross-module linkage.

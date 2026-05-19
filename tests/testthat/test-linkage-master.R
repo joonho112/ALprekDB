@@ -92,6 +92,32 @@ test_that("linkage_create_master avoids .x/.y columns at both levels", {
                info = "Student-level has .x/.y columns")
 })
 
+test_that("linkage_create_master records asymmetric budget coverage", {
+  fixtures <- make_asymmetric_linkage_fixtures(n_classrooms = 5)
+  master <- linkage_create_master(fixtures$budget_panel, fixtures$classroom_panel,
+                                   fixtures$student_panel)
+
+  coverage <- master$meta$coverage
+  expect_equal(coverage$missing_budget_years, fixtures$extra_year)
+  expect_true(is.data.frame(coverage$by_year))
+
+  extra_row <- coverage$by_year[coverage$by_year$school_year == fixtures$extra_year, ]
+  expect_equal(nrow(extra_row), 1L)
+  expect_false(extra_row$has_budget)
+  expect_true(extra_row$has_classroom)
+  expect_true(extra_row$has_student)
+  expect_equal(extra_row$budget_status, "missing_budget")
+  expect_equal(extra_row$n_budget_rows, 0L)
+
+  missing_year_rows <- master$classroom_level$school_year == fixtures$extra_year
+  expect_true(all(is.na(master$classroom_level$grand_total[missing_year_rows])))
+  expect_true(all(is.na(master$classroom_level$per_child_budget[missing_year_rows])))
+
+  student_missing_year_rows <- master$student_level$school_year == fixtures$extra_year
+  expect_true(all(is.na(master$student_level$grand_total[student_missing_year_rows])))
+  expect_true(all(is.na(master$student_level$osr_total[student_missing_year_rows])))
+})
+
 test_that("linkage_create_master has print method", {
   fixtures <- make_linkage_fixtures()
   master <- linkage_create_master(fixtures$budget_panel, fixtures$classroom_panel,
@@ -133,6 +159,89 @@ test_that("linkage_validate works for master object", {
   expect_true(val$passed)
 })
 
+test_that("linkage_validate treats missing budget years as coverage info", {
+  fixtures <- make_asymmetric_linkage_fixtures(n_classrooms = 20)
+  master <- linkage_create_master(fixtures$budget_panel, fixtures$classroom_panel,
+                                   fixtures$student_panel)
+  val <- linkage_validate(master)
+
+  expect_true(val$passed)
+
+  checks <- val$checks
+  match_rate <- checks[checks$check_name == "match_rate", ]
+  budget_orphans <- checks[checks$check_name == "budget_overlap_orphans", ]
+  budget_coverage <- checks[checks$check_name == "budget_missing_coverage", ]
+  na_intro <- checks[checks$check_name == "na_introduced", ]
+  coverage <- checks[checks$check_name == "year_coverage", ]
+
+  expect_equal(match_rate$status, "PASS")
+  expect_equal(budget_orphans$status, "WARN")
+  expect_equal(budget_coverage$status, "INFO")
+  expect_equal(na_intro$status, "PASS")
+  expect_equal(coverage$status, "INFO")
+  expect_match(coverage$details, fixtures$extra_year)
+})
+
+test_that("linkage_validate errors when student year lacks classroom coverage", {
+  fixtures <- make_student_classroom_coverage_fixtures(
+    n_classrooms = 20,
+    extra_side = "student"
+  )
+  sc <- linkage_student_classroom(fixtures$student_panel, fixtures$classroom_panel)
+  val <- linkage_validate(sc)
+  checks <- val$checks
+  missing_coverage <- checks[checks$check_name == "student_classroom_missing_coverage", ]
+  overlap_orphans <- checks[checks$check_name == "student_classroom_overlap_orphans", ]
+
+  expect_false(val$passed)
+  expect_equal(missing_coverage$status, "ERROR")
+  expect_equal(overlap_orphans$status, "PASS")
+  expect_match(missing_coverage$details, fixtures$extra_year)
+})
+
+test_that("linkage_validate warns when classroom year lacks student coverage", {
+  fixtures <- make_student_classroom_coverage_fixtures(
+    n_classrooms = 20,
+    extra_side = "classroom"
+  )
+  sc <- linkage_student_classroom(fixtures$student_panel, fixtures$classroom_panel)
+  val <- linkage_validate(sc)
+  checks <- val$checks
+  missing_coverage <- checks[checks$check_name == "student_classroom_missing_coverage", ]
+  empty_classrooms <- checks[checks$check_name == "empty_classrooms", ]
+
+  expect_true(val$passed)
+  expect_equal(missing_coverage$status, "WARN")
+  expect_equal(empty_classrooms$status, "INFO")
+  expect_match(missing_coverage$details, fixtures$extra_year)
+})
+
+test_that("linkage_validate surfaces student-classroom overlap orphan severity", {
+  fixtures <- make_linkage_fixtures(n_classrooms = 5, n_students_per = 3)
+  fixtures$student_panel$data$classroom_code[1] <- "999P999999.99"
+  sc <- linkage_student_classroom(fixtures$student_panel, fixtures$classroom_panel)
+  val <- linkage_validate(sc)
+  checks <- val$checks
+  overlap_orphans <- checks[checks$check_name == "student_classroom_overlap_orphans", ]
+
+  expect_false(val$passed)
+  expect_equal(overlap_orphans$status, "ERROR")
+  expect_match(overlap_orphans$details, "1 student classroom code")
+
+  master <- linkage_create_master(
+    fixtures$budget_panel,
+    fixtures$classroom_panel,
+    fixtures$student_panel
+  )
+  master_val <- linkage_validate(master)
+  master_overlap <- master_val$checks[
+    master_val$checks$check_name == "student_classroom_overlap_orphans",
+  ]
+
+  expect_false(master_val$passed)
+  expect_equal(master_overlap$status, "ERROR")
+})
+
 test_that("linkage_validate has print method", {
   fixtures <- make_linkage_fixtures()
   cb <- linkage_classroom_budget(fixtures$classroom_panel, fixtures$budget_panel)
@@ -151,6 +260,21 @@ test_that("linkage_summary_stats works for master object", {
 
   expect_true(is.data.frame(stats))
   expect_true("n" %in% names(stats))
+})
+
+test_that("linkage_summary_stats reports zero budget coverage for missing budget years", {
+  fixtures <- make_asymmetric_linkage_fixtures(n_classrooms = 5)
+  master <- linkage_create_master(fixtures$budget_panel, fixtures$classroom_panel,
+                                   fixtures$student_panel)
+  stats <- linkage_summary_stats(master)
+
+  missing_year_stats <- stats[stats$school_year == fixtures$extra_year, ]
+  expect_equal(nrow(missing_year_stats), 1L)
+  expect_equal(missing_year_stats$pct_with_budget, 0)
+  expect_true(is.na(missing_year_stats$mean_grand_total))
+  expect_true(is.na(missing_year_stats$mean_per_child_budget))
+  expect_false(is.nan(missing_year_stats$mean_grand_total))
+  expect_false(is.nan(missing_year_stats$mean_per_child_budget))
 })
 
 test_that("linkage_summary_stats works for classroom join", {

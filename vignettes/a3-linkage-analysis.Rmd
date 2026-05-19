@@ -1,0 +1,359 @@
+---
+title: "A3 - Linkage Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A3 - Linkage Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB links budget, classroom, and student panels into a two-level master
+object:
+
+- `classroom_level`: one row per classroom-year, with budget fields and
+  classroom-level student aggregates;
+- `student_level`: one row per student-year, with classroom and budget
+  attributes attached.
+
+The main linkage rule is simple: missing coverage years are metadata, while
+overlap-year orphans are linkage problems to inspect. In v0.6.0, the real-data
+workflow keeps 2025-26 classroom and student rows even though the canonical
+2025-26 budget file is not available.
+
+```{r load}
+library(ALprekDB)
+```
+
+## Build Synthetic Panels
+
+This public example intentionally gives budget fewer years than classroom and
+student panels. The final synthetic year stands in for the v0.6.0 2025-26
+budget caveat. The synthetic classroom identifiers use fake `9xx` prefixes so
+row-level excerpts in this vignette remain visibly separate from confidential
+ADECE records.
+
+```{r synthetic-panels}
+n_classrooms <- 12
+n_students <- 60
+seed <- 42
+
+budget_panel <- alprek_synthetic_budget(
+  n_classrooms = n_classrooms,
+  n_years = 2,
+  seed = seed
+)
+
+classroom_panel <- alprek_synthetic_classroom(
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+student_panel <- alprek_synthetic_student(
+  n_students = n_students,
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+student_panel <- student_transform(student_panel)
+```
+
+## Direct Joins
+
+The master helper performs all joins, but the direct join helpers are useful for
+understanding diagnostics.
+
+```{r classroom-budget-join}
+classroom_budget <- linkage_classroom_budget(
+  classroom = classroom_panel,
+  budget = budget_panel
+)
+
+classroom_budget
+```
+
+```{r student-classroom-join}
+student_classroom <- linkage_student_classroom(
+  student = student_panel,
+  classroom = classroom_panel
+)
+
+student_classroom
+```
+
+## Create the Master Object
+
+`linkage_create_master()` builds the classroom-level and student-level analysis
+tables and stores the diagnostics from both join paths.
+
+```{r create-master}
+master <- linkage_create_master(
+  budget = budget_panel,
+  classroom = classroom_panel,
+  student = student_panel
+)
+
+master
+```
+
+```{r master-assertions, include = FALSE}
+validation <- linkage_validate(master)
+needed_coverage_cols <- c(
+  "school_year",
+  "has_budget",
+  "has_classroom",
+  "has_student",
+  "budget_status"
+)
+coverage_by_year <- master$meta$coverage$by_year
+if (is.null(coverage_by_year) ||
+    !all(needed_coverage_cols %in% names(coverage_by_year))) {
+  coverage_by_year <- master$diagnostics$coverage$by_year
+}
+coverage_by_year <- as.data.frame(coverage_by_year)
+stopifnot(inherits(master, "alprek_linkage_master"))
+stopifnot(is.data.frame(master$classroom_level))
+stopifnot(is.data.frame(master$student_level))
+stopifnot(all(needed_coverage_cols %in% names(coverage_by_year)))
+stopifnot(all(c("budget_overlap_orphans", "budget_missing_coverage") %in%
+  validation$checks$check_name))
+stopifnot(!any(grepl("[.]x$|[.]y$", names(master$classroom_level))))
+stopifnot(!any(grepl("[.]x$|[.]y$", names(master$student_level))))
+```
+
+## Coverage Diagnostics
+
+Coverage is summarized by year. A missing budget year is retained as an
+explicit coverage status; it is not turned into a zero budget.
+
+```{r coverage-by-year}
+coverage_by_year[c(
+  "school_year",
+  "has_budget",
+  "has_classroom",
+  "has_student",
+  "n_budget_rows",
+  "n_classroom_rows",
+  "n_student_rows",
+  "budget_status"
+)]
+```
+
+`linkage_summary_stats()` keeps budget means as `NA` when a year has no budget
+coverage.
+
+```{r linkage-summary}
+linkage_summary_stats(master)
+```
+
+## Orphan Diagnostics
+
+The classroom-budget diagnostics distinguish overlap-year orphans from rows
+retained because an entire budget year is unavailable.
+
+```{r classroom-budget-orphans}
+classroom_budget$diagnostics$orphan_summary_by_year
+```
+
+```{r classroom-budget-metrics}
+paste_or_none <- function(x) {
+  if (length(x) == 0) "none" else paste(x, collapse = ", ")
+}
+
+data.frame(
+  metric = c(
+    "classroom rows without budget in overlapping years",
+    "classroom rows retained because budget year is missing",
+    "budget rows without classroom in overlapping years",
+    "missing budget years"
+  ),
+  value = c(
+    classroom_budget$diagnostics$n_left_orphan_overlap_years,
+    classroom_budget$diagnostics$n_left_orphan_missing_budget_years,
+    classroom_budget$diagnostics$n_right_orphan_overlap_years,
+    paste_or_none(classroom_budget$diagnostics$missing_budget_years)
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+The student-classroom diagnostics show whether student classroom codes matched
+classroom records and whether any classrooms had no linked student rows.
+
+```{r student-classroom-orphans}
+student_classroom$diagnostics$orphan_summary_by_year
+```
+
+```{r student-classroom-metrics}
+data.frame(
+  metric = c(
+    "student classroom codes missing in overlapping years",
+    "student rows affected in overlapping years",
+    "classrooms with no linked student rows",
+    "missing classroom years",
+    "missing student years"
+  ),
+  value = c(
+    student_classroom$diagnostics$n_student_orphan_overlap_years,
+    student_classroom$diagnostics$n_student_orphan_overlap_year_rows,
+    student_classroom$diagnostics$n_classroom_orphan,
+    paste_or_none(student_classroom$diagnostics$missing_classroom_years),
+    paste_or_none(student_classroom$diagnostics$missing_student_years)
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+## Validation Checks
+
+`linkage_validate()` reports pass, warning, error, and info checks. In this
+example the missing budget year is informational because it is an explicit
+coverage gap, not a broken classroom-budget key in an overlapping year.
+
+```{r validation}
+validation
+```
+
+```{r validation-table}
+validation$checks[c(
+  "check_name",
+  "status",
+  "n_issues",
+  "details"
+)]
+```
+
+## Student Aggregation
+
+The classroom-level master includes student aggregates created by
+`linkage_aggregate_students()`. You can also call the aggregation helper
+directly.
+
+```{r aggregate-students}
+student_aggregates <- linkage_aggregate_students(student_panel)
+
+head(student_aggregates[c(
+  "school_year",
+  "classroom_code",
+  "n_children",
+  "pct_poverty",
+  "mean_age",
+  "pct_chronic_absence",
+  "mean_risk_index"
+)])
+```
+
+## Classroom-Level Analysis
+
+Budget-derived fields are available for years with budget coverage. They remain
+missing for years without budget coverage.
+
+```{r classroom-analysis-preview}
+cl <- master$classroom_level
+
+head(cl[c(
+  "school_year",
+  "classroom_code",
+  "delivery_type",
+  "n_children",
+  "grand_total",
+  "per_child_budget",
+  "per_seat_budget",
+  "pct_poverty",
+  "mean_days_absent"
+)])
+```
+
+```{r classroom-analysis-summary}
+available_budget <- !is.na(cl$per_child_budget)
+
+aggregate(
+  cbind(per_child_budget, pct_poverty, mean_days_absent) ~ school_year,
+  data = cl[available_budget, ],
+  FUN = function(x) round(mean(x, na.rm = TRUE), 2)
+)
+```
+
+## Student-Level Analysis
+
+The student-level master carries classroom and budget context onto each
+student-year row. Use those fields for descriptive summaries and modeling
+inputs, not as automatic causal evidence.
+
+```{r student-analysis-preview}
+sl <- master$student_level
+
+head(sl[c(
+  "school_year",
+  "classroom_code",
+  "delivery_type",
+  "poverty_dum",
+  "days_absent_total",
+  "gold_literacy_gain_raw",
+  "grand_total"
+)])
+```
+
+```{r student-analysis-summary}
+aggregate(
+  gold_literacy_gain_raw ~ school_year + delivery_type,
+  data = sl,
+  FUN = function(x) round(mean(x, na.rm = TRUE), 2)
+)
+```
+
+## Private Real-Data Linkage
+
+In a private project, build panels as shown in A2, then link and validate them.
+Real-data chunks stay non-executed in public documentation.
+
+```{r private-linkage, eval = FALSE}
+output_dir <- Sys.getenv("ALPREKDB_OUTPUT_DIR")
+
+master <- linkage_create_master(
+  budget = budget_processed$panel,
+  classroom = classroom_processed$panel,
+  student = student_transform(student_processed$panel)
+)
+
+validation <- linkage_validate(master)
+coverage <- master$meta$coverage$by_year
+
+validation
+coverage
+```
+
+Row-level exports should be written only in a private workflow with explicit
+local opt-in. For master CSV export, pass a base filename, not a bare directory:
+the exporter writes `_classroom.csv` and `_student.csv` suffixes.
+
+```{r private-export, eval = FALSE}
+if (identical(Sys.getenv("ALPREKDB_WRITE_OUTPUTS"), "1")) {
+  linkage_export_rds(
+    master,
+    file.path(output_dir, "linkage_master.rds")
+  )
+
+  linkage_export_csv(
+    master,
+    file.path(output_dir, "linkage_master.csv")
+  )
+}
+```
+
+## Next Step
+
+A4 shows how to persist panels and master objects in DuckDB and query them with
+SQL.

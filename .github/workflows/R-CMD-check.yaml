@@ -1,0 +1,76 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+name: R-CMD-check
+
+permissions: read-all
+
+concurrency:
+  group: r-cmd-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  R-CMD-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      NOT_CRAN: "true"
+      ALPREKDB_RUN_REALDATA: "0"
+      ALPREKDB_DATA_DIR: ""
+      ALPREKDB_WRITE_OUTPUTS: "0"
+      ALPREKDB_OUTPUT_DIR: ${{ runner.temp }}/alprekdb-output
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::rcmdcheck
+            any::sessioninfo
+            local::.
+          needs: check
+
+      - name: Run targets template synthetic smoke
+        run: |
+          template <- file.path(getwd(), "inst", "templates", "targets")
+          work <- file.path(tempdir(), "alprekdb-targets-template")
+          dir.create(work, recursive = TRUE, showWarnings = FALSE)
+          file.copy(
+            list.files(template, all.files = TRUE, no.. = TRUE, full.names = TRUE),
+            work,
+            recursive = TRUE
+          )
+          old <- setwd(work)
+          on.exit(setwd(old), add = TRUE)
+          Sys.setenv(
+            ALPREKDB_RUN_REALDATA = "0",
+            ALPREKDB_WRITE_OUTPUTS = "0",
+            ALPREKDB_OUTPUT_DIR = file.path(tempdir(), "alprekdb-targets-output"),
+            ALPREKDB_SYNTHETIC_N_CLASSROOMS = "4",
+            ALPREKDB_SYNTHETIC_N_STUDENTS = "12",
+            ALPREKDB_SYNTHETIC_N_YEARS = "1",
+            ALPREKDB_SYNTHETIC_SEED = "42"
+          )
+          targets::tar_make(callr_function = NULL)
+        shell: Rscript {0}
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
+          build_args: 'c("--no-manual")'
+          upload-snapshots: true

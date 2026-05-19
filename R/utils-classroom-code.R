@@ -1,6 +1,6 @@
 #' Parse a Single Classroom Code
 #'
-#' @description Parses an Alabama Pre-K classroom code in "XXXAYYYYY.ZZ" format
+#' @description Parses an Alabama Pre-K classroom code in "CCCDNNNNNN.NN" format
 #'   into its component parts.
 #'
 #' @param code Character. A single classroom code string.
@@ -8,9 +8,9 @@
 #'   `program_code`, `class_num`. Returns NAs for invalid codes.
 #'
 #' @examples
-#' parse_classroom_code("823P012601.01")
-#' # list(county_code = "823", delivery_type_code = "P",
-#' #      program_code = "012601", class_num = "01")
+#' parse_classroom_code("901P900001.01")
+#' # list(county_code = "901", delivery_type_code = "P",
+#' #      program_code = "900001", class_num = "01")
 #'
 #' @export
 parse_classroom_code <- function(code) {
@@ -52,7 +52,7 @@ parse_classroom_code <- function(code) {
 #'   `delivery_type`, `program_code`, `class_num`.
 #'
 #' @examples
-#' parse_classroom_codes(c("823P012601.01", "456C789.02"))
+#' parse_classroom_codes(c("901P900001.01", "956C900789.02"))
 #'
 #' @importFrom tibble tibble
 #' @importFrom purrr map_chr

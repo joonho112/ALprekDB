@@ -1,0 +1,359 @@
+---
+title: "A2 - Build Panels"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A2 - Build Panels}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB builds three panel objects before linkage:
+
+- a budget panel with one row per classroom-year funding record;
+- a classroom panel with one row per classroom-year site/classroom record;
+- a student panel with one row per student-year record.
+
+In v0.6.0, the real-data source scope is intentionally asymmetric:
+
+| Module | Covered school years | Panel policy |
+|--------|----------------------|--------------|
+| Budget | 2021-22 through 2024-25 | Do not infer, copy forward, or zero-fill 2025-26 budget records. |
+| Classroom | 2021-22 through 2025-26 | Retain classroom rows even when budget is unavailable. |
+| Student | 2021-22 through 2025-26 | Exclude PII by default and retain student rows even when budget is unavailable. |
+
+This vignette uses synthetic data for executable examples. The private
+real-data snippets show the same object contract without exposing raw ADECE
+files.
+
+```{r load}
+library(ALprekDB)
+```
+
+## Build Synthetic Panels
+
+The synthetic generators return panel objects directly. They are useful for
+learning the package structure and testing analysis code, not for estimating
+Alabama program quantities. Generated classroom identifiers use fake `9xx`
+prefixes and synthetic county labels to keep public printed output visibly
+separate from confidential ADECE rows.
+
+```{r synthetic-panels}
+n_classrooms <- 12
+n_students <- 60
+seed <- 42
+
+budget_panel <- alprek_synthetic_budget(
+  n_classrooms = n_classrooms,
+  n_years = 2,
+  seed = seed
+)
+
+classroom_panel <- alprek_synthetic_classroom(
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+student_panel <- alprek_synthetic_student(
+  n_students = n_students,
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+budget_panel
+classroom_panel
+student_panel
+```
+
+This synthetic setup deliberately gives budget two years and classroom/student
+three years. It mirrors the real v0.6.0 lesson: a later classroom/student year
+can be retained even when budget coverage is unavailable.
+
+## Panel Object Anatomy
+
+Every panel object has a `$data` table and a `$years` vector. Module-specific
+metadata differs slightly.
+
+```{r panel-anatomy}
+panel_anatomy <- function(x, module) {
+  data.frame(
+    module = module,
+    class = paste(class(x), collapse = ", "),
+    fields = paste(names(x), collapse = ", "),
+    years = paste(as.character(x$years), collapse = ", "),
+    rows = nrow(x$data),
+    columns = ncol(x$data),
+    stringsAsFactors = FALSE
+  )
+}
+
+rbind(
+  panel_anatomy(budget_panel, "budget"),
+  panel_anatomy(classroom_panel, "classroom"),
+  panel_anatomy(student_panel, "student")
+)
+```
+
+The main difference is that budget panels expose `$n_years`, while classroom
+and student panels expose `$n_total`. Classroom panels also carry an
+`$imputation_log`; student panels carry `$n_unique_students`.
+
+## Budget Panel
+
+Budget panels track OSR and other funding sources by classroom-year.
+
+```{r budget-preview}
+head(budget_panel$data[c(
+  "school_year",
+  "classroom_code",
+  "delivery_type",
+  "grand_total",
+  "share_osr"
+)])
+```
+
+```{r budget-summary}
+budget_summary_stats(budget_panel)[c(
+  "school_year",
+  "n",
+  "grand_total_mean",
+  "grand_total_median",
+  "share_osr_mean"
+)]
+```
+
+```{r budget-tracking}
+head(budget_track_classrooms(budget_panel))
+```
+
+## Classroom Panel
+
+Classroom panels hold site, geography, staffing, delivery type, and classroom
+metadata.
+
+```{r classroom-preview}
+head(classroom_panel$data[c(
+  "school_year",
+  "classroom_code",
+  "county_code",
+  "delivery_type",
+  "site_name",
+  "latitude",
+  "longitude"
+)])
+```
+
+```{r classroom-summary}
+classroom_summary_stats(classroom_panel)
+```
+
+The imputation log records forward-filled coordinates and first-funded years
+within site groups when those operations are needed.
+
+```{r classroom-imputation}
+classroom_panel$imputation_log
+```
+
+## Student Panel
+
+Student panels contain one row per student-year. Direct PII is excluded by
+default in private real-data workflows; synthetic examples use fabricated
+student identifiers.
+
+```{r student-preview}
+head(student_panel$data[c(
+  "school_year",
+  "classroom_code",
+  "adece_id",
+  "gender",
+  "race",
+  "poverty_dum",
+  "days_absent_total"
+)])
+```
+
+```{r student-summary}
+student_summary_stats(student_panel)
+```
+
+`student_transform()` adds derived analysis variables such as assessment gains,
+chronic absence, service density, and risk index when the source columns are
+available.
+
+```{r student-transform}
+enriched_student_panel <- student_transform(student_panel)
+
+head(enriched_student_panel$data[c(
+  "school_year",
+  "classroom_code",
+  "gold_literacy_gain_raw",
+  "chronic_absence",
+  "n_services",
+  "risk_index"
+)])
+```
+
+```{r student-transform-log}
+enriched_student_panel$transform_log
+```
+
+## Coverage Caveat Before Linkage
+
+The panel builder should preserve module-specific coverage. Later linkage steps
+make the coverage gap explicit rather than fabricating budget records.
+
+```{r synthetic-coverage-linkage}
+coverage_master <- linkage_create_master(
+  budget = budget_panel,
+  classroom = classroom_panel,
+  student = enriched_student_panel
+)
+
+coverage_master$meta$coverage$by_year[c(
+  "school_year",
+  "has_budget",
+  "has_classroom",
+  "has_student",
+  "n_budget_rows",
+  "n_classroom_rows",
+  "n_student_rows",
+  "budget_status"
+)]
+```
+
+```{r synthetic-coverage-validation}
+linkage_validate(coverage_master)
+```
+
+In real v0.6.0 processing, this same pattern applies to 2025-26: classroom and
+student rows are retained, and budget-derived fields remain missing until a
+canonical 2025-26 budget source exists.
+
+## Private Real-Data Manifest
+
+For private processing, define a local manifest from environment-variable
+paths. Keep the manifest in a private project and keep `include_pii = FALSE`
+and `include_dob = FALSE` unless a controlled analysis explicitly requires
+otherwise.
+
+```{r private-manifest, eval = FALSE}
+data_dir <- Sys.getenv("ALPREKDB_DATA_DIR")
+
+budget_files <- c(
+  "2021-2022" = "budget_2021_2022.xlsx",
+  "2022-2023" = "budget_2022_2023.xlsx",
+  "2023-2024" = "budget_2023_2024.xlsx",
+  "2024-2025" = "budget_2024_2025.xlsx"
+)
+
+classroom_files <- c(
+  "2021-2022" = "classroom_2021_2022.xlsx",
+  "2022-2023" = "classroom_2022_2023.xlsx",
+  "2023-2024" = "classroom_2023_2024.xlsx",
+  "2024-2025" = "classroom_2024_2025.xlsx",
+  "2025-2026" = "classroom_2025_2026.xlsx"
+)
+
+student_files <- c(
+  "2021-2022" = "student_2021_2022.xlsx",
+  "2022-2023" = "student_2022_2023.xlsx",
+  "2023-2024" = "student_2023_2024.xlsx",
+  "2024-2025" = "student_2024_2025.xlsx",
+  "2025-2026" = "student_2025_2026.xlsx"
+)
+```
+
+Notice that there is no 2025-26 budget entry. That absence is an input contract,
+not a missing coding step.
+
+## Private Real-Data Processing
+
+The `*_process_years()` helpers return a result object with a `$panel` element
+and a `$validation_summary` element. These examples are not executed in public
+documentation.
+
+```{r private-configs, eval = FALSE}
+budget_configs <- Map(
+  function(year, file) {
+    budget_config(
+      school_year = year,
+      budget_path = file.path(data_dir, file),
+      verbose = FALSE
+    )
+  },
+  names(budget_files),
+  budget_files
+)
+
+classroom_configs <- Map(
+  function(year, file) {
+    classroom_config(
+      school_year = year,
+      classroom_path = file.path(data_dir, file),
+      include_dob = FALSE
+    )
+  },
+  names(classroom_files),
+  classroom_files
+)
+
+student_configs <- Map(
+  function(year, file) {
+    student_config(
+      school_year = year,
+      path = file.path(data_dir, file),
+      include_pii = FALSE
+    )
+  },
+  names(student_files),
+  student_files
+)
+```
+
+```{r private-process-years, eval = FALSE}
+budget_processed <- budget_process_years(budget_configs, export = FALSE)
+classroom_processed <- classroom_process_years(classroom_configs, export = FALSE)
+student_processed <- student_process_years(student_configs, export = FALSE)
+
+budget_panel <- budget_processed$panel
+classroom_panel <- classroom_processed$panel
+student_panel <- student_transform(student_processed$panel)
+
+budget_processed$validation_summary
+classroom_processed$validation_summary
+student_processed$validation_summary
+```
+
+Row-level exports, local DuckDB files, and `_targets/` caches should remain
+outside Git and outside public package artifacts. Use `ALPREKDB_WRITE_OUTPUTS=1`
+only in a private workflow when those outputs are intentionally needed.
+
+## Output Contract
+
+| Helper family | Main output contract |
+|---------------|----------------------|
+| `budget_process()` | `raw`, `long`, `validation`, and `master` |
+| `classroom_process()` | `raw`, `clean`, and `validation` |
+| `student_process()` | `raw`, `clean`, and `validation` |
+| `*_process_years()` | `by_year`, `panel`, and `validation_summary` |
+| Budget panels | `$data`, `$years`, `$n_years`, and `$by_year` |
+| Classroom panels | `$data`, `$years`, `$n_total`, `$by_year`, and `$imputation_log` |
+| Student panels | `$data`, `$years`, `$n_total`, `$n_unique_students`, and `$by_year` |
+
+## Next Step
+
+A3 links the three panel objects into classroom-level and student-level master
+datasets, then reads the orphan and coverage diagnostics created during that
+join.

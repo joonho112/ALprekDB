@@ -19,6 +19,6 @@ of classroom codes and returns a tibble with parsed components plus the
 delivery type name.
 }
 \examples{
-parse_classroom_codes(c("823P012601.01", "456C789.02"))
+parse_classroom_codes(c("901P900001.01", "956C900789.02"))
 
 }

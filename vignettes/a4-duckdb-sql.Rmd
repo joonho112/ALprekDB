@@ -1,0 +1,365 @@
+---
+title: "A4 - DuckDB and SQL"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A4 - DuckDB and SQL}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_duckdb <- requireNamespace("duckdb", quietly = TRUE) &&
+  requireNamespace("DBI", quietly = TRUE)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB can persist panel objects and linked master datasets in DuckDB. This
+is useful when private workflows need SQL queries, fast reloads, or a stable
+local analysis database.
+
+Public examples in this vignette use synthetic data and write only to a
+temporary database under `tempdir()`. Real DuckDB files built from ADECE data
+are row-level private outputs and should stay outside GitHub, pkgdown, and
+package builds.
+
+The database features require the optional `duckdb` and `DBI` packages.
+
+```{r load}
+library(ALprekDB)
+```
+
+```{r duckdb-missing-note, eval = !has_duckdb, echo = FALSE, results = "asis"}
+cat("*DuckDB examples are skipped because optional packages `duckdb` and `DBI` are not installed.*")
+```
+
+## Build Synthetic Linked Data
+
+The synthetic setup mirrors A3: budget covers two years while classroom and
+student panels cover three years. The third year demonstrates missing budget
+coverage through the database round trip.
+
+```{r synthetic-panels, eval = has_duckdb}
+n_classrooms <- 12
+n_students <- 60
+seed <- 42
+
+budget_panel <- alprek_synthetic_budget(
+  n_classrooms = n_classrooms,
+  n_years = 2,
+  seed = seed
+)
+
+classroom_panel <- alprek_synthetic_classroom(
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+student_panel <- alprek_synthetic_student(
+  n_students = n_students,
+  n_classrooms = n_classrooms,
+  n_years = 3,
+  seed = seed
+)
+
+student_panel <- student_transform(student_panel)
+
+master <- linkage_create_master(
+  budget = budget_panel,
+  classroom = classroom_panel,
+  student = student_panel
+)
+```
+
+## Create a Temporary Database
+
+Use a temporary path for examples. Private projects should use a controlled
+output directory instead.
+
+```{r create-db, eval = has_duckdb, message = FALSE}
+db_path <- tempfile(fileext = ".duckdb")
+conn <- db_init(db_path)
+```
+
+## Write Panels and Master Tables
+
+`db_write_panel()` chooses a table name from the panel object's S3 class.
+`db_write_master()` writes the classroom-level and student-level master tables.
+
+```{r write-db, eval = has_duckdb}
+db_write_panel(conn, budget_panel)
+db_write_panel(conn, classroom_panel)
+db_write_panel(conn, student_panel)
+db_write_master(conn, master)
+
+db_list_tables(conn)
+```
+
+```{r db-table-assertions, include = FALSE, eval = has_duckdb}
+stopifnot(all(c(
+  "budget_panel",
+  "classroom_panel",
+  "student_panel",
+  "master_classroom",
+  "master_student"
+) %in% db_list_tables(conn)))
+```
+
+## Inspect Schema and R Types
+
+ALprekDB stores R type metadata in an internal registry. Factor columns are
+stored as character values in DuckDB and reconstructed as factors when read
+back into R.
+
+```{r inspect-schema, eval = has_duckdb}
+head(db_table_info(conn, "classroom_panel"), 10)
+```
+
+```{r inspect-master-schema, eval = has_duckdb}
+head(db_table_info(conn, "master_student"), 10)
+```
+
+## Query with SQL
+
+Use `db_query()` for SQL analysis. It returns a tibble.
+
+```{r sql-budget-year, eval = has_duckdb}
+db_query(conn, "
+  SELECT
+    school_year,
+    COUNT(*) AS n_classrooms,
+    ROUND(AVG(grand_total), 0) AS mean_budget,
+    ROUND(AVG(per_child_budget), 0) AS mean_per_child_budget
+  FROM master_classroom
+  GROUP BY school_year
+  ORDER BY school_year
+")
+```
+
+The missing budget year remains present, with budget means returned as `NA`.
+
+```{r sql-missing-budget, eval = has_duckdb}
+db_query(conn, "
+  SELECT
+    school_year,
+    COUNT(*) AS n_classrooms,
+    SUM(CASE WHEN grand_total IS NULL THEN 1 ELSE 0 END) AS n_without_budget
+  FROM master_classroom
+  GROUP BY school_year
+  ORDER BY school_year
+")
+```
+
+Student-level tables can be queried directly.
+
+```{r sql-student-summary, eval = has_duckdb}
+db_query(conn, "
+  SELECT
+    school_year,
+    COUNT(*) AS n_students,
+    ROUND(AVG(poverty_dum) * 100, 1) AS pct_poverty,
+    ROUND(AVG(days_absent_total), 1) AS mean_absences
+  FROM student_panel
+  GROUP BY school_year
+  ORDER BY school_year
+")
+```
+
+The linked student master can support grouped descriptive summaries.
+
+```{r sql-linked-students, eval = has_duckdb}
+db_query(conn, "
+  SELECT
+    school_year,
+    delivery_type,
+    COUNT(*) AS n_students,
+    ROUND(AVG(gold_literacy_gain_raw), 1) AS mean_literacy_gain
+  FROM master_student
+  GROUP BY school_year, delivery_type
+  ORDER BY school_year, delivery_type
+  LIMIT 10
+")
+```
+
+## Read Objects Back into R
+
+The read helpers reconstruct ALprekDB S3 objects.
+
+```{r read-back, eval = has_duckdb}
+budget_from_db <- db_read_panel(conn, "budget")
+classroom_from_db <- db_read_panel(conn, "classroom")
+student_from_db <- db_read_panel(conn, "student")
+master_from_db <- db_read_master(conn)
+
+data.frame(
+  object = c(
+    "budget_panel",
+    "classroom_panel",
+    "student_panel",
+    "master_classroom",
+    "master_student"
+  ),
+  original_rows = c(
+    nrow(budget_panel$data),
+    nrow(classroom_panel$data),
+    nrow(student_panel$data),
+    nrow(master$classroom_level),
+    nrow(master$student_level)
+  ),
+  read_rows = c(
+    nrow(budget_from_db$data),
+    nrow(classroom_from_db$data),
+    nrow(student_from_db$data),
+    nrow(master_from_db$classroom_level),
+    nrow(master_from_db$student_level)
+  )
+)
+```
+
+Type reconstruction is part of the round trip.
+
+```{r type-roundtrip, eval = has_duckdb}
+data.frame(
+  check = c(
+    "budget year is integer",
+    "classroom delivery_type is factor",
+    "student dob is Date",
+    "master student dob is Date"
+  ),
+  passed = c(
+    is.integer(budget_from_db$data$year),
+    is.factor(classroom_from_db$data$delivery_type),
+    inherits(student_from_db$data$dob, "Date"),
+    inherits(master_from_db$student_level$dob, "Date")
+  ),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r type-assertions, include = FALSE, eval = has_duckdb}
+stopifnot(inherits(budget_from_db, "alprek_budget_panel"))
+stopifnot(inherits(classroom_from_db, "alprek_classroom_panel"))
+stopifnot(inherits(student_from_db, "alprek_student_panel"))
+stopifnot(inherits(master_from_db, "alprek_linkage_master"))
+stopifnot(is.integer(budget_from_db$data$year))
+stopifnot(is.factor(classroom_from_db$data$delivery_type))
+stopifnot(inherits(student_from_db$data$dob, "Date"))
+stopifnot(inherits(master_from_db$student_level$dob, "Date"))
+```
+
+## Reconstruct Coverage Diagnostics
+
+`db_read_master()` reconstructs validation-compatible coverage diagnostics from
+the stored master tables.
+
+```{r coverage-roundtrip, eval = has_duckdb}
+master_from_db$meta$coverage$by_year[c(
+  "school_year",
+  "has_budget",
+  "has_classroom",
+  "has_student",
+  "n_budget_rows",
+  "n_classroom_rows",
+  "n_student_rows",
+  "budget_status"
+)]
+```
+
+```{r coverage-validation, eval = has_duckdb}
+db_validation <- linkage_validate(master_from_db)
+db_validation
+```
+
+```{r coverage-assertions, include = FALSE, eval = has_duckdb}
+stopifnot("2023-2024" %in% master_from_db$meta$coverage$missing_budget_years)
+stopifnot(any(master_from_db$meta$coverage$by_year$budget_status == "missing_budget"))
+stopifnot(db_validation$passed)
+```
+
+There is one important boundary: `db_read_master()` rebuilds diagnostics from
+the stored `master_classroom` and `master_student` tables. It cannot recover
+budget-only right-side rows that were not present in the master tables. If a
+future workflow needs to audit those rows after reload, keep the source budget
+panel or persisted diagnostics alongside the master tables.
+
+## Year Filters
+
+Read helpers can filter to one or more school years.
+
+```{r read-year-filter, eval = has_duckdb}
+classroom_2023 <- db_read_panel(conn, "classroom", years = "2023-2024")
+master_2023 <- db_read_master(conn, years = "2023-2024")
+
+data.frame(
+  object = c("classroom_2023", "master_classroom_2023", "master_student_2023"),
+  rows = c(
+    nrow(classroom_2023$data),
+    nrow(master_2023$classroom_level),
+    nrow(master_2023$student_level)
+  )
+)
+```
+
+```{r read-year-filter-validation, eval = has_duckdb}
+linkage_validate(master_2023)
+```
+
+## Read-Only Reopen
+
+Once a database exists, it can be opened in read-only mode for analysis.
+
+```{r read-only-reopen, eval = has_duckdb, message = FALSE}
+db_close(conn)
+
+conn <- db_init(db_path, read_only = TRUE)
+
+db_query(conn, "
+  SELECT COUNT(*) AS n_students
+  FROM master_student
+")
+```
+
+## Private Real-Data DuckDB Files
+
+Real-data DuckDB files are row-level private outputs. Write them only in a
+private project and only when row-level output is intentional.
+
+```{r private-duckdb, eval = FALSE}
+output_dir <- Sys.getenv("ALPREKDB_OUTPUT_DIR")
+private_db_path <- file.path(output_dir, "alprekdb.duckdb")
+
+if (identical(Sys.getenv("ALPREKDB_RUN_REALDATA"), "1") &&
+    identical(Sys.getenv("ALPREKDB_WRITE_OUTPUTS"), "1")) {
+  conn <- db_init(private_db_path)
+  on.exit(db_close(conn), add = TRUE)
+
+  db_write_panel(conn, budget_processed$panel, overwrite = TRUE)
+  db_write_panel(conn, classroom_processed$panel, overwrite = TRUE)
+  db_write_panel(conn, student_transform(student_processed$panel), overwrite = TRUE)
+  db_write_master(conn, master, overwrite = TRUE)
+}
+```
+
+Do not commit `.duckdb` files, row-level exports, `_targets/` caches, or
+private output folders. Publish aggregate diagnostics and non-disclosive counts
+instead.
+
+## Cleanup
+
+```{r cleanup, include = FALSE, eval = has_duckdb}
+db_close(conn)
+unlink(db_path)
+```
+
+## Next Step
+
+A5 shows how to run the package's companion `targets` workflow for repeatable
+synthetic and private real-data processing.

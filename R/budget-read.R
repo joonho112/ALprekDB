@@ -32,7 +32,10 @@ budget_read <- function(path,
                         sheet = NULL,
                         remove_footer = TRUE) {
 
+  .budget_check_input_path(path)
+
   if (!file.exists(path)) {
+    .budget_stop_missing_file(path)
     stop("File not found: ", path, call. = FALSE)
   }
 
@@ -144,4 +147,58 @@ print.alprek_budget_raw <- function(x, ...) {
   m <- regmatches(bv_col, regexpr("(20\\d{2})-(20\\d{2})", bv_col))
   if (length(m) == 1 && nchar(m) > 0) return(m)
   NA_character_
+}
+
+
+#' Check budget input path for known noncanonical source files
+#' @keywords internal
+.budget_check_input_path <- function(path) {
+  fname <- basename(path)
+
+  if (grepl("^~\\$", fname)) {
+    stop(
+      "Excel lock/temp budget file detected: ", fname, ". ",
+      "Close the workbook and use the canonical budget export instead.",
+      call. = FALSE
+    )
+  }
+
+  if (grepl("Foundant|Budget Requests", fname, ignore.case = TRUE)) {
+    stop(
+      "Budget request/Foundant export detected: ", fname, ". ",
+      "This is not a processed classroom budget file and cannot be used as a ",
+      "canonical ALprekDB budget source.",
+      call. = FALSE
+    )
+  }
+
+  if (grepl("\\bas\\s+of\\b", fname, ignore.case = TRUE) &&
+      grepl("budget", fname, ignore.case = TRUE)) {
+    stop(
+      "Dated/interim budget snapshot detected: ", fname, ". ",
+      "Use the final canonical budget export for this school year instead.",
+      call. = FALSE
+    )
+  }
+
+  invisible(TRUE)
+}
+
+
+#' Stop with a specific message for known missing budget coverage
+#' @keywords internal
+.budget_stop_missing_file <- function(path) {
+  fname <- basename(path)
+  sy <- alprek_infer_school_year(fname)
+
+  if (identical(sy, "2025-2026") && grepl("budget", fname, ignore.case = TRUE)) {
+    stop(
+      "Canonical 2025-2026 budget source not found: ", fname, ". ",
+      "The current ALprekDB 0.6.0 source manifest has classroom/student ",
+      "coverage for 2025-2026, but no canonical processed budget workbook.",
+      call. = FALSE
+    )
+  }
+
+  invisible(FALSE)
 }

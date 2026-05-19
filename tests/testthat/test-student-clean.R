@@ -132,6 +132,21 @@ test_that("num_in_house converts text words to numeric", {
   expect_true(clean$cleaning_log$n_num_house_text >= 0)
 })
 
+test_that("num_in_house parsing is warning-free for known nonnumeric values", {
+  expect_no_warning({
+    parsed <- .parse_num_in_house(c("Four", "Seven", "2 children", ";",
+                                    "unknown", NA))
+  })
+  expect_equal(parsed, c(4, 7, 2, NA, NA, NA))
+
+  raw <- make_student_raw("legacy", n = 10)
+  raw$data[["Number In House"]] <- rep(c("Four", "Seven", "2 children", ";",
+                                         "unknown"), length.out = nrow(raw$data))
+  expect_no_warning(clean <- student_clean(raw))
+  expect_equal(clean$data$num_in_house[1:5], c(4, 7, 2, NA, NA))
+  expect_s3_class(clean, "alprek_student_clean")
+})
+
 
 test_that("gross income is parsed to midpoint", {
   raw <- make_student_raw("legacy", n = 10)

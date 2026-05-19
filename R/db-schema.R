@@ -166,6 +166,10 @@ DBI::dbExecute(conn, "
       if (!inherits(col, "Date")) {
         df[[col_name]] <- as.Date(col)
       }
+    } else if (r_type == "POSIXct") {
+      if (!inherits(col, "POSIXct")) {
+        df[[col_name]] <- as.POSIXct(col, tz = "UTC")
+      }
     } else if (r_type == "integer") {
       if (!is.integer(col)) {
         df[[col_name]] <- as.integer(col)

@@ -14,12 +14,12 @@ A named list with elements: \code{county_code}, \code{delivery_type_code},
 \code{program_code}, \code{class_num}. Returns NAs for invalid codes.
 }
 \description{
-Parses an Alabama Pre-K classroom code in "XXXAYYYYY.ZZ" format
+Parses an Alabama Pre-K classroom code in "CCCDNNNNNN.NN" format
 into its component parts.
 }
 \examples{
-parse_classroom_code("823P012601.01")
-# list(county_code = "823", delivery_type_code = "P",
-#      program_code = "012601", class_num = "01")
+parse_classroom_code("901P900001.01")
+# list(county_code = "901", delivery_type_code = "P",
+#      program_code = "900001", class_num = "01")
 
 }

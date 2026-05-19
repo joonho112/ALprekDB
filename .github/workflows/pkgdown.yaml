@@ -25,6 +25,10 @@ jobs:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      ALPREKDB_RUN_REALDATA: "0"
+      ALPREKDB_DATA_DIR: ""
+      ALPREKDB_WRITE_OUTPUTS: "0"
+      ALPREKDB_OUTPUT_DIR: ${{ runner.temp }}/alprekdb-output
     steps:
       - uses: actions/checkout@v4
 
@@ -56,6 +60,6 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
-          clean: false
+          clean: true
           branch: gh-pages
           folder: docs

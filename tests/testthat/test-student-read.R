@@ -14,18 +14,32 @@ test_that("student_detect_format identifies new format", {
 
 test_that("student_detect_format uses marker columns for detection", {
   # Add Child First Name to a small df -> should detect as new
-  df <- tibble::tibble(
-    `Child First Name` = "Test",
-    `Other Col` = 1
-  )
+  df <- make_student_legacy_raw_df(5)
+  df$`Child First Name` <- paste0("Test", seq_len(nrow(df)))
   expect_equal(student_detect_format(df), "new")
 
   # Modified Schedule marker
-  df2 <- tibble::tibble(
-    `Modified Schedule` = TRUE,
-    `Other Col` = 1
-  )
+  df2 <- make_student_legacy_raw_df(5)
+  df2$`Modified Schedule` <- FALSE
   expect_equal(student_detect_format(df2), "new")
+})
+
+
+test_that("student_detect_format rejects partial student exports", {
+  partial <- make_student_legacy_raw_df(5)[, seq_len(67)]
+
+  expect_error(
+    student_detect_format(partial),
+    "too narrow.*canonical Student/Child Details"
+  )
+
+  partial_with_marker <- partial
+  partial_with_marker$`Child First Name` <- paste0("Test", seq_len(nrow(partial)))
+
+  expect_error(
+    student_detect_format(partial_with_marker),
+    "too narrow.*canonical Student/Child Details"
+  )
 })
 
 

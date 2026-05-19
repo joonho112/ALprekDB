@@ -1,0 +1,315 @@
+---
+title: "M3 - Codebooks and Mappings"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{M3 - Codebooks and Mappings}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## Overview
+
+ALprekDB keeps many data-cleaning decisions outside R code. Public CSV files in
+`inst/extdata/` define column mappings and codebooks that are read by the
+processing functions at runtime.
+
+This design has three practical benefits:
+
+- codebooks are readable by analysts and program staff who do not write R;
+- mapping changes are versioned as data-cleaning decisions;
+- public documentation can describe processing rules without sharing raw ADECE
+  records.
+
+```{r load}
+library(ALprekDB)
+```
+
+## Installed CSV Inventory
+
+The package ships 14 public CSV files: 8 codebooks and 6 column mappings.
+
+```{r inventory}
+ext_dir <- system.file("extdata", package = "ALprekDB", mustWork = TRUE)
+ext_files <- list.files(
+  ext_dir,
+  pattern = "[.]csv$",
+  recursive = TRUE,
+  full.names = TRUE
+)
+ext_relative_files <- sub("^.*[/]extdata[/]", "", ext_files)
+
+csv_inventory <- data.frame(
+  file = ext_relative_files,
+  role = ifelse(grepl("^mappings/", ext_relative_files), "mapping", "codebook"),
+  rows = unname(vapply(
+    ext_files,
+    function(path) nrow(utils::read.csv(path, check.names = FALSE)),
+    integer(1)
+  )),
+  fields = unname(vapply(
+    ext_files,
+    function(path) length(names(utils::read.csv(path, nrows = 0, check.names = FALSE))),
+    integer(1)
+  )),
+  row.names = NULL
+)
+
+csv_inventory[order(csv_inventory$role, csv_inventory$file), ]
+```
+
+```{r inventory-summary}
+aggregate(
+  cbind(files = rep(1L, nrow(csv_inventory)), rows = csv_inventory$rows),
+  by = list(role = csv_inventory$role),
+  FUN = sum
+)
+```
+
+These files are part of the package API in a broad sense: changing them changes
+how raw fields become standardized analytic columns.
+
+## Two Kinds of CSV Files
+
+Column mappings have a common four-column schema.
+
+```{r mapping-schema}
+mapping_files <- csv_inventory[csv_inventory$role == "mapping", "file"]
+
+data.frame(
+  file = mapping_files,
+  schema = vapply(
+    file.path(ext_dir, mapping_files),
+    function(path) {
+      paste(names(utils::read.csv(path, nrows = 0, check.names = FALSE)), collapse = ", ")
+    },
+    character(1)
+  ),
+  row.names = NULL
+)
+```
+
+| Mapping field | Meaning |
+|---------------|---------|
+| `raw_column` | Column label expected in a source file format. |
+| `standard_name` | Package-standard variable name used after cleaning. |
+| `type` | Domain tag used for cleaning, privacy filtering, and tests. |
+| `notes` | Human-readable explanation or implementation note. |
+
+Codebooks have domain-specific schemas because they serve different cleaning
+tasks.
+
+```{r helper-schemas}
+helpers <- list(
+  delivery_types = alprek_delivery_types(),
+  county_codes = alprek_county_codes(),
+  degree_patterns = alprek_degree_patterns(),
+  budget_categories = alprek_category_groups(),
+  classroom_race = alprek_race_mapping(),
+  classroom_language = alprek_language_mapping(),
+  student_race = alprek_student_race_mapping(),
+  student_delivery = alprek_student_delivery_mapping()
+)
+
+data.frame(
+  helper = names(helpers),
+  rows = vapply(helpers, nrow, integer(1)),
+  schema = vapply(helpers, function(x) paste(names(x), collapse = ", "), character(1)),
+  row.names = NULL
+)
+```
+
+## Codebooks as Boundary Objects
+
+A codebook can be read in a spreadsheet, reviewed in a pull request, and loaded
+by the package. The delivery-type codebook is a simple example.
+
+```{r delivery-types}
+alprek_delivery_types()
+```
+
+The same seven provider types are used by classroom codes, classroom panels,
+student panels, linkage diagnostics, and synthetic data.
+
+The degree-pattern codebook is more procedural. It defines regular-expression
+patterns and priorities for parsing free-text credential fields into standard
+degree levels and areas. The codebook is still data, but it drives executable
+cleaning logic.
+
+```{r degree-pattern-types}
+aggregate(
+  priority ~ pattern_type,
+  data = alprek_degree_patterns(),
+  FUN = length
+)
+```
+
+## How Mappings Are Used
+
+The module cleaning functions load mappings after format detection.
+
+```text
+read source columns
+  -> detect format
+  -> load matching column map
+  -> rename raw columns to standard names
+  -> apply codebooks and derived variables
+  -> validate standardized output
+```
+
+For example:
+
+- budget cleaning uses `budget_category_groups.csv` to group detailed budget
+  line items;
+- classroom cleaning uses classroom mappings, degree patterns, race mappings,
+  language mappings, and delivery-type codes;
+- student cleaning uses student mappings, student race mappings, and student
+  delivery-type mappings.
+
+The public mappings describe how raw field names are standardized; they should
+not contain row-level examples from real source data.
+
+## Format Detection
+
+Column mappings are selected by detected format. Detection rules look at column
+names, marker fields, and source-file width rather than row-level values.
+
+```{r format-detection-demo}
+budget_legacy <- data.frame(
+  "Classroom Code" = "",
+  "Classroom Name" = "",
+  "Example From OSR Funds" = 0,
+  check.names = FALSE
+)
+
+budget_new <- data.frame(
+  "Classroom Code" = "",
+  "Classroom Name" = "",
+  "OSR" = 0,
+  "Proration" = 0,
+  check.names = FALSE
+)
+
+classroom_legacy <- as.data.frame(matrix(NA, nrow = 1, ncol = 100))
+names(classroom_legacy) <- paste0("col", seq_len(ncol(classroom_legacy)))
+
+classroom_new <- as.data.frame(matrix(NA, nrow = 1, ncol = 121))
+names(classroom_new) <- paste0("col", seq_len(ncol(classroom_new)))
+
+student_legacy <- as.data.frame(matrix(NA, nrow = 1, ncol = 202))
+names(student_legacy) <- paste0("col", seq_len(ncol(student_legacy)))
+
+student_new <- as.data.frame(matrix(NA, nrow = 1, ncol = 250))
+names(student_new) <- paste0("col", seq_len(ncol(student_new)))
+
+data.frame(
+  module = c("budget", "budget", "classroom", "classroom", "student", "student"),
+  scenario = c("legacy marker", "new marker", "legacy width", "new width", "legacy width", "new width"),
+  detected = c(
+    budget_detect_format(budget_legacy),
+    budget_detect_format(budget_new),
+    classroom_detect_format(classroom_legacy),
+    classroom_detect_format(classroom_new),
+    student_detect_format(student_legacy),
+    student_detect_format(student_new)
+  )
+)
+```
+
+Format detection is deliberately conservative. If a source export is too narrow
+or contains incompatible markers, the package stops rather than guessing.
+
+## Mapping Contracts
+
+The tests enforce these contracts:
+
+- all 14 expected CSV files are present;
+- mapping files use `raw_column`, `standard_name`, `type`, and `notes`;
+- mapping keys are nonblank and unique within each file;
+- `standard_name` values are unique and use snake case;
+- codebook keys are unique;
+- canonical domains such as delivery types and race categories are covered;
+- degree-pattern regexes compile;
+- privacy-related mapping types remain explicit in new-format maps.
+
+```{r mapping-contracts}
+all_mappings <- lapply(file.path(ext_dir, mapping_files), function(path) {
+  utils::read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
+})
+names(all_mappings) <- mapping_files
+
+data.frame(
+  file = names(all_mappings),
+  unique_raw_column = vapply(all_mappings, function(x) !any(duplicated(x$raw_column)), logical(1)),
+  unique_standard_name = vapply(all_mappings, function(x) !any(duplicated(x$standard_name)), logical(1)),
+  snake_case_standard_name = vapply(
+    all_mappings,
+    function(x) all(grepl("^[a-z][a-z0-9_]*$", x$standard_name)),
+    logical(1)
+  ),
+  row.names = NULL
+)
+```
+
+## Extension Workflow
+
+When a source format changes, the safest update path is:
+
+1. Add or update a mapping CSV with the same schema.
+2. Add or update a detection rule that selects the mapping only for the intended
+   format.
+3. Keep raw data and row-level examples out of `inst/extdata/`.
+4. Add schema tests for the mapping file and its required standardized names.
+5. Add cleaning tests that exercise the new mapping on synthetic or minimal
+   fixture data.
+6. Run the affected module tests and render the relevant vignettes.
+
+This keeps format drift visible as a versioned package change rather than a
+private one-off script edit.
+
+## What Public Codebooks Should Not Contain
+
+Do not put these in public package codebooks or mappings:
+
+- raw ADECE files or row extracts;
+- real classroom codes from confidential files;
+- student identifiers;
+- names, dates of birth, or staff contact fields;
+- local absolute paths;
+- private output filenames;
+- examples copied from a private worksheet.
+
+Public codebooks can describe categories, standardized names, and format-level
+field mappings. They should not document individual records.
+
+## Hidden Contract Checks
+
+```{r contract-checks, include = FALSE}
+stopifnot(nrow(csv_inventory) == 14L)
+stopifnot(sum(csv_inventory$role == "codebook") == 8L)
+stopifnot(sum(csv_inventory$role == "mapping") == 6L)
+stopifnot(sum(csv_inventory$rows[csv_inventory$role == "codebook"]) == 225L)
+stopifnot(sum(csv_inventory$rows[csv_inventory$role == "mapping"]) == 715L)
+stopifnot(all(c("code", "name", "name_short") %in% names(alprek_delivery_types())))
+stopifnot(setequal(alprek_delivery_types()$code, c("P", "C", "H", "O", "F", "U", "S")))
+stopifnot(all(vapply(all_mappings, function(x) {
+  all(c("raw_column", "standard_name", "type", "notes") %in% names(x))
+}, logical(1))))
+```
+
+## Reading Map
+
+| Need | Where to go |
+|------|-------------|
+| Why externalized codebooks are part of the architecture | M1 |
+| How validation checks enforce codebook contracts | M2 |
+| How to build panels with current mappings | A2 |
+| How to keep private source files out of public docs | M4 |

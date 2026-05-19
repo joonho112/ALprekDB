@@ -22,12 +22,32 @@
 #' @export
 budget_detect_format <- function(df) {
   col_names <- names(df)
+  has_core_cols <- .detect_budget_core_columns(col_names)
+  has_legacy <- .detect_legacy_markers(col_names)
+  has_new <- .detect_new_markers(col_names)
 
-  if (.detect_legacy_markers(col_names)) {
+  if (!has_core_cols && (has_legacy || has_new)) {
+    stop(
+      "Cannot detect budget format. Budget marker columns were found, but ",
+      "required classroom-budget identifiers are missing: Classroom Code, ",
+      "Classroom Name.",
+      call. = FALSE
+    )
+  }
+
+  if (has_legacy && has_new) {
+    stop(
+      "Cannot detect budget format. Found both legacy and new budget markers; ",
+      "please verify this is a canonical processed classroom budget export.",
+      call. = FALSE
+    )
+  }
+
+  if (has_legacy) {
     return("legacy")
   }
 
-  if (.detect_new_markers(col_names)) {
+  if (has_new) {
     return("new")
   }
 
@@ -59,4 +79,13 @@ budget_detect_format <- function(df) {
   has_osr <- any(grepl("\\bOSR\\b", col_names))
   has_proration <- any(grepl("Proration", col_names, ignore.case = TRUE))
   has_osr && has_proration
+}
+
+
+#' Detect core processed classroom-budget identifier columns
+#' @param col_names Character vector of column names.
+#' @return Logical.
+#' @keywords internal
+.detect_budget_core_columns <- function(col_names) {
+  all(c("Classroom Code", "Classroom Name") %in% col_names)
 }

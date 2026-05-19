@@ -17,6 +17,20 @@ docs/
 # Output data (NEVER commit - contains PII)
 output/
 
+# Local/private source data and workflow artifacts (NEVER commit)
+ORIGINAL-DATA/
+log/
+.claude/
+_targets/
+_targets.R
+_targets.yaml
+.env
+.env.*
+local.env
+*.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+
 # OS files
 .DS_Store
 Thumbs.db

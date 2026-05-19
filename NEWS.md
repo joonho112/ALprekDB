@@ -1,5 +1,92 @@
 # ALprekDB (development version)
 
+# ALprekDB 0.6.0 (2026-05-19)
+
+## Major changes
+
+* Added coverage-aware linkage metadata for asymmetric module coverage. Classroom
+  and student panels can now retain years without matching canonical budget
+  coverage, and missing budget years are recorded as coverage metadata rather
+  than imputed or zero-filled.
+* Updated linkage validation to distinguish true overlap-year orphan records
+  from expected missing-module coverage gaps.
+* Added clearer linkage diagnostics, including per-year orphan summaries and
+  overlap-year versus all-year match-rate reporting.
+* Added reconstruction of coverage-aware linkage diagnostics when reading linked
+  master outputs back from DuckDB.
+
+## Workflow and privacy
+
+* Added a reusable `targets` workflow template for synthetic examples and
+  opt-in local real-data processing.
+* Added environment-gated real-data tests and workflow paths so CI and public
+  examples run on synthetic data by default.
+* Added privacy/provenance guardrails for local source-data directories, output
+  folders, DuckDB files, target caches, environment files, and working logs.
+* Disabled row-level real-data output writing by default in the workflow
+  template; row-level outputs require an explicit local opt-in.
+
+## Data processing
+
+* Updated classroom-code validation and synthetic classroom-code generation to
+  use the canonical six-digit program-code format.
+* Hardened budget source detection and reading against temporary lock files,
+  marker-only sheets, ambiguous budget-version columns, request/application
+  exports, interim snapshots, and noncanonical missing-year substitutes.
+* Improved budget amount parsing for currency strings, missing-value labels,
+  commas, and parenthetical negatives without base coercion warnings.
+* Hardened student format detection against partial exports and improved parsing
+  of household-size text and mixed values.
+* Improved user-facing warning and progress messages to keep noisy parse details
+  out of normal workflows while preserving actionable validation feedback.
+
+## Database
+
+* Preserved `POSIXct` columns during DuckDB write/read round trips.
+* Improved `db_read_master()` reconstruction of master objects, linkage
+  coverage metadata, and validation diagnostics.
+* Kept DuckDB and DBI optional so the package can still be used without database
+  dependencies installed.
+
+## Documentation
+
+* Replaced the previous vignette set with two tracks:
+  applied workflow vignettes for getting started, panel construction, linkage,
+  DuckDB/SQL, and `targets`; and methodological vignettes for architecture,
+  validation, codebooks/mappings, privacy, and provenance.
+* Updated README and pkgdown home content around synthetic-first examples,
+  private workflow boundaries, asymmetric release coverage, and known
+  limitations.
+* Updated pkgdown navigation and reference grouping so linkage diagnostics,
+  exports, DuckDB helpers, codebooks, synthetic data, and display methods are
+  easier to find.
+* Audited the PLOS manuscript PDF link and kept only the curated site-level
+  manuscript PDF exposed through pkgdown.
+
+## Testing and CI
+
+* Added GitHub Actions coverage for R CMD check with real-data execution
+  disabled in CI.
+* Added synthetic `targets` template smoke tests.
+* Added tests for coverage-aware linkage, database diagnostic reconstruction,
+  privacy defaults, template parsing, external-data schemas, canonical classroom
+  code shapes, and source-format guardrails.
+
+## Known limitations
+
+* Raw ADECE records are not distributed with the package and must remain in
+  private local workflows.
+* The current real-data manifest has budget coverage through 2024-25 and
+  classroom/student coverage through 2025-26; the absent 2025-26 budget source
+  is treated as a documented coverage limitation.
+* Validation warnings may reflect source-data quality issues or expected
+  coverage gaps and still require substantive analyst review.
+* Student-level outputs remain confidential even when direct PII columns are
+  excluded.
+* `db_read_master()` reconstructs master outputs from stored master tables; exact
+  persistence of budget-only right-side orphan rows is not guaranteed in this
+  release.
+
 # ALprekDB 0.5.0 (2026-02-09)
 
 ## New features

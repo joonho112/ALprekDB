@@ -131,9 +131,12 @@ print.alprek_student_raw <- function(x, ...) {
 #'
 #' @details
 #' Detection logic:
+#' - **Reject partial exports**: fewer than 190 columns is too narrow for a
+#'   canonical Student/Child Details file.
 #' - **New**: Contains "Child First Name" or "Modified Schedule" or "Student ID"
 #'   (without "State") or ncol >= 250.
-#' - **Legacy**: ncol <= 210 and no new-format marker columns present.
+#' - **Legacy**: roughly 190-210 columns and no new-format marker columns
+#'   present.
 #'
 #' @examples
 #' \dontrun{
@@ -146,6 +149,16 @@ print.alprek_student_raw <- function(x, ...) {
 student_detect_format <- function(df) {
   col_names <- names(df)
   nc <- ncol(df)
+
+  if (nc < 190) {
+    stop(
+      "Cannot detect student format. Found ", nc, " columns, which is too narrow ",
+      "for a canonical Student/Child Details file.\n",
+      "Expected legacy (~202 cols) or new (~270 cols). If this is a partial ",
+      "2024-2025 Student Details export, use the canonical Child Details file instead.",
+      call. = FALSE
+    )
+  }
 
   # New format markers (2024-2025+)
   has_child_name <- "Child First Name" %in% col_names

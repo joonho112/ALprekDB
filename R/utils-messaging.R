@@ -21,6 +21,7 @@ msg_error <- function(msg, .envir = parent.frame()) {
   cli::cli_alert_danger(glue::glue(msg, .envir = .envir))
 }
 
-msg_step <- function(step_num, total, description) {
+msg_step <- function(step_num, total, description, .envir = parent.frame()) {
+  description <- glue::glue(description, .envir = .envir)
   cli::cli_alert_info("Step {step_num}/{total}: {description}")
 }
