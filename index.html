@@ -5,14 +5,16 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Alabama Pre-K Administrative Data Processing and Database Management • ALprekDB</title>
+<title>ALprekDB • ALprekDB</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Alabama Pre-K Administrative Data Processing and Database Management">
-<meta name="description" content="A modular toolkit for processing, cleaning, validating, and managing Alabama First Class Pre-K (FCPK) administrative records. This package standardizes annual data processing workflows for budget, classroom, and student data files received from ADECE (Alabama Department of Early Childhood Education). Features include: data-driven column mapping via external codebooks, pattern-based format detection across file versions, reconciliation diagnostics, derived variable creation, multi-year panel construction, cross-module linkage with join diagnostics, classroom-level student aggregation, DuckDB-based persistent storage with SQL query support, and multiple export formats.">
-<meta property="og:description" content="A modular toolkit for processing, cleaning, validating, and managing Alabama First Class Pre-K (FCPK) administrative records. This package standardizes annual data processing workflows for budget, classroom, and student data files received from ADECE (Alabama Department of Early Childhood Education). Features include: data-driven column mapping via external codebooks, pattern-based format detection across file versions, reconciliation diagnostics, derived variable creation, multi-year panel construction, cross-module linkage with join diagnostics, classroom-level student aggregation, DuckDB-based persistent storage with SQL query support, and multiple export formats.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="ALprekDB">
+<meta name="description" content="Processing engine for Alabama First Class Pre-K administrative data: validated budget, classroom, and student panels; cross-module linkage; DuckDB storage; and privacy-conscious synthetic and private real-data workflows.
+">
+<meta property="og:description" content="Processing engine for Alabama First Class Pre-K administrative data: validated budget, classroom, and student panels; cross-module linkage; DuckDB storage; and privacy-conscious synthetic and private real-data workflows.
+">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,8 +33,24 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/a1-getting-started.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+<li><h6 class="dropdown-header" data-toc-skip>--- Applied Track ---</h6></li>
+    <li><a class="dropdown-item" href="articles/a1-getting-started.html">A1 - Getting started</a></li>
+    <li><a class="dropdown-item" href="articles/a2-build-panels.html">A2 - Build panels</a></li>
+    <li><a class="dropdown-item" href="articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
+    <li><a class="dropdown-item" href="articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
+    <li><a class="dropdown-item" href="articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+    <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
+    <li><a class="dropdown-item" href="articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
+    <li><a class="dropdown-item" href="articles/m2-validation-framework.html">M2 - Validation framework</a></li>
+    <li><a class="dropdown-item" href="articles/m3-codebooks-mappings.html">M3 - Codebooks and mappings</a></li>
+    <li><a class="dropdown-item" href="articles/m4-privacy-provenance.html">M4 - Privacy and provenance</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
 <li class="nav-item"><a class="nav-link" href="manuscript.pdf"><span class="fa fa-file-pdf"></span> Paper</a></li>
       </ul>
@@ -53,60 +71,61 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p><strong>Alabama Pre-K Administrative Data Processing and Database Management</strong> (v0.5.0)</p>
-<p>A modular R toolkit for processing, cleaning, validating, and managing Alabama First Class Pre-K (FCPK) administrative records received from ADECE (Alabama Department of Early Childhood Education). Transforms raw Excel files into analysis-ready longitudinal panel datasets covering <strong>92,500+ students</strong>, <strong>5,900+ classrooms</strong>, and <strong>4 school years</strong> (2021-22 through 2024-25).</p>
+<p><strong>ALprekDB turns Alabama First Class Pre-K administrative files into validated, analysis-ready panel datasets while keeping raw data out of public code.</strong></p>
+<p>ALprekDB is a modular R package for ADECE budget, classroom, and student records. It handles file-format detection, data-driven codebooks, validation diagnostics, derived student variables, cross-module linkage, DuckDB storage, and export helpers. Public examples use fully synthetic data. Real ADECE data workflows are opt-in, local-only, and designed for private analysis projects.</p>
+<p><img src="reference/figures/figure_01_readme.png" alt="ALprekDB public synthetic examples and private real-data workflow" width="100%"></p>
 <div class="section level2">
 <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a>
 </h2>
-<p>JoonHo Lee, Ph.D. Assistant Professor, The University of Alabama <a href="mailto:jlee296@ua.edu" class="email">jlee296@ua.edu</a></p>
+<p>JoonHo Lee, Ph.D.<br> Assistant Professor, The University of Alabama<br><a href="mailto:jlee296@ua.edu" class="email">jlee296@ua.edu</a></p>
 </div>
 <div class="section level2">
-<h2 id="modules">Modules<a class="anchor" aria-label="anchor" href="#modules"></a>
+<h2 id="why-alprekdb">Why ALprekDB?<a class="anchor" aria-label="anchor" href="#why-alprekdb"></a>
 </h2>
+<p>ALprekDB is built for repeatable Pre-K administrative data work:</p>
+<ul>
+<li>standardize annual ADECE Excel files across changing source formats;</li>
+<li>build longitudinal budget, classroom, and student panels;</li>
+<li>create classroom- and student-level linked master datasets;</li>
+<li>record validation, linkage, orphan, and coverage diagnostics;</li>
+<li>support SQL-friendly DuckDB outputs for downstream analysis;</li>
+<li>separate public package documentation from private real-data processing.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="data-coverage-in-v060">Data Coverage in v0.6.0<a class="anchor" aria-label="anchor" href="#data-coverage-in-v060"></a>
+</h2>
+<p>The v0.6.0 real-data manifest uses asymmetric coverage because the currently available 2025-26 source set includes classroom and student files, but no canonical 2025-26 budget file.</p>
 <table class="table">
 <colgroup>
-<col width="27%">
-<col width="31%">
+<col width="15%">
 <col width="41%">
+<col width="43%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Module</th>
-<th>Purpose</th>
-<th>Key Output</th>
+<th>Covered school years</th>
+<th>Current release notes</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
-<td><strong>Budget</strong></td>
-<td>Per-classroom funding (OSR + Other, 8 categories)</td>
-<td>5,867 rows x 53 cols</td>
+<tr>
+<td>Budget</td>
+<td>2021-22 through 2024-25</td>
+<td>The 2025-26 budget is structurally unavailable and is not inferred, zero-filled, or copied from another source.</td>
 </tr>
-<tr class="even">
-<td><strong>Classroom</strong></td>
-<td>Teacher demographics, geography, credentials</td>
-<td>5,888 rows x 125 cols</td>
+<tr>
+<td>Classroom</td>
+<td>2021-22 through 2025-26</td>
+<td>Classroom-code validation uses six-digit program codes.</td>
 </tr>
-<tr class="odd">
-<td><strong>Student</strong></td>
-<td>Demographics, 4 assessments, services, attendance</td>
-<td>92,507 rows x 288 cols</td>
-</tr>
-<tr class="even">
-<td><strong>Transform</strong></td>
-<td>GOLD gains, chronic absence, risk index (27 vars)</td>
-<td>Enriched student panel</td>
-</tr>
-<tr class="odd">
-<td><strong>Linkage</strong></td>
-<td>Cross-module joins, 2-level master datasets</td>
-<td>Classroom + Student masters</td>
-</tr>
-<tr class="even">
-<td><strong>Database</strong></td>
-<td>DuckDB persistent storage, SQL queries</td>
-<td>Instant loading, incremental updates</td>
+<tr>
+<td>Student</td>
+<td>2021-22 through 2025-26</td>
+<td>Student PII is excluded by default in private workflows.</td>
 </tr>
 </tbody>
 </table>
+<p>Aggregate real-data smoke tests currently cover 5,867 budget classroom-year records, 7,409 classroom-year records, and 116,689 student-year records. These are aggregate processing counts, not row-level data.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -116,136 +135,234 @@
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"joonho112/ALprekDB"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="quick-start-synthetic-data">Quick Start: Synthetic Data<a class="anchor" aria-label="anchor" href="#quick-start-synthetic-data"></a>
 </h2>
-<div class="section level3">
-<h3 id="synthetic-data-no-adece-files-needed">Synthetic Data (no ADECE files needed)<a class="anchor" aria-label="anchor" href="#synthetic-data-no-adece-files-needed"></a>
-</h3>
+<p>Synthetic examples require no ADECE files and are safe for public documentation, CI checks, teaching, and package development. They use fake <code>9xx</code> classroom-code prefixes and synthetic county labels so printed examples cannot be mistaken for confidential ADECE records.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://joonho112.github.io/ALprekDB/">ALprekDB</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Generate linked synthetic datasets (same seed = shared classroom codes)</span></span>
-<span><span class="va">budget</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_budget.html">alprek_synthetic_budget</a></span><span class="op">(</span>n_classrooms <span class="op">=</span> <span class="fl">20</span>, n_years <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">classroom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_classroom.html">alprek_synthetic_classroom</a></span><span class="op">(</span>n_classrooms <span class="op">=</span> <span class="fl">20</span>, n_years <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">student</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_student.html">alprek_synthetic_student</a></span><span class="op">(</span>n_students <span class="op">=</span> <span class="fl">100</span>, n_classrooms <span class="op">=</span> <span class="fl">20</span>,</span>
-<span>                                       n_years <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Create 2-level master dataset</span></span>
-<span><span class="va">master</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/linkage_create_master.html">linkage_create_master</a></span><span class="op">(</span><span class="va">budget</span>, <span class="va">classroom</span>, <span class="va">student</span><span class="op">)</span></span>
-<span><span class="va">master</span><span class="op">$</span><span class="va">classroom_level</span>  <span class="co"># classroom-year with budget + aggregated student data</span></span>
-<span><span class="va">master</span><span class="op">$</span><span class="va">student_level</span>    <span class="co"># student-year with classroom + budget attributes</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="real-data-pipeline">Real Data Pipeline<a class="anchor" aria-label="anchor" href="#real-data-pipeline"></a>
-</h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Budget: 4-year panel</span></span>
-<span><span class="va">configs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="reference/budget_config.html">budget_config</a></span><span class="op">(</span><span class="st">"2021-2022"</span>, <span class="st">"Budget_21-22.xlsx"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="reference/budget_config.html">budget_config</a></span><span class="op">(</span><span class="st">"2022-2023"</span>, <span class="st">"Budget_22-23.xlsx"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="reference/budget_config.html">budget_config</a></span><span class="op">(</span><span class="st">"2023-2024"</span>, <span class="st">"Budget_23-24.xlsx"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="reference/budget_config.html">budget_config</a></span><span class="op">(</span><span class="st">"2024-2025"</span>, <span class="st">"Budget_24-25.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">budget</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_budget.html">alprek_synthetic_budget</a></span><span class="op">(</span></span>
+<span>  n_classrooms <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  n_years <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/budget_process_years.html">budget_process_years</a></span><span class="op">(</span><span class="va">configs</span><span class="op">)</span></span>
-<span><span class="va">budget_panel</span> <span class="op">&lt;-</span> <span class="va">result</span><span class="op">$</span><span class="va">panel</span></span>
 <span></span>
-<span><span class="co"># Same pattern for classroom_process_years() and student_process_years()</span></span>
+<span><span class="va">classroom</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_classroom.html">alprek_synthetic_classroom</a></span><span class="op">(</span></span>
+<span>  n_classrooms <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  n_years <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Enrich student data with derived variables</span></span>
-<span><span class="va">enriched</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/student_transform.html">student_transform</a></span><span class="op">(</span><span class="va">student_panel</span><span class="op">)</span></span>
+<span><span class="va">student</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/alprek_synthetic_student.html">alprek_synthetic_student</a></span><span class="op">(</span></span>
+<span>  n_students <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  n_classrooms <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  n_years <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">42</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Link all three into master</span></span>
-<span><span class="va">master</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/linkage_create_master.html">linkage_create_master</a></span><span class="op">(</span><span class="va">budget_panel</span>, <span class="va">classroom_panel</span>, <span class="va">enriched</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">master</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/linkage_create_master.html">linkage_create_master</a></span><span class="op">(</span><span class="va">budget</span>, <span class="va">classroom</span>, <span class="va">student</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/linkage_validate.html">linkage_validate</a></span><span class="op">(</span><span class="va">master</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/linkage_summary_stats.html">linkage_summary_stats</a></span><span class="op">(</span><span class="va">master</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3">
-<h3 id="duckdb-storage">DuckDB Storage<a class="anchor" aria-label="anchor" href="#duckdb-storage"></a>
-</h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Store processed data for instant future loading</span></span>
-<span><span class="va">conn</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/db_init.html">db_init</a></span><span class="op">(</span><span class="st">"alprekdb.duckdb"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/db_write_panel.html">db_write_panel</a></span><span class="op">(</span><span class="va">conn</span>, <span class="va">budget_panel</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/db_write_panel.html">db_write_panel</a></span><span class="op">(</span><span class="va">conn</span>, <span class="va">classroom_panel</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/db_write_panel.html">db_write_panel</a></span><span class="op">(</span><span class="va">conn</span>, <span class="va">enriched</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/db_write_master.html">db_write_master</a></span><span class="op">(</span><span class="va">conn</span>, <span class="va">master</span><span class="op">)</span></span>
+<div class="section level2">
+<h2 id="private-real-data-workflow">Private Real-Data Workflow<a class="anchor" aria-label="anchor" href="#private-real-data-workflow"></a>
+</h2>
+<p>Raw ADECE files are not distributed with ALprekDB and should not be committed to GitHub, included in package builds, or rendered into public pkgdown pages. For private processing, keep raw files in a local source directory such as <code>ORIGINAL-DATA/</code> or another directory referenced by <code>ALPREKDB_DATA_DIR</code>.</p>
+<p>The package includes a <code>targets</code> workflow template:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">template_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"templates"</span>, <span class="st">"targets"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># SQL queries directly on the database</span></span>
-<span><span class="fu"><a href="reference/db_query.html">db_query</a></span><span class="op">(</span><span class="va">conn</span>, <span class="st">"</span></span>
-<span><span class="st">  SELECT school_year, delivery_type, COUNT(*) as n,</span></span>
-<span><span class="st">         AVG(grand_total) as mean_budget</span></span>
-<span><span class="st">  FROM master_classroom</span></span>
-<span><span class="st">  GROUP BY school_year, delivery_type</span></span>
-<span><span class="st">"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/db_close.html">db_close</a></span><span class="op">(</span><span class="va">conn</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"alprekdb-private-workflow"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">template_dir</span>, full.names <span class="op">=</span> <span class="cn">TRUE</span>, all.files <span class="op">=</span> <span class="cn">TRUE</span>, no.. <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>  <span class="st">"alprekdb-private-workflow"</span>,</span>
+<span>  recursive <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>From the private workflow directory, configure paths with environment variables:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_RUN_REALDATA</span><span class="op">=</span>1</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_DATA_DIR</span><span class="op">=</span><span class="st">"/path/to/local/ADECE/source/files"</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_OUTPUT_DIR</span><span class="op">=</span><span class="st">"output/alprekdb"</span></span></code></pre></div>
+<p>Then run:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_make.html" class="external-link">tar_make</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>The private workflow keeps student PII out of processed student panels by default. Row-level RDS outputs and DuckDB writes require an explicit local opt-in:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_WRITE_OUTPUTS</span><span class="op">=</span>1</span></code></pre></div>
 </div>
+<div class="section level2">
+<h2 id="modules">Modules<a class="anchor" aria-label="anchor" href="#modules"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="29%">
+<col width="45%">
+</colgroup>
+<thead><tr>
+<th>Module</th>
+<th>Purpose</th>
+<th>Main outputs</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Budget</td>
+<td>Read, clean, validate, reshape, and bind per-classroom funding records.</td>
+<td>Long budget records and multi-year budget panels.</td>
+</tr>
+<tr>
+<td>Classroom</td>
+<td>Read, clean, validate, and bind classroom characteristics, geography, and staffing records.</td>
+<td>Multi-year classroom panels.</td>
+</tr>
+<tr>
+<td>Student</td>
+<td>Read, clean, validate, and bind child-level enrollment, demographics, assessment, attendance, and service records.</td>
+<td>Multi-year student panels with PII excluded by default.</td>
+</tr>
+<tr>
+<td>Transform</td>
+<td>Derive analytic student measures such as gains, readiness, chronic absence, and risk indicators.</td>
+<td>Enriched student panels.</td>
+</tr>
+<tr>
+<td>Linkage</td>
+<td>Join budget, classroom, and student panels with explicit orphan and coverage diagnostics.</td>
+<td>Classroom-level and student-level master datasets.</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Persist panels and master datasets in DuckDB for SQL analysis.</td>
+<td>Local DuckDB databases and query results.</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level2">
 <h2 id="pipeline-architecture">Pipeline Architecture<a class="anchor" aria-label="anchor" href="#pipeline-architecture"></a>
 </h2>
-<pre><code>Excel files (.xlsx)
-     |
-  *_read()        --&gt; alprek_*_raw        (raw data + metadata)
-     |
-  *_clean()       --&gt; alprek_*_clean      (standardized, typed)
-     |
-  *_validate()    --&gt; alprek_*_validation (advisory checks)
-     |
-  *_bind_years()  --&gt; alprek_*_panel      (multi-year longitudinal)
-     |
-  student_transform()  --&gt; enriched panel (27 derived variables)
-     |
-  linkage_create_master()  --&gt; 2-level master (classroom + student)
-     |
-  db_write_*()   --&gt; DuckDB              (persistent, SQL-queryable)
-  *_export_*()   --&gt; CSV / RDS / Stata / Excel / Parquet</code></pre>
+<pre class="text"><code>Public examples
+  synthetic data generators
+        |
+        v
+  runnable examples, tests, vignettes, and pkgdown
+
+Private analysis project
+  local ADECE Excel files
+        |
+        v
+  *_read()        -&gt; alprek_*_raw
+  *_clean()       -&gt; alprek_*_clean
+  *_validate()    -&gt; alprek_*_validation
+  *_bind_years()  -&gt; alprek_*_panel
+  student_transform()
+        |
+        v
+  linkage_create_master()
+        |
+        v
+  aggregate diagnostics, local exports, and optional DuckDB storage</code></pre>
 </div>
 <div class="section level2">
-<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+<h2 id="privacy-and-provenance-guardrails">Privacy and Provenance Guardrails<a class="anchor" aria-label="anchor" href="#privacy-and-provenance-guardrails"></a>
 </h2>
 <ul>
-<li>
-<strong>Format auto-detection</strong>: Legacy (2021-2024) vs New (2024-2025) Excel layouts</li>
-<li>
-<strong>Data-driven mappings</strong>: Column names and value standardization via CSV codebooks</li>
-<li>
-<strong>37 validation checks</strong>: Budget reconciliation, demographic ranges, assessment consistency</li>
-<li>
-<strong>Assessment processing</strong>: GOLD (6 domains), PPVT, eDECA (pre/post), ASQ</li>
-<li>
-<strong>Derived variables</strong>: Gain scores, K-readiness transitions, chronic absence, risk index</li>
-<li>
-<strong>Cross-module linkage</strong>: Join diagnostics, orphan detection, match rate reporting</li>
-<li>
-<strong>DuckDB database</strong>: Column-oriented storage, SQL queries, incremental year addition</li>
-<li>
-<strong>Multiple exports</strong>: CSV, RDS, Stata (.dta), Excel, Parquet</li>
+<li>Do not commit raw ADECE files, <code>_targets/</code> caches, row-level exports, local DuckDB databases, or private output folders.</li>
+<li>Use <code><a href="reference/alprek_synthetic_budget.html">alprek_synthetic_budget()</a></code>, <code><a href="reference/alprek_synthetic_classroom.html">alprek_synthetic_classroom()</a></code>, and <code><a href="reference/alprek_synthetic_student.html">alprek_synthetic_student()</a></code> for public examples; these generators use fake <code>9xx</code> classroom-code prefixes and synthetic county labels.</li>
+<li>Treat all real student-level outputs as confidential, even when direct PII columns are excluded.</li>
+<li>Keep real-data paths in environment variables rather than committed scripts.</li>
+<li>Report only aggregate diagnostics, validation summaries, and non-disclosive counts in public documentation.</li>
+<li>Preserve package version, source manifest coverage, validation summaries, and linkage diagnostics with private analytic outputs.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"getting-started"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"panel-construction"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"linkage-and-analysis"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"reference-architecture"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="applied-track">Applied Track<a class="anchor" aria-label="anchor" href="#applied-track"></a>
+</h3>
+<ul>
+<li><a href="articles/a1-getting-started.html">A1 - Getting started</a></li>
+<li><a href="articles/a2-build-panels.html">A2 - Build panels</a></li>
+<li><a href="articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
+<li><a href="articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
+<li><a href="articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="methodological-track">Methodological Track<a class="anchor" aria-label="anchor" href="#methodological-track"></a>
+</h3>
+<ul>
+<li><a href="articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
+<li><a href="articles/m2-validation-framework.html">M2 - Validation framework</a></li>
+<li><a href="articles/m3-codebooks-mappings.html">M3 - Codebooks and mappings</a></li>
+<li><a href="articles/m4-privacy-provenance.html">M4 - Privacy and provenance</a></li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="classroom-code-format">Classroom Code Format<a class="anchor" aria-label="anchor" href="#classroom-code-format"></a>
 </h2>
-<p>Every record is identified by a classroom code: <code>CCCDNNNNN.NN</code></p>
+<p>Every classroom record is identified by a classroom code: <code>CCCDNNNNNN.NN</code></p>
 <ul>
 <li>
-<code>CCC</code> = County code (001-067)</li>
+<code>CCC</code> = county code, such as <code>001</code> through <code>067</code>;</li>
 <li>
-<code>D</code> = Delivery type (P=Public, C=Private Child Care, H=Head Start, O=Community, F=Faith-Based, U=University, S=Private School)</li>
+<code>D</code> = delivery type;</li>
 <li>
-<code>NNNNN</code> = Program number</li>
+<code>NNNNNN</code> = six-digit program code;</li>
 <li>
-<code>NN</code> = Class number within site</li>
+<code>NN</code> = classroom number within site.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/parse_classroom_codes.html">parse_classroom_codes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"001P12345.01"</span>, <span class="st">"067H54321.02"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The example below uses fake <code>9xx</code> prefixes and <code>9xxxxx</code> program codes for public documentation.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/parse_classroom_codes.html">parse_classroom_codes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"901P900001.01"</span>, <span class="st">"967H900002.02"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Delivery type codes are defined by <code><a href="reference/alprek_delivery_types.html">alprek_delivery_types()</a></code>:</p>
+<table class="table">
+<thead><tr>
+<th>Code</th>
+<th>Delivery type</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>P</code></td>
+<td>Public School</td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>Private Child Care</td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>Head Start</td>
+</tr>
+<tr>
+<td><code>O</code></td>
+<td>Community Organization</td>
+</tr>
+<tr>
+<td><code>F</code></td>
+<td>Faith-Based Organization</td>
+</tr>
+<tr>
+<td><code>U</code></td>
+<td>University Operated</td>
+</tr>
+<tr>
+<td><code>S</code></td>
+<td>Private School</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="known-limitations">Known Limitations<a class="anchor" aria-label="anchor" href="#known-limitations"></a>
+</h2>
+<ul>
+<li>ALprekDB does not distribute or expose raw ADECE row-level records.</li>
+<li>Synthetic data are fabricated for demonstration and testing; they should not be interpreted as Alabama program estimates.</li>
+<li>The 2025-26 budget file is not available in the current source scope, so 2025-26 classroom and student records are retained with explicit missing budget coverage.</li>
+<li>Validation checks are advisory diagnostics, not a substitute for substantive review of analysis choices.</li>
+<li>Real-data processing depends on local file access and the canonical source manifest; paths and outputs should remain outside public repositories.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -258,6 +375,10 @@
 <ul class="list-unstyled">
 <li><a href="https://github.com/joonho112/ALprekDB/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/joonho112/ALprekDB/issues" class="external-link">Report a bug</a></li>
+<li><a href="articles/a1-getting-started.html">Synthetic quick start</a></li>
+<li><a href="articles/a5-targets-workflow.html">Private targets workflow</a></li>
+<li><a href="articles/m4-privacy-provenance.html">Privacy and provenance</a></li>
+<li><a href="reference/index.html">Function reference</a></li>
 </ul>
 </div>
 

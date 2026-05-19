@@ -2,28 +2,29 @@
 
 ## Budget Module
 
-Per-classroom funding data processing
+Reading, cleaning, validation, transformation, panels, diagnostics, and
+exports
 
+- [`budget_config()`](https://joonho112.github.io/ALprekDB/reference/budget_config.md)
+  : Create a Budget Processing Configuration
 - [`budget_read()`](https://joonho112.github.io/ALprekDB/reference/budget_read.md)
   : Read Pre-K Budget Data
 - [`budget_detect_format()`](https://joonho112.github.io/ALprekDB/reference/budget_detect_format.md)
   : Detect Budget File Format
 - [`budget_clean()`](https://joonho112.github.io/ALprekDB/reference/budget_clean.md)
   : Clean Budget Data to Long Format
-- [`budget_to_long()`](https://joonho112.github.io/ALprekDB/reference/budget_to_long.md)
-  : Convert Master/Panel to Long Format
 - [`budget_validate()`](https://joonho112.github.io/ALprekDB/reference/budget_validate.md)
   : Validate Budget Data Quality
 - [`budget_transform()`](https://joonho112.github.io/ALprekDB/reference/budget_transform.md)
   : Transform Budget Data to Wide Format with Derived Variables
+- [`budget_to_long()`](https://joonho112.github.io/ALprekDB/reference/budget_to_long.md)
+  : Convert Master/Panel to Long Format
 - [`budget_bind_years()`](https://joonho112.github.io/ALprekDB/reference/budget_bind_years.md)
   : Combine Multiple Years into a Panel Dataset
 - [`budget_process()`](https://joonho112.github.io/ALprekDB/reference/budget_process.md)
   : Run Complete Budget Processing Pipeline
 - [`budget_process_years()`](https://joonho112.github.io/ALprekDB/reference/budget_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`budget_config()`](https://joonho112.github.io/ALprekDB/reference/budget_config.md)
-  : Create a Budget Processing Configuration
 - [`budget_track_classrooms()`](https://joonho112.github.io/ALprekDB/reference/budget_track_classrooms.md)
   : Track Classroom Presence Across Years
 - [`budget_yoy_summary()`](https://joonho112.github.io/ALprekDB/reference/budget_yoy_summary.md)
@@ -43,8 +44,10 @@ Per-classroom funding data processing
 
 ## Classroom Module
 
-Classroom characteristics, teacher demographics, geography
+Reading, cleaning, validation, panels, tracking, summaries, and exports
 
+- [`classroom_config()`](https://joonho112.github.io/ALprekDB/reference/classroom_config.md)
+  : Create a Classroom Processing Configuration
 - [`classroom_read()`](https://joonho112.github.io/ALprekDB/reference/classroom_read.md)
   : Read Pre-K Classroom Detail Data
 - [`classroom_detect_format()`](https://joonho112.github.io/ALprekDB/reference/classroom_detect_format.md)
@@ -59,8 +62,6 @@ Classroom characteristics, teacher demographics, geography
   : Run Complete Classroom Processing Pipeline
 - [`classroom_process_years()`](https://joonho112.github.io/ALprekDB/reference/classroom_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`classroom_config()`](https://joonho112.github.io/ALprekDB/reference/classroom_config.md)
-  : Create a Classroom Processing Configuration
 - [`classroom_track()`](https://joonho112.github.io/ALprekDB/reference/classroom_track.md)
   : Track Classroom Presence Across Years
 - [`classroom_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/classroom_summary_stats.md)
@@ -78,8 +79,11 @@ Classroom characteristics, teacher demographics, geography
 
 ## Student Module
 
-Student demographics, assessments, services
+Reading, cleaning, validation, analytic transforms, panels, summaries,
+and exports
 
+- [`student_config()`](https://joonho112.github.io/ALprekDB/reference/student_config.md)
+  : Create a Student Processing Configuration
 - [`student_read()`](https://joonho112.github.io/ALprekDB/reference/student_read.md)
   : Read Pre-K Student/Child Detail Data
 - [`student_detect_format()`](https://joonho112.github.io/ALprekDB/reference/student_detect_format.md)
@@ -96,8 +100,6 @@ Student demographics, assessments, services
   : Run Complete Student Processing Pipeline
 - [`student_process_years()`](https://joonho112.github.io/ALprekDB/reference/student_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`student_config()`](https://joonho112.github.io/ALprekDB/reference/student_config.md)
-  : Create a Student Processing Configuration
 - [`student_track()`](https://joonho112.github.io/ALprekDB/reference/student_track.md)
   : Track Student Presence Across Years
 - [`student_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/student_summary_stats.md)
@@ -113,9 +115,9 @@ Student demographics, assessments, services
 - [`student_export_stata()`](https://joonho112.github.io/ALprekDB/reference/student_export_stata.md)
   : Export Student Data to Stata (.dta)
 
-## Linkage Module
+## Linkage Construction
 
-Cross-module joins and master datasets
+Cross-module joins, student aggregation, and master dataset creation
 
 - [`linkage_classroom_budget()`](https://joonho112.github.io/ALprekDB/reference/linkage_classroom_budget.md)
   : Join Classroom and Budget Data
@@ -125,10 +127,20 @@ Cross-module joins and master datasets
   : Aggregate Student Data to Classroom Level
 - [`linkage_create_master()`](https://joonho112.github.io/ALprekDB/reference/linkage_create_master.md)
   : Create Master Linked Dataset
+
+## Linkage Diagnostics
+
+Coverage-aware validation and summary diagnostics
+
 - [`linkage_validate()`](https://joonho112.github.io/ALprekDB/reference/linkage_validate.md)
   : Validate Linkage Results
 - [`linkage_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/linkage_summary_stats.md)
   : Summary Statistics for Linkage Data
+
+## Linkage Export
+
+Export helpers for linked and master datasets
+
 - [`linkage_export_csv()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_csv.md)
   : Export Linkage Data to CSV
 - [`linkage_export_excel()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_excel.md)
@@ -140,14 +152,12 @@ Cross-module joins and master datasets
 - [`linkage_export_stata()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_stata.md)
   : Export Linkage Data to Stata (.dta)
 
-## Database Module
+## DuckDB Database Module
 
 DuckDB persistent storage and SQL queries
 
 - [`db_init()`](https://joonho112.github.io/ALprekDB/reference/db_init.md)
   : Initialize ALprekDB DuckDB Database
-- [`db_close()`](https://joonho112.github.io/ALprekDB/reference/db_close.md)
-  : Close ALprekDB DuckDB Connection
 - [`db_write_panel()`](https://joonho112.github.io/ALprekDB/reference/db_write_panel.md)
   : Write Panel Data to DuckDB
 - [`db_write_master()`](https://joonho112.github.io/ALprekDB/reference/db_write_master.md)
@@ -164,6 +174,8 @@ DuckDB persistent storage and SQL queries
   : Get Column Metadata for a Database Table
 - [`db_query()`](https://joonho112.github.io/ALprekDB/reference/db_query.md)
   : Execute SQL Query on ALprekDB Database
+- [`db_close()`](https://joonho112.github.io/ALprekDB/reference/db_close.md)
+  : Close ALprekDB DuckDB Connection
 
 ## Codebooks & Mappings
 
@@ -188,8 +200,10 @@ Data-driven reference tables
 
 ## Synthetic Data
 
-Generators for examples and vignettes
+Overview and generators for examples, vignettes, and tests
 
+- [`synthetic-data`](https://joonho112.github.io/ALprekDB/reference/synthetic-data.md)
+  : Generate Synthetic ALprekDB Data for Demonstrations
 - [`alprek_synthetic_budget()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_budget.md)
   : Generate Synthetic Budget Panel Data
 - [`alprek_synthetic_classroom()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_classroom.md)
@@ -210,7 +224,7 @@ Classroom code parsing and helpers
 - [`alprek_school_year_to_start()`](https://joonho112.github.io/ALprekDB/reference/alprek_school_year_to_start.md)
   : Convert School Year to Start Year
 
-## S3 Print Methods
+## Display Methods
 
 Display methods for ALprekDB objects
 

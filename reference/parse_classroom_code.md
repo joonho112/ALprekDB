@@ -1,7 +1,7 @@
 # Parse a Single Classroom Code
 
-Parses an Alabama Pre-K classroom code in "XXXAYYYYY.ZZ" format into its
-component parts.
+Parses an Alabama Pre-K classroom code in "CCCDNNNNNN.NN" format into
+its component parts.
 
 ## Usage
 
@@ -23,19 +23,19 @@ A named list with elements: `county_code`, `delivery_type_code`,
 ## Examples
 
 ``` r
-parse_classroom_code("823P012601.01")
+parse_classroom_code("901P900001.01")
 #> $county_code
-#> [1] "823"
+#> [1] "901"
 #> 
 #> $delivery_type_code
 #> [1] "P"
 #> 
 #> $program_code
-#> [1] "012601"
+#> [1] "900001"
 #> 
 #> $class_num
 #> [1] "01"
 #> 
-# list(county_code = "823", delivery_type_code = "P",
-#      program_code = "012601", class_num = "01")
+# list(county_code = "901", delivery_type_code = "P",
+#      program_code = "900001", class_num = "01")
 ```

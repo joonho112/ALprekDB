@@ -1,12 +1,17 @@
-pandoc: 3.1.11
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
-  getting-started: getting-started.html
-  linkage-and-analysis: linkage-and-analysis.html
-  panel-construction: panel-construction.html
-  reference-architecture: reference-architecture.html
-last_built: 2026-02-21T21:26Z
+  a1-getting-started: a1-getting-started.html
+  a2-build-panels: a2-build-panels.html
+  a3-linkage-analysis: a3-linkage-analysis.html
+  a4-duckdb-sql: a4-duckdb-sql.html
+  a5-targets-workflow: a5-targets-workflow.html
+  m1-architecture-trilemma: m1-architecture-trilemma.html
+  m2-validation-framework: m2-validation-framework.html
+  m3-codebooks-mappings: m3-codebooks-mappings.html
+  m4-privacy-provenance: m4-privacy-provenance.html
+last_built: 2026-05-19T20:38Z
 urls:
   reference: https://joonho112.github.io/ALprekDB/reference
   article: https://joonho112.github.io/ALprekDB/articles

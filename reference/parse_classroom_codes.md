@@ -25,10 +25,10 @@ A tibble with columns: `county_code`, `delivery_type_code`,
 ## Examples
 
 ``` r
-parse_classroom_codes(c("823P012601.01", "456C789.02"))
+parse_classroom_codes(c("901P900001.01", "956C900789.02"))
 #> # A tibble: 2 × 5
 #>   county_code delivery_type_code program_code class_num delivery_type     
 #>   <chr>       <chr>              <chr>        <chr>     <chr>             
-#> 1 823         P                  012601       01        Public School     
-#> 2 456         C                  789          02        Private Child Care
+#> 1 901         P                  900001       01        Public School     
+#> 2 956         C                  900789       02        Private Child Care
 ```

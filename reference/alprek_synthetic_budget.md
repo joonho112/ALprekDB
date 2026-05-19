@@ -41,12 +41,12 @@ head(budget$data)
 #> # A tibble: 6 × 38
 #>   school_year  year classroom_code classroom_name county_code delivery_type     
 #>   <fct>       <int> <chr>          <chr>          <chr>       <fct>             
-#> 1 2021-2022    2021 018P12453.02   Classroom 4    018         Public School     
-#> 2 2021-2022    2021 020S54276.01   Classroom 9    020         Private School    
-#> 3 2021-2022    2021 024O78087.02   Classroom 7    024         Community Organiz…
-#> 4 2021-2022    2021 025H76016.01   Classroom 3    025         Head Start        
-#> 5 2021-2022    2021 026F93315.01   Classroom 10   026         Faith-Based Organ…
-#> 6 2021-2022    2021 037F92646.02   Classroom 8    037         Faith-Based Organ…
+#> 1 2021-2022    2021 917C965794.02  Classroom 6    917         Private Child Care
+#> 2 2021-2022    2021 923H902453.01  Classroom 9    923         Head Start        
+#> 3 2021-2022    2021 924F929292.01  Classroom 3    924         Faith-Based Organ…
+#> 4 2021-2022    2021 946S990410.03  Classroom 8    946         Private School    
+#> 5 2021-2022    2021 948C966016.03  Classroom 7    948         Private Child Care
+#> 6 2021-2022    2021 948O905402.02  Classroom 1    948         Community Organiz…
 #> # ℹ 32 more variables: delivery_type_binary <fct>, delivery_type_3way <fct>,
 #> #   program_code <chr>, class_num <chr>, delivery_type_code <chr>,
 #> #   osr_lead_teacher_salary <dbl>, osr_lead_teacher_benefits <dbl>,

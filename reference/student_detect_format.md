@@ -23,10 +23,14 @@ Character string: `"legacy"` or `"new"`.
 
 Detection logic:
 
+- **Reject partial exports**: fewer than 190 columns is too narrow for a
+  canonical Student/Child Details file.
+
 - **New**: Contains "Child First Name" or "Modified Schedule" or
   "Student ID" (without "State") or ncol \>= 250.
 
-- **Legacy**: ncol \<= 210 and no new-format marker columns present.
+- **Legacy**: roughly 190-210 columns and no new-format marker columns
+  present.
 
 ## Examples
 

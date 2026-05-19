@@ -1,159 +1,270 @@
 # ALprekDB
 
-**Alabama Pre-K Administrative Data Processing and Database Management**
-(v0.5.0)
+**ALprekDB turns Alabama First Class Pre-K administrative files into
+validated, analysis-ready panel datasets while keeping raw data out of
+public code.**
 
-A modular R toolkit for processing, cleaning, validating, and managing
-Alabama First Class Pre-K (FCPK) administrative records received from
-ADECE (Alabama Department of Early Childhood Education). Transforms raw
-Excel files into analysis-ready longitudinal panel datasets covering
-**92,500+ students**, **5,900+ classrooms**, and **4 school years**
-(2021-22 through 2024-25).
+ALprekDB is a modular R package for ADECE budget, classroom, and student
+records. It handles file-format detection, data-driven codebooks,
+validation diagnostics, derived student variables, cross-module linkage,
+DuckDB storage, and export helpers. Public examples use fully synthetic
+data. Real ADECE data workflows are opt-in, local-only, and designed for
+private analysis projects.
+
+![ALprekDB public synthetic examples and private real-data
+workflow](reference/figures/figure_01_readme.png)
 
 ## Author
 
-JoonHo Lee, Ph.D. Assistant Professor, The University of Alabama
+JoonHo Lee, Ph.D.  
+Assistant Professor, The University of Alabama  
 <jlee296@ua.edu>
 
-## Modules
+## Why ALprekDB?
 
-| Module        | Purpose                                           | Key Output                           |
-|---------------|---------------------------------------------------|--------------------------------------|
-| **Budget**    | Per-classroom funding (OSR + Other, 8 categories) | 5,867 rows x 53 cols                 |
-| **Classroom** | Teacher demographics, geography, credentials      | 5,888 rows x 125 cols                |
-| **Student**   | Demographics, 4 assessments, services, attendance | 92,507 rows x 288 cols               |
-| **Transform** | GOLD gains, chronic absence, risk index (27 vars) | Enriched student panel               |
-| **Linkage**   | Cross-module joins, 2-level master datasets       | Classroom + Student masters          |
-| **Database**  | DuckDB persistent storage, SQL queries            | Instant loading, incremental updates |
+ALprekDB is built for repeatable Pre-K administrative data work:
+
+- standardize annual ADECE Excel files across changing source formats;
+- build longitudinal budget, classroom, and student panels;
+- create classroom- and student-level linked master datasets;
+- record validation, linkage, orphan, and coverage diagnostics;
+- support SQL-friendly DuckDB outputs for downstream analysis;
+- separate public package documentation from private real-data
+  processing.
+
+## Data Coverage in v0.6.0
+
+The v0.6.0 real-data manifest uses asymmetric coverage because the
+currently available 2025-26 source set includes classroom and student
+files, but no canonical 2025-26 budget file.
+
+| Module | Covered school years | Current release notes |
+|----|----|----|
+| Budget | 2021-22 through 2024-25 | The 2025-26 budget is structurally unavailable and is not inferred, zero-filled, or copied from another source. |
+| Classroom | 2021-22 through 2025-26 | Classroom-code validation uses six-digit program codes. |
+| Student | 2021-22 through 2025-26 | Student PII is excluded by default in private workflows. |
+
+Aggregate real-data smoke tests currently cover 5,867 budget
+classroom-year records, 7,409 classroom-year records, and 116,689
+student-year records. These are aggregate processing counts, not
+row-level data.
 
 ## Installation
 
 ``` r
+
 # From GitHub
 remotes::install_github("joonho112/ALprekDB")
 ```
 
-## Quick Start
+## Quick Start: Synthetic Data
 
-### Synthetic Data (no ADECE files needed)
+Synthetic examples require no ADECE files and are safe for public
+documentation, CI checks, teaching, and package development. They use
+fake `9xx` classroom-code prefixes and synthetic county labels so
+printed examples cannot be mistaken for confidential ADECE records.
 
 ``` r
+
 library(ALprekDB)
 
-# Generate linked synthetic datasets (same seed = shared classroom codes)
-budget    <- alprek_synthetic_budget(n_classrooms = 20, n_years = 2, seed = 42)
-classroom <- alprek_synthetic_classroom(n_classrooms = 20, n_years = 2, seed = 42)
-student   <- alprek_synthetic_student(n_students = 100, n_classrooms = 20,
-                                       n_years = 2, seed = 42)
-
-# Create 2-level master dataset
-master <- linkage_create_master(budget, classroom, student)
-master$classroom_level  # classroom-year with budget + aggregated student data
-master$student_level    # student-year with classroom + budget attributes
-```
-
-### Real Data Pipeline
-
-``` r
-# Budget: 4-year panel
-configs <- list(
-  budget_config("2021-2022", "Budget_21-22.xlsx"),
-  budget_config("2022-2023", "Budget_22-23.xlsx"),
-  budget_config("2023-2024", "Budget_23-24.xlsx"),
-  budget_config("2024-2025", "Budget_24-25.xlsx")
+budget <- alprek_synthetic_budget(
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
 )
-result <- budget_process_years(configs)
-budget_panel <- result$panel
 
-# Same pattern for classroom_process_years() and student_process_years()
+classroom <- alprek_synthetic_classroom(
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
+)
 
-# Enrich student data with derived variables
-enriched <- student_transform(student_panel)
+student <- alprek_synthetic_student(
+  n_students = 100,
+  n_classrooms = 20,
+  n_years = 2,
+  seed = 42
+)
 
-# Link all three into master
-master <- linkage_create_master(budget_panel, classroom_panel, enriched)
+master <- linkage_create_master(budget, classroom, student)
+linkage_validate(master)
+linkage_summary_stats(master)
 ```
 
-### DuckDB Storage
+## Private Real-Data Workflow
+
+Raw ADECE files are not distributed with ALprekDB and should not be
+committed to GitHub, included in package builds, or rendered into public
+pkgdown pages. For private processing, keep raw files in a local source
+directory such as `ORIGINAL-DATA/` or another directory referenced by
+`ALPREKDB_DATA_DIR`.
+
+The package includes a `targets` workflow template:
 
 ``` r
-# Store processed data for instant future loading
-conn <- db_init("alprekdb.duckdb")
-db_write_panel(conn, budget_panel)
-db_write_panel(conn, classroom_panel)
-db_write_panel(conn, enriched)
-db_write_master(conn, master)
 
-# SQL queries directly on the database
-db_query(conn, "
-  SELECT school_year, delivery_type, COUNT(*) as n,
-         AVG(grand_total) as mean_budget
-  FROM master_classroom
-  GROUP BY school_year, delivery_type
-")
+template_dir <- system.file("templates", "targets", package = "ALprekDB")
 
-db_close(conn)
+dir.create("alprekdb-private-workflow", showWarnings = FALSE)
+file.copy(
+  list.files(template_dir, full.names = TRUE, all.files = TRUE, no.. = TRUE),
+  "alprekdb-private-workflow",
+  recursive = TRUE
+)
 ```
+
+From the private workflow directory, configure paths with environment
+variables:
+
+``` sh
+export ALPREKDB_RUN_REALDATA=1
+export ALPREKDB_DATA_DIR="/path/to/local/ADECE/source/files"
+export ALPREKDB_OUTPUT_DIR="output/alprekdb"
+```
+
+Then run:
+
+``` r
+
+targets::tar_make()
+```
+
+The private workflow keeps student PII out of processed student panels
+by default. Row-level RDS outputs and DuckDB writes require an explicit
+local opt-in:
+
+``` sh
+export ALPREKDB_WRITE_OUTPUTS=1
+```
+
+## Modules
+
+| Module | Purpose | Main outputs |
+|----|----|----|
+| Budget | Read, clean, validate, reshape, and bind per-classroom funding records. | Long budget records and multi-year budget panels. |
+| Classroom | Read, clean, validate, and bind classroom characteristics, geography, and staffing records. | Multi-year classroom panels. |
+| Student | Read, clean, validate, and bind child-level enrollment, demographics, assessment, attendance, and service records. | Multi-year student panels with PII excluded by default. |
+| Transform | Derive analytic student measures such as gains, readiness, chronic absence, and risk indicators. | Enriched student panels. |
+| Linkage | Join budget, classroom, and student panels with explicit orphan and coverage diagnostics. | Classroom-level and student-level master datasets. |
+| Database | Persist panels and master datasets in DuckDB for SQL analysis. | Local DuckDB databases and query results. |
 
 ## Pipeline Architecture
 
-    Excel files (.xlsx)
-         |
-      *_read()        --> alprek_*_raw        (raw data + metadata)
-         |
-      *_clean()       --> alprek_*_clean      (standardized, typed)
-         |
-      *_validate()    --> alprek_*_validation (advisory checks)
-         |
-      *_bind_years()  --> alprek_*_panel      (multi-year longitudinal)
-         |
-      student_transform()  --> enriched panel (27 derived variables)
-         |
-      linkage_create_master()  --> 2-level master (classroom + student)
-         |
-      db_write_*()   --> DuckDB              (persistent, SQL-queryable)
-      *_export_*()   --> CSV / RDS / Stata / Excel / Parquet
+``` text
+Public examples
+  synthetic data generators
+        |
+        v
+  runnable examples, tests, vignettes, and pkgdown
 
-## Key Features
+Private analysis project
+  local ADECE Excel files
+        |
+        v
+  *_read()        -> alprek_*_raw
+  *_clean()       -> alprek_*_clean
+  *_validate()    -> alprek_*_validation
+  *_bind_years()  -> alprek_*_panel
+  student_transform()
+        |
+        v
+  linkage_create_master()
+        |
+        v
+  aggregate diagnostics, local exports, and optional DuckDB storage
+```
 
-- **Format auto-detection**: Legacy (2021-2024) vs New (2024-2025) Excel
-  layouts
-- **Data-driven mappings**: Column names and value standardization via
-  CSV codebooks
-- **37 validation checks**: Budget reconciliation, demographic ranges,
-  assessment consistency
-- **Assessment processing**: GOLD (6 domains), PPVT, eDECA (pre/post),
-  ASQ
-- **Derived variables**: Gain scores, K-readiness transitions, chronic
-  absence, risk index
-- **Cross-module linkage**: Join diagnostics, orphan detection, match
-  rate reporting
-- **DuckDB database**: Column-oriented storage, SQL queries, incremental
-  year addition
-- **Multiple exports**: CSV, RDS, Stata (.dta), Excel, Parquet
+## Privacy and Provenance Guardrails
+
+- Do not commit raw ADECE files, `_targets/` caches, row-level exports,
+  local DuckDB databases, or private output folders.
+- Use
+  [`alprek_synthetic_budget()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_budget.md),
+  [`alprek_synthetic_classroom()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_classroom.md),
+  and
+  [`alprek_synthetic_student()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_student.md)
+  for public examples; these generators use fake `9xx` classroom-code
+  prefixes and synthetic county labels.
+- Treat all real student-level outputs as confidential, even when direct
+  PII columns are excluded.
+- Keep real-data paths in environment variables rather than committed
+  scripts.
+- Report only aggregate diagnostics, validation summaries, and
+  non-disclosive counts in public documentation.
+- Preserve package version, source manifest coverage, validation
+  summaries, and linkage diagnostics with private analytic outputs.
 
 ## Vignettes
 
-``` r
-vignette("getting-started", package = "ALprekDB")
-vignette("panel-construction", package = "ALprekDB")
-vignette("linkage-and-analysis", package = "ALprekDB")
-vignette("reference-architecture", package = "ALprekDB")
-```
+### Applied Track
+
+- [A1 - Getting
+  started](https://joonho112.github.io/ALprekDB/articles/a1-getting-started.md)
+- [A2 - Build
+  panels](https://joonho112.github.io/ALprekDB/articles/a2-build-panels.md)
+- [A3 - Linkage
+  analysis](https://joonho112.github.io/ALprekDB/articles/a3-linkage-analysis.md)
+- [A4 - DuckDB and
+  SQL](https://joonho112.github.io/ALprekDB/articles/a4-duckdb-sql.md)
+- [A5 - Targets
+  workflow](https://joonho112.github.io/ALprekDB/articles/a5-targets-workflow.md)
+
+### Methodological Track
+
+- [M1 - Architecture
+  trilemma](https://joonho112.github.io/ALprekDB/articles/m1-architecture-trilemma.md)
+- [M2 - Validation
+  framework](https://joonho112.github.io/ALprekDB/articles/m2-validation-framework.md)
+- [M3 - Codebooks and
+  mappings](https://joonho112.github.io/ALprekDB/articles/m3-codebooks-mappings.md)
+- [M4 - Privacy and
+  provenance](https://joonho112.github.io/ALprekDB/articles/m4-privacy-provenance.md)
 
 ## Classroom Code Format
 
-Every record is identified by a classroom code: `CCCDNNNNN.NN`
+Every classroom record is identified by a classroom code:
+`CCCDNNNNNN.NN`
 
-- `CCC` = County code (001-067)
-- `D` = Delivery type (P=Public, C=Private Child Care, H=Head Start,
-  O=Community, F=Faith-Based, U=University, S=Private School)
-- `NNNNN` = Program number
-- `NN` = Class number within site
+- `CCC` = county code, such as `001` through `067`;
+- `D` = delivery type;
+- `NNNNNN` = six-digit program code;
+- `NN` = classroom number within site.
+
+The example below uses fake `9xx` prefixes and `9xxxxx` program codes
+for public documentation.
 
 ``` r
-parse_classroom_codes(c("001P12345.01", "067H54321.02"))
+
+parse_classroom_codes(c("901P900001.01", "967H900002.02"))
 ```
+
+Delivery type codes are defined by
+[`alprek_delivery_types()`](https://joonho112.github.io/ALprekDB/reference/alprek_delivery_types.md):
+
+| Code | Delivery type            |
+|------|--------------------------|
+| `P`  | Public School            |
+| `C`  | Private Child Care       |
+| `H`  | Head Start               |
+| `O`  | Community Organization   |
+| `F`  | Faith-Based Organization |
+| `U`  | University Operated      |
+| `S`  | Private School           |
+
+## Known Limitations
+
+- ALprekDB does not distribute or expose raw ADECE row-level records.
+- Synthetic data are fabricated for demonstration and testing; they
+  should not be interpreted as Alabama program estimates.
+- The 2025-26 budget file is not available in the current source scope,
+  so 2025-26 classroom and student records are retained with explicit
+  missing budget coverage.
+- Validation checks are advisory diagnostics, not a substitute for
+  substantive review of analysis choices.
+- Real-data processing depends on local file access and the canonical
+  source manifest; paths and outputs should remain outside public
+  repositories.
 
 ## License
 
@@ -163,28 +274,29 @@ MIT
 
 ## Budget Module
 
-Per-classroom funding data processing
+Reading, cleaning, validation, transformation, panels, diagnostics, and
+exports
 
+- [`budget_config()`](https://joonho112.github.io/ALprekDB/reference/budget_config.md)
+  : Create a Budget Processing Configuration
 - [`budget_read()`](https://joonho112.github.io/ALprekDB/reference/budget_read.md)
   : Read Pre-K Budget Data
 - [`budget_detect_format()`](https://joonho112.github.io/ALprekDB/reference/budget_detect_format.md)
   : Detect Budget File Format
 - [`budget_clean()`](https://joonho112.github.io/ALprekDB/reference/budget_clean.md)
   : Clean Budget Data to Long Format
-- [`budget_to_long()`](https://joonho112.github.io/ALprekDB/reference/budget_to_long.md)
-  : Convert Master/Panel to Long Format
 - [`budget_validate()`](https://joonho112.github.io/ALprekDB/reference/budget_validate.md)
   : Validate Budget Data Quality
 - [`budget_transform()`](https://joonho112.github.io/ALprekDB/reference/budget_transform.md)
   : Transform Budget Data to Wide Format with Derived Variables
+- [`budget_to_long()`](https://joonho112.github.io/ALprekDB/reference/budget_to_long.md)
+  : Convert Master/Panel to Long Format
 - [`budget_bind_years()`](https://joonho112.github.io/ALprekDB/reference/budget_bind_years.md)
   : Combine Multiple Years into a Panel Dataset
 - [`budget_process()`](https://joonho112.github.io/ALprekDB/reference/budget_process.md)
   : Run Complete Budget Processing Pipeline
 - [`budget_process_years()`](https://joonho112.github.io/ALprekDB/reference/budget_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`budget_config()`](https://joonho112.github.io/ALprekDB/reference/budget_config.md)
-  : Create a Budget Processing Configuration
 - [`budget_track_classrooms()`](https://joonho112.github.io/ALprekDB/reference/budget_track_classrooms.md)
   : Track Classroom Presence Across Years
 - [`budget_yoy_summary()`](https://joonho112.github.io/ALprekDB/reference/budget_yoy_summary.md)
@@ -204,8 +316,10 @@ Per-classroom funding data processing
 
 ## Classroom Module
 
-Classroom characteristics, teacher demographics, geography
+Reading, cleaning, validation, panels, tracking, summaries, and exports
 
+- [`classroom_config()`](https://joonho112.github.io/ALprekDB/reference/classroom_config.md)
+  : Create a Classroom Processing Configuration
 - [`classroom_read()`](https://joonho112.github.io/ALprekDB/reference/classroom_read.md)
   : Read Pre-K Classroom Detail Data
 - [`classroom_detect_format()`](https://joonho112.github.io/ALprekDB/reference/classroom_detect_format.md)
@@ -220,8 +334,6 @@ Classroom characteristics, teacher demographics, geography
   : Run Complete Classroom Processing Pipeline
 - [`classroom_process_years()`](https://joonho112.github.io/ALprekDB/reference/classroom_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`classroom_config()`](https://joonho112.github.io/ALprekDB/reference/classroom_config.md)
-  : Create a Classroom Processing Configuration
 - [`classroom_track()`](https://joonho112.github.io/ALprekDB/reference/classroom_track.md)
   : Track Classroom Presence Across Years
 - [`classroom_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/classroom_summary_stats.md)
@@ -239,8 +351,11 @@ Classroom characteristics, teacher demographics, geography
 
 ## Student Module
 
-Student demographics, assessments, services
+Reading, cleaning, validation, analytic transforms, panels, summaries,
+and exports
 
+- [`student_config()`](https://joonho112.github.io/ALprekDB/reference/student_config.md)
+  : Create a Student Processing Configuration
 - [`student_read()`](https://joonho112.github.io/ALprekDB/reference/student_read.md)
   : Read Pre-K Student/Child Detail Data
 - [`student_detect_format()`](https://joonho112.github.io/ALprekDB/reference/student_detect_format.md)
@@ -257,8 +372,6 @@ Student demographics, assessments, services
   : Run Complete Student Processing Pipeline
 - [`student_process_years()`](https://joonho112.github.io/ALprekDB/reference/student_process_years.md)
   : Run Complete Pipeline for Multiple Years
-- [`student_config()`](https://joonho112.github.io/ALprekDB/reference/student_config.md)
-  : Create a Student Processing Configuration
 - [`student_track()`](https://joonho112.github.io/ALprekDB/reference/student_track.md)
   : Track Student Presence Across Years
 - [`student_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/student_summary_stats.md)
@@ -274,9 +387,9 @@ Student demographics, assessments, services
 - [`student_export_stata()`](https://joonho112.github.io/ALprekDB/reference/student_export_stata.md)
   : Export Student Data to Stata (.dta)
 
-## Linkage Module
+## Linkage Construction
 
-Cross-module joins and master datasets
+Cross-module joins, student aggregation, and master dataset creation
 
 - [`linkage_classroom_budget()`](https://joonho112.github.io/ALprekDB/reference/linkage_classroom_budget.md)
   : Join Classroom and Budget Data
@@ -286,10 +399,20 @@ Cross-module joins and master datasets
   : Aggregate Student Data to Classroom Level
 - [`linkage_create_master()`](https://joonho112.github.io/ALprekDB/reference/linkage_create_master.md)
   : Create Master Linked Dataset
+
+## Linkage Diagnostics
+
+Coverage-aware validation and summary diagnostics
+
 - [`linkage_validate()`](https://joonho112.github.io/ALprekDB/reference/linkage_validate.md)
   : Validate Linkage Results
 - [`linkage_summary_stats()`](https://joonho112.github.io/ALprekDB/reference/linkage_summary_stats.md)
   : Summary Statistics for Linkage Data
+
+## Linkage Export
+
+Export helpers for linked and master datasets
+
 - [`linkage_export_csv()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_csv.md)
   : Export Linkage Data to CSV
 - [`linkage_export_excel()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_excel.md)
@@ -301,14 +424,12 @@ Cross-module joins and master datasets
 - [`linkage_export_stata()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_stata.md)
   : Export Linkage Data to Stata (.dta)
 
-## Database Module
+## DuckDB Database Module
 
 DuckDB persistent storage and SQL queries
 
 - [`db_init()`](https://joonho112.github.io/ALprekDB/reference/db_init.md)
   : Initialize ALprekDB DuckDB Database
-- [`db_close()`](https://joonho112.github.io/ALprekDB/reference/db_close.md)
-  : Close ALprekDB DuckDB Connection
 - [`db_write_panel()`](https://joonho112.github.io/ALprekDB/reference/db_write_panel.md)
   : Write Panel Data to DuckDB
 - [`db_write_master()`](https://joonho112.github.io/ALprekDB/reference/db_write_master.md)
@@ -325,6 +446,8 @@ DuckDB persistent storage and SQL queries
   : Get Column Metadata for a Database Table
 - [`db_query()`](https://joonho112.github.io/ALprekDB/reference/db_query.md)
   : Execute SQL Query on ALprekDB Database
+- [`db_close()`](https://joonho112.github.io/ALprekDB/reference/db_close.md)
+  : Close ALprekDB DuckDB Connection
 
 ## Codebooks & Mappings
 
@@ -349,8 +472,10 @@ Data-driven reference tables
 
 ## Synthetic Data
 
-Generators for examples and vignettes
+Overview and generators for examples, vignettes, and tests
 
+- [`synthetic-data`](https://joonho112.github.io/ALprekDB/reference/synthetic-data.md)
+  : Generate Synthetic ALprekDB Data for Demonstrations
 - [`alprek_synthetic_budget()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_budget.md)
   : Generate Synthetic Budget Panel Data
 - [`alprek_synthetic_classroom()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_classroom.md)
@@ -371,7 +496,7 @@ Classroom code parsing and helpers
 - [`alprek_school_year_to_start()`](https://joonho112.github.io/ALprekDB/reference/alprek_school_year_to_start.md)
   : Convert School Year to Start Year
 
-## S3 Print Methods
+## Display Methods
 
 Display methods for ALprekDB objects
 
@@ -418,13 +543,34 @@ Display methods for ALprekDB objects
 
 # Articles
 
-### Guides
+### Applied Track
 
-- [Getting Started with
-  ALprekDB](https://joonho112.github.io/ALprekDB/articles/getting-started.md):
-- [Building Multi-Year Panel
-  Data](https://joonho112.github.io/ALprekDB/articles/panel-construction.md):
-- [Cross-Module Linkage and
-  Analysis](https://joonho112.github.io/ALprekDB/articles/linkage-and-analysis.md):
-- [Package Architecture and Data
-  Dictionary](https://joonho112.github.io/ALprekDB/articles/reference-architecture.md):
+Workflow-oriented guides for installing the package, building panels,
+linking modules, querying DuckDB outputs, and running the companion
+targets workflow with synthetic examples and private real-data recipes.
+
+- [A1 - Getting started with
+  ALprekDB](https://joonho112.github.io/ALprekDB/articles/a1-getting-started.md):
+- [A2 - Build
+  Panels](https://joonho112.github.io/ALprekDB/articles/a2-build-panels.md):
+- [A3 - Linkage
+  Analysis](https://joonho112.github.io/ALprekDB/articles/a3-linkage-analysis.md):
+- [A4 - DuckDB and
+  SQL](https://joonho112.github.io/ALprekDB/articles/a4-duckdb-sql.md):
+- [A5 - Targets
+  Workflow](https://joonho112.github.io/ALprekDB/articles/a5-targets-workflow.md):
+
+### Methodological Track
+
+Technical and design-oriented articles about the package architecture,
+validation framework, codebook and mapping contracts, privacy controls,
+provenance, and reproducibility posture.
+
+- [M1 - Architecture
+  Trilemma](https://joonho112.github.io/ALprekDB/articles/m1-architecture-trilemma.md):
+- [M2 - Validation
+  Framework](https://joonho112.github.io/ALprekDB/articles/m2-validation-framework.md):
+- [M3 - Codebooks and
+  Mappings](https://joonho112.github.io/ALprekDB/articles/m3-codebooks-mappings.md):
+- [M4 - Privacy and
+  Provenance](https://joonho112.github.io/ALprekDB/articles/m4-privacy-provenance.md):
