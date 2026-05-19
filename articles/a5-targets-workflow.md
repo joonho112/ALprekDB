@@ -38,7 +38,8 @@ The installed template contains three main files.
 
 template_dir <- system.file("templates", "targets", package = "ALprekDB")
 list.files(template_dir, recursive = TRUE)
-#> [1] "local.env.example" "R/functions.R"     "README.md"
+#> [1] "_targets.R"        "local.env.example" "R/functions.R"    
+#> [4] "README.md"
 ```
 
 | File | Role |
