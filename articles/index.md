@@ -16,6 +16,8 @@ targets workflow with synthetic examples and private real-data recipes.
   SQL](https://joonho112.github.io/ALprekDB/articles/a4-duckdb-sql.md):
 - [A5 - Targets
   Workflow](https://joonho112.github.io/ALprekDB/articles/a5-targets-workflow.md):
+- [A6 - Applications intake (read → reconcile → validate →
+  link)](https://joonho112.github.io/ALprekDB/articles/a6-applications-intake.md):
 
 ### Methodological Track
 

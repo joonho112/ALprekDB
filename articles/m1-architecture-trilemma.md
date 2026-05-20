@@ -97,8 +97,8 @@ aggregate(
   FUN = sum
 )
 #>             role files entries
-#> 1       codebook     8     225
-#> 2 column mapping     6     715
+#> 1       codebook    12     267
+#> 2 column mapping    10     755
 ```
 
 This design matters for collaboration. A mapping can be inspected as a

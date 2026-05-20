@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,7 @@
     <li><a class="dropdown-item" href="../articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
     <li><a class="dropdown-item" href="../articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="../articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/a6-applications-intake.html">A6 - Applications intake</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="../articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="../articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -418,6 +419,246 @@
         </dt>
         <dd>Export Student Data to Stata (.dta)</dd>
       </dl></div><div class="section level2">
+      <h2 id="applications-module-v-">Applications Module (v0.7.0)<a class="anchor" aria-label="anchor" href="#applications-module-v-"></a></h2>
+
+      <div class="section-desc"><p>Reading, format detection, cleaning, fuzzy 4-bucket reconciliation, validation (18 base checks plus linkage checks), derived variables, multi-cycle panel binding, and 5-format export for ADECE annual classroom applications workbooks. In-scope: data-contract layer only. Out-of-scope (planned downstream packages): geocoding, ACS integration, Bayesian SAE tier estimation.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="applications_config.html">applications_config()</a></code>
+
+        </dt>
+        <dd>Create an Applications Processing Configuration</dd>
+
+        <dt>
+
+          <code><a href="applications_read_renewals.html">applications_read_renewals()</a></code>
+
+        </dt>
+        <dd>Read ADECE Renewal Classroom Applications</dd>
+
+        <dt>
+
+          <code><a href="applications_read_new.html">applications_read_new()</a></code>
+
+        </dt>
+        <dd>Read ADECE New Classroom Applications</dd>
+
+        <dt>
+
+          <code><a href="applications_read_nonrenewal.html">applications_read_nonrenewal()</a></code>
+
+        </dt>
+        <dd>Read ADECE Non-Renewal Classrooms</dd>
+
+        <dt>
+
+          <code><a href="applications_read_capacity.html">applications_read_capacity()</a></code>
+
+        </dt>
+        <dd>Read ADECE Site Capacity Report</dd>
+
+        <dt>
+
+          <code><a href="applications_detect_format.html">applications_detect_format()</a></code>
+
+        </dt>
+        <dd>Detect ADECE Applications Data Format</dd>
+
+        <dt>
+
+          <code><a href="applications_clean.html">applications_clean()</a></code>
+
+        </dt>
+        <dd>Clean ADECE Applications Data</dd>
+
+        <dt>
+
+          <code><a href="applications_reconcile.html">applications_reconcile()</a></code>
+
+        </dt>
+        <dd>Reconcile ADECE Applications Against Prior Classroom Panel</dd>
+
+        <dt>
+
+          <code><a href="applications_validate.html">applications_validate()</a></code>
+
+        </dt>
+        <dd>Validate Cleaned or Reconciled Applications Data</dd>
+
+        <dt>
+
+          <code><a href="applications_transform.html">applications_transform()</a></code>
+
+        </dt>
+        <dd>Transform Reconciled Applications Into Master Object</dd>
+
+        <dt>
+
+          <code><a href="applications_bind_years.html">applications_bind_years()</a></code>
+
+        </dt>
+        <dd>Combine Multiple Cycles into an Applications Panel</dd>
+
+        <dt>
+
+          <code><a href="applications_track_classrooms.html">applications_track_classrooms()</a></code>
+
+        </dt>
+        <dd>Track Classroom Presence Across Application Cycles</dd>
+
+        <dt>
+
+          <code><a href="applications_export_csv.html">applications_export_csv()</a></code>
+
+        </dt>
+        <dd>Export Applications Data to CSV</dd>
+
+        <dt>
+
+          <code><a href="applications_export_excel.html">applications_export_excel()</a></code>
+
+        </dt>
+        <dd>Export Applications Data to Excel</dd>
+
+        <dt>
+
+          <code><a href="applications_export_parquet.html">applications_export_parquet()</a></code>
+
+        </dt>
+        <dd>Export Applications Data to Parquet</dd>
+
+        <dt>
+
+          <code><a href="applications_export_rds.html">applications_export_rds()</a></code>
+
+        </dt>
+        <dd>Export Applications Object to RDS</dd>
+
+        <dt>
+
+          <code><a href="applications_export_stata.html">applications_export_stata()</a></code>
+
+        </dt>
+        <dd>Export Applications Data to Stata (.dta)</dd>
+
+        <dt>
+
+          <code><a href="linkage_applications_classroom.html">linkage_applications_classroom()</a></code>
+
+        </dt>
+        <dd>Link Applications Master to Classroom Panel</dd>
+
+        <dt>
+
+          <code><a href="db_write_applications_master.html">db_write_applications_master()</a></code>
+
+        </dt>
+        <dd>Write Applications Master to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_applications_master.html">db_read_applications_master()</a></code>
+
+        </dt>
+        <dd>Read Applications Master from DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_write_applications_panel.html">db_write_applications_panel()</a></code>
+
+        </dt>
+        <dd>Write Applications Panel to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_applications_panel.html">db_read_applications_panel()</a></code>
+
+        </dt>
+        <dd>Read Applications Panel from DuckDB</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_status_codes.html">alprek_applications_status_codes()</a></code>
+
+        </dt>
+        <dd>Load Applications Status Codes</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_funding_types.html">alprek_applications_funding_types()</a></code>
+
+        </dt>
+        <dd>Load Applications Funding Types</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_source_manifest.html">alprek_applications_source_manifest()</a></code>
+
+        </dt>
+        <dd>Load Applications Source Manifest</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_renewal_map.html">alprek_applications_renewal_map()</a></code>
+
+        </dt>
+        <dd>Load Applications Renewals Column Map</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_new_map.html">alprek_applications_new_map()</a></code>
+
+        </dt>
+        <dd>Load Applications New Classroom Column Map</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_nonrenewal_map.html">alprek_applications_nonrenewal_map()</a></code>
+
+        </dt>
+        <dd>Load Applications Non-Renewals Column Map</dd>
+
+        <dt>
+
+          <code><a href="alprek_applications_capacity_map.html">alprek_applications_capacity_map()</a></code>
+
+        </dt>
+        <dd>Load Applications Capacity Column Map</dd>
+
+        <dt>
+
+          <code><a href="alprek_synthetic_applications.html">alprek_synthetic_applications()</a></code>
+
+        </dt>
+        <dd>Generate Synthetic Applications Data</dd>
+
+        <dt>
+
+          <code><a href="alprek_file_hash.html">alprek_file_hash()</a></code>
+
+        </dt>
+        <dd>Compute SHA-256 Hash of a File</dd>
+
+        <dt>
+
+          <code><a href="alprek_git_sha.html">alprek_git_sha()</a></code>
+
+        </dt>
+        <dd>Get Current Git SHA of ALprekDB</dd>
+
+        <dt>
+
+          <code><a href="alprek_provenance_record.html">alprek_provenance_record()</a></code>
+
+        </dt>
+        <dd>Construct a Provenance Record</dd>
+      </dl></div><div class="section level2">
       <h2 id="linkage-construction">Linkage Construction<a class="anchor" aria-label="anchor" href="#linkage-construction"></a></h2>
 
       <div class="section-desc"><p>Cross-module joins, student aggregation, and master dataset creation</p></div>
@@ -750,6 +991,62 @@
 
 
       <dl><dt>
+
+          <code><a href="print.alprek_applications_clean.html">print(<i>&lt;alprek_applications_clean&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_applications_clean</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_config.html">print(<i>&lt;alprek_applications_config&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_applications_config</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_linkage.html">print(<i>&lt;alprek_applications_linkage&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_applications_linkage</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_master.html">print(<i>&lt;alprek_applications_master&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_applications_master</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_panel.html">print(<i>&lt;alprek_applications_panel&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_applications_panel</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_raw.html">print(<i>&lt;alprek_applications_raw&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_applications_raw</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_reconciled.html">print(<i>&lt;alprek_applications_reconciled&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_applications_reconciled</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_applications_validation.html">print(<i>&lt;alprek_applications_validation&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_applications_validation</code></dd>
+
+        <dt>
 
           <code><a href="print.alprek_budget_config.html">print(<i>&lt;alprek_budget_config&gt;</i>)</a></code>
 

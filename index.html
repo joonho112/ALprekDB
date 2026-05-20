@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
     <li><a class="dropdown-item" href="articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+    <li><a class="dropdown-item" href="articles/a6-applications-intake.html">A6 - Applications intake</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -92,9 +93,9 @@
 </ul>
 </div>
 <div class="section level2">
-<h2 id="data-coverage-in-v060">Data Coverage in v0.6.0<a class="anchor" aria-label="anchor" href="#data-coverage-in-v060"></a>
+<h2 id="data-coverage-in-v070">Data Coverage in v0.7.0<a class="anchor" aria-label="anchor" href="#data-coverage-in-v070"></a>
 </h2>
-<p>The v0.6.0 real-data manifest uses asymmetric coverage because the currently available 2025-26 source set includes classroom and student files, but no canonical 2025-26 budget file.</p>
+<p>The v0.7.0 real-data manifest uses asymmetric coverage because the currently available source set spans different ranges per module.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -122,9 +123,15 @@
 <td>2021-22 through 2025-26</td>
 <td>Student PII is excluded by default in private workflows.</td>
 </tr>
+<tr>
+<td>
+<strong>Applications</strong> (new in v0.7.0)</td>
+<td><strong>Cycle-1 (2026-2027)</strong></td>
+<td>Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook. <strong>Out-of-scope this release:</strong> geocoding, ACS integration, Bayesian tier estimation — those are planned as separate downstream packages.</td>
+</tr>
 </tbody>
 </table>
-<p>Aggregate real-data smoke tests currently cover 5,867 budget classroom-year records, 7,409 classroom-year records, and 116,689 student-year records. These are aggregate processing counts, not row-level data.</p>
+<p>Aggregate real-data smoke tests currently cover 5,867 budget classroom-year records, 7,409 classroom-year records, 116,689 student-year records, and 1,617 cycle-1 application rows (1,495 renewals + 122 new) plus 819 site-level capacity rows. These are aggregate processing counts, not row-level data.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -164,11 +171,40 @@
 <span><span class="fu"><a href="reference/linkage_summary_stats.html">linkage_summary_stats</a></span><span class="op">(</span><span class="va">master</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="quick-start-applications-module">Quick Start: Applications Module<a class="anchor" aria-label="anchor" href="#quick-start-applications-module"></a>
+</h2>
+<p>The applications module starts from ADECE’s annual classroom-applications workbook and keeps geocoding / ACS / Bayesian tier estimation outside this package. For a private cycle-1 run, pair the applications workbook with an existing classroom panel:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ALPREKDB_APPLICATIONS_FILE"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ren</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/applications_clean.html">applications_clean</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/applications_read_renewals.html">applications_read_renewals</a></span><span class="op">(</span><span class="va">path</span>, cycle_year <span class="op">=</span> <span class="st">"2026-2027"</span>,</span>
+<span>                             receipt_date <span class="op">=</span> <span class="st">"2026-04-20"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/applications_clean.html">applications_clean</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/applications_read_new.html">applications_read_new</a></span><span class="op">(</span><span class="va">path</span>, cycle_year <span class="op">=</span> <span class="st">"2026-2027"</span>,</span>
+<span>                        receipt_date <span class="op">=</span> <span class="st">"2026-04-20"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cap</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/applications_clean.html">applications_clean</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/applications_read_capacity.html">applications_read_capacity</a></span><span class="op">(</span><span class="va">path</span>, cycle_year <span class="op">=</span> <span class="st">"2026-2027"</span>,</span>
+<span>                             receipt_date <span class="op">=</span> <span class="st">"2026-04-20"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/applications_reconcile.html">applications_reconcile</a></span><span class="op">(</span><span class="va">ren</span>, <span class="va">new</span>, prior_classroom_panel <span class="op">=</span> <span class="va">classroom_panel</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/applications_validate.html">applications_validate</a></span><span class="op">(</span><span class="va">rec</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mst</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/applications_transform.html">applications_transform</a></span><span class="op">(</span><span class="va">rec</span>, capacity_clean <span class="op">=</span> <span class="va">cap</span><span class="op">)</span></span>
+<span><span class="va">lk</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/linkage_applications_classroom.html">linkage_applications_classroom</a></span><span class="op">(</span><span class="va">mst</span>, <span class="va">classroom_panel</span>,</span>
+<span>                                     target_school_year <span class="op">=</span> <span class="va">rec</span><span class="op">$</span><span class="va">meta</span><span class="op">$</span><span class="va">prior_school_year</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/applications_validate.html">applications_validate</a></span><span class="op">(</span><span class="va">lk</span><span class="op">)</span></span></code></pre></div>
+<p>For a public synthetic walkthrough that does not require ADECE files, see <code><a href="articles/a6-applications-intake.html">vignette("a6-applications-intake", package = "ALprekDB")</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="private-real-data-workflow">Private Real-Data Workflow<a class="anchor" aria-label="anchor" href="#private-real-data-workflow"></a>
 </h2>
 <p>Raw ADECE files are not distributed with ALprekDB and should not be committed to GitHub, included in package builds, or rendered into public pkgdown pages. For private processing, keep raw files in a local source directory such as <code>ORIGINAL-DATA/</code> or another directory referenced by <code>ALPREKDB_DATA_DIR</code>.</p>
 <p>The package includes a <code>targets</code> workflow template:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">template_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"templates"</span>, <span class="st">"targets"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"alprekdb-private-workflow"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -178,14 +214,14 @@
 <span>  recursive <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>From the private workflow directory, configure paths with environment variables:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_RUN_REALDATA</span><span class="op">=</span>1</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_DATA_DIR</span><span class="op">=</span><span class="st">"/path/to/local/ADECE/source/files"</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_OUTPUT_DIR</span><span class="op">=</span><span class="st">"output/alprekdb"</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_RUN_REALDATA</span><span class="op">=</span>1</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_DATA_DIR</span><span class="op">=</span><span class="st">"/path/to/local/ADECE/source/files"</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_OUTPUT_DIR</span><span class="op">=</span><span class="st">"output/alprekdb"</span></span></code></pre></div>
 <p>Then run:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_make.html" class="external-link">tar_make</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The private workflow keeps student PII out of processed student panels by default. Row-level RDS outputs and DuckDB writes require an explicit local opt-in:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_WRITE_OUTPUTS</span><span class="op">=</span>1</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_WRITE_OUTPUTS</span><span class="op">=</span>1</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="modules">Modules<a class="anchor" aria-label="anchor" href="#modules"></a>
@@ -216,6 +252,11 @@
 <td>Student</td>
 <td>Read, clean, validate, and bind child-level enrollment, demographics, assessment, attendance, and service records.</td>
 <td>Multi-year student panels with PII excluded by default.</td>
+</tr>
+<tr>
+<td>Applications</td>
+<td>Read, detect, clean, reconcile, validate, transform, export, and persist annual ADECE classroom applications.</td>
+<td>Application-grain master data, capacity-grain data, reconciliation audit logs, linkage outputs, and DuckDB tables.</td>
 </tr>
 <tr>
 <td>Transform</td>
@@ -293,7 +334,7 @@
 <code>NN</code> = classroom number within site.</li>
 </ul>
 <p>The example below uses fake <code>9xx</code> prefixes and <code>9xxxxx</code> program codes for public documentation.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/parse_classroom_codes.html">parse_classroom_codes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"901P900001.01"</span>, <span class="st">"967H900002.02"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Delivery type codes are defined by <code><a href="reference/alprek_delivery_types.html">alprek_delivery_types()</a></code>:</p>
 <table class="table">
@@ -341,6 +382,7 @@
 <li>Synthetic data are fabricated for demonstration and testing; they should not be interpreted as Alabama program estimates.</li>
 <li>The 2025-26 budget file is not available in the current source scope, so 2025-26 classroom and student records are retained with explicit missing budget coverage.</li>
 <li>Validation checks are advisory diagnostics, not a substitute for substantive review of analysis choices.</li>
+<li>Bucket D applications are retained without <code>matched_classroom_code</code> / <code>matched_site_code</code> so downstream geocoding packages can resolve them from organization, project, and county fields.</li>
 <li>Real-data processing depends on local file access and the canonical source manifest; paths and outputs should remain outside public repositories.</li>
 </ul>
 </div>

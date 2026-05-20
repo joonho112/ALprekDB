@@ -21,8 +21,9 @@ library(ALprekDB)
 
 ## Installed CSV Inventory
 
-The package ships 14 public CSV files: 8 codebooks and 6 column
-mappings.
+The package ships 22 public CSV files in v0.7.0: 12 codebooks and 10
+column mappings. Eight of those files support the new Applications
+module.
 
 ``` r
 
@@ -52,21 +53,29 @@ csv_inventory <- data.frame(
 )
 
 csv_inventory[order(csv_inventory$role, csv_inventory$file), ]
-#>                                           file     role rows fields
-#> 1         codebooks/budget_category_groups.csv codebook   38      3
-#> 2      codebooks/classroom_degree_patterns.csv codebook   27      6
-#> 3     codebooks/classroom_language_mapping.csv codebook   39      3
-#> 4         codebooks/classroom_race_mapping.csv codebook   16      3
-#> 5                   codebooks/county_codes.csv codebook   67      3
-#> 6            codebooks/delivery_type_codes.csv codebook    7      3
-#> 7  codebooks/student_delivery_type_mapping.csv codebook   16      2
-#> 8           codebooks/student_race_mapping.csv codebook   15      3
-#> 9        mappings/budget_column_map_legacy.csv  mapping    6      4
-#> 10          mappings/budget_column_map_new.csv  mapping   12      4
-#> 11    mappings/classroom_column_map_legacy.csv  mapping  100      4
-#> 12       mappings/classroom_column_map_new.csv  mapping  125      4
-#> 13      mappings/student_column_map_legacy.csv  mapping  202      4
-#> 14         mappings/student_column_map_new.csv  mapping  270      4
+#>                                                       file     role rows fields
+#> 1                    codebooks/applications_edge_cases.csv codebook   17      7
+#> 2                 codebooks/applications_funding_types.csv codebook    6      3
+#> 3               codebooks/applications_source_manifest.csv codebook   13      6
+#> 4                  codebooks/applications_status_codes.csv codebook    6      4
+#> 5                     codebooks/budget_category_groups.csv codebook   38      3
+#> 6                  codebooks/classroom_degree_patterns.csv codebook   27      6
+#> 7                 codebooks/classroom_language_mapping.csv codebook   39      3
+#> 8                     codebooks/classroom_race_mapping.csv codebook   16      3
+#> 9                               codebooks/county_codes.csv codebook   67      3
+#> 10                       codebooks/delivery_type_codes.csv codebook    7      3
+#> 11             codebooks/student_delivery_type_mapping.csv codebook   16      2
+#> 12                      codebooks/student_race_mapping.csv codebook   15      3
+#> 13    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
+#> 14         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
+#> 15 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
+#> 16    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
+#> 17                   mappings/budget_column_map_legacy.csv  mapping    6      4
+#> 18                      mappings/budget_column_map_new.csv  mapping   12      4
+#> 19                mappings/classroom_column_map_legacy.csv  mapping  100      4
+#> 20                   mappings/classroom_column_map_new.csv  mapping  125      4
+#> 21                  mappings/student_column_map_legacy.csv  mapping  202      4
+#> 22                     mappings/student_column_map_new.csv  mapping  270      4
 ```
 
 ``` r
@@ -77,8 +86,8 @@ aggregate(
   FUN = sum
 )
 #>       role files rows
-#> 1 codebook     8  225
-#> 2  mapping     6  715
+#> 1 codebook    12  267
+#> 2  mapping    10  755
 ```
 
 These files are part of the package API in a broad sense: changing them
@@ -103,20 +112,28 @@ data.frame(
   ),
   row.names = NULL
 )
-#>                                       file
-#> 1    mappings/budget_column_map_legacy.csv
-#> 2       mappings/budget_column_map_new.csv
-#> 3 mappings/classroom_column_map_legacy.csv
-#> 4    mappings/classroom_column_map_new.csv
-#> 5   mappings/student_column_map_legacy.csv
-#> 6      mappings/student_column_map_new.csv
-#>                                   schema
-#> 1 raw_column, standard_name, type, notes
-#> 2 raw_column, standard_name, type, notes
-#> 3 raw_column, standard_name, type, notes
-#> 4 raw_column, standard_name, type, notes
-#> 5 raw_column, standard_name, type, notes
-#> 6 raw_column, standard_name, type, notes
+#>                                                       file
+#> 1     mappings/applications_column_map_capacity_cycle1.csv
+#> 2          mappings/applications_column_map_new_cycle1.csv
+#> 3  mappings/applications_column_map_nonrenewals_cycle1.csv
+#> 4     mappings/applications_column_map_renewals_cycle1.csv
+#> 5                    mappings/budget_column_map_legacy.csv
+#> 6                       mappings/budget_column_map_new.csv
+#> 7                 mappings/classroom_column_map_legacy.csv
+#> 8                    mappings/classroom_column_map_new.csv
+#> 9                   mappings/student_column_map_legacy.csv
+#> 10                     mappings/student_column_map_new.csv
+#>                                    schema
+#> 1  raw_column, standard_name, type, notes
+#> 2  raw_column, standard_name, type, notes
+#> 3  raw_column, standard_name, type, notes
+#> 4  raw_column, standard_name, type, notes
+#> 5  raw_column, standard_name, type, notes
+#> 6  raw_column, standard_name, type, notes
+#> 7  raw_column, standard_name, type, notes
+#> 8  raw_column, standard_name, type, notes
+#> 9  raw_column, standard_name, type, notes
+#> 10 raw_column, standard_name, type, notes
 ```
 
 | Mapping field | Meaning |
@@ -139,7 +156,15 @@ helpers <- list(
   classroom_race = alprek_race_mapping(),
   classroom_language = alprek_language_mapping(),
   student_race = alprek_student_race_mapping(),
-  student_delivery = alprek_student_delivery_mapping()
+  student_delivery = alprek_student_delivery_mapping(),
+  applications_status = alprek_applications_status_codes(),
+  applications_funding = alprek_applications_funding_types(),
+  applications_manifest = alprek_applications_source_manifest(),
+  applications_edge_cases = utils::read.csv(
+    file.path(ext_dir, "codebooks", "applications_edge_cases.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
 )
 
 data.frame(
@@ -148,24 +173,32 @@ data.frame(
   schema = vapply(helpers, function(x) paste(names(x), collapse = ", "), character(1)),
   row.names = NULL
 )
-#>               helper rows
-#> 1     delivery_types    7
-#> 2       county_codes   67
-#> 3    degree_patterns   27
-#> 4  budget_categories   38
-#> 5     classroom_race   16
-#> 6 classroom_language   39
-#> 7       student_race   15
-#> 8   student_delivery   16
-#>                                                       schema
-#> 1                                     code, name, name_short
-#> 2                        county_code, county_name, fips_code
-#> 3 pattern_type, regex, result, priority, teacher_role, notes
-#> 4                     category_detail, category_group, notes
-#> 5                      raw_value, standardized, factor_order
-#> 6                           raw_value, standardized, is_null
-#> 7                      raw_value, standardized, factor_order
-#> 8                                    raw_value, standardized
+#>                     helper rows
+#> 1           delivery_types    7
+#> 2             county_codes   67
+#> 3          degree_patterns   27
+#> 4        budget_categories   38
+#> 5           classroom_race   16
+#> 6       classroom_language   39
+#> 7             student_race   15
+#> 8         student_delivery   16
+#> 9      applications_status    6
+#> 10    applications_funding    6
+#> 11   applications_manifest   13
+#> 12 applications_edge_cases   17
+#>                                                                                schema
+#> 1                                                              code, name, name_short
+#> 2                                                 county_code, county_name, fips_code
+#> 3                          pattern_type, regex, result, priority, teacher_role, notes
+#> 4                                              category_detail, category_group, notes
+#> 5                                               raw_value, standardized, factor_order
+#> 6                                                    raw_value, standardized, is_null
+#> 7                                               raw_value, standardized, factor_order
+#> 8                                                             raw_value, standardized
+#> 9                                      process_name, kind_inferred, cycle_year, notes
+#> 10                                              funding_type, funding_category, notes
+#> 11          kind, filename_pattern, sheet, cycle_year, canonical_status, known_issues
+#> 12 case_id, label, description, detection_rule, policy, severity, validate_check_name
 ```
 
 ## Codebooks as Boundary Objects
@@ -229,7 +262,9 @@ For example:
 - classroom cleaning uses classroom mappings, degree patterns, race
   mappings, language mappings, and delivery-type codes;
 - student cleaning uses student mappings, student race mappings, and
-  student delivery-type mappings.
+  student delivery-type mappings;
+- applications cleaning uses four cycle-1 column maps plus status-code,
+  funding-type, source-manifest, and edge-case codebooks.
 
 The public mappings describe how raw field names are standardized; they
 should not contain row-level examples from real source data.
@@ -294,11 +329,38 @@ Format detection is deliberately conservative. If a source export is too
 narrow or contains incompatible markers, the package stops rather than
 guessing.
 
+## Applications Codebooks and Mappings
+
+The v0.7.0 Applications module adds four public codebooks and four
+cycle-1 column maps:
+
+``` r
+
+csv_inventory[
+  grepl("^codebooks/applications_|^mappings/applications_", csv_inventory$file),
+  c("file", "role", "rows", "fields")
+]
+#>                                                       file     role rows fields
+#> 1                    codebooks/applications_edge_cases.csv codebook   17      7
+#> 2                 codebooks/applications_funding_types.csv codebook    6      3
+#> 3               codebooks/applications_source_manifest.csv codebook   13      6
+#> 4                  codebooks/applications_status_codes.csv codebook    6      4
+#> 13    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
+#> 14         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
+#> 15 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
+#> 16    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
+```
+
+The non-renewal source sheet in cycle-1 is headerless, so
+`applications_column_map_nonrenewals_cycle1.csv` maps positional
+`col_1`, `col_2`, … fields. Future cycles should add new cycle-specific
+mapping files rather than editing old maps in place.
+
 ## Mapping Contracts
 
 The tests enforce these contracts:
 
-- all 14 expected CSV files are present;
+- all 22 expected CSV files are present;
 - mapping files use `raw_column`, `standard_name`, `type`, and `notes`;
 - mapping keys are nonblank and unique within each file;
 - `standard_name` values are unique and use snake case;
@@ -326,20 +388,28 @@ data.frame(
   ),
   row.names = NULL
 )
-#>                                       file unique_raw_column
-#> 1    mappings/budget_column_map_legacy.csv              TRUE
-#> 2       mappings/budget_column_map_new.csv              TRUE
-#> 3 mappings/classroom_column_map_legacy.csv              TRUE
-#> 4    mappings/classroom_column_map_new.csv              TRUE
-#> 5   mappings/student_column_map_legacy.csv              TRUE
-#> 6      mappings/student_column_map_new.csv              TRUE
-#>   unique_standard_name snake_case_standard_name
-#> 1                 TRUE                     TRUE
-#> 2                 TRUE                     TRUE
-#> 3                 TRUE                     TRUE
-#> 4                 TRUE                     TRUE
-#> 5                 TRUE                     TRUE
-#> 6                 TRUE                     TRUE
+#>                                                       file unique_raw_column
+#> 1     mappings/applications_column_map_capacity_cycle1.csv              TRUE
+#> 2          mappings/applications_column_map_new_cycle1.csv              TRUE
+#> 3  mappings/applications_column_map_nonrenewals_cycle1.csv              TRUE
+#> 4     mappings/applications_column_map_renewals_cycle1.csv              TRUE
+#> 5                    mappings/budget_column_map_legacy.csv              TRUE
+#> 6                       mappings/budget_column_map_new.csv              TRUE
+#> 7                 mappings/classroom_column_map_legacy.csv              TRUE
+#> 8                    mappings/classroom_column_map_new.csv              TRUE
+#> 9                   mappings/student_column_map_legacy.csv              TRUE
+#> 10                     mappings/student_column_map_new.csv              TRUE
+#>    unique_standard_name snake_case_standard_name
+#> 1                  TRUE                     TRUE
+#> 2                  TRUE                     TRUE
+#> 3                  TRUE                     TRUE
+#> 4                 FALSE                     TRUE
+#> 5                  TRUE                     TRUE
+#> 6                  TRUE                     TRUE
+#> 7                  TRUE                     TRUE
+#> 8                  TRUE                     TRUE
+#> 9                  TRUE                     TRUE
+#> 10                 TRUE                     TRUE
 ```
 
 ## Extension Workflow

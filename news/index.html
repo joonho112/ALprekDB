@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,7 @@
     <li><a class="dropdown-item" href="../articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
     <li><a class="dropdown-item" href="../articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="../articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/a6-applications-intake.html">A6 - Applications intake</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="../articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="../articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -50,6 +51,62 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="alprekdb-development-version">ALprekDB (development version)<a class="anchor" aria-label="anchor" href="#alprekdb-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="alprekdb-070-2026-05-19">ALprekDB 0.7.0 (2026-05-19)<a class="anchor" aria-label="anchor" href="#alprekdb-070-2026-05-19"></a></h2>
+<div class="section level3">
+<h3 id="added--applications-module-new-0-7-0">Added — Applications module (new)<a class="anchor" aria-label="anchor" href="#added--applications-module-new-0-7-0"></a></h3>
+<p>This release adds a new <strong>applications module</strong> for processing the ADECE annual classroom-applications workbook (renewals, new applications, non-renewals, and per-site capacity). The module follows the same architecture as the existing budget, classroom, and student modules.</p>
+<ul><li>New read functions for the four input kinds: <code><a href="../reference/applications_read_renewals.html">applications_read_renewals()</a></code>, <code><a href="../reference/applications_read_new.html">applications_read_new()</a></code>, <code><a href="../reference/applications_read_nonrenewal.html">applications_read_nonrenewal()</a></code>, <code><a href="../reference/applications_read_capacity.html">applications_read_capacity()</a></code>. Each captures file SHA-256, git SHA, receipt date, sheet, per-row <code>raw_row_index</code>, and a stable per-row <code>lineage_id</code> for downstream tracing.</li>
+<li>
+<code><a href="../reference/applications_detect_format.html">applications_detect_format()</a></code> distinguishes cycle-1 (2026-2027) and cycle-0 (2025-2026) formats by marker columns.</li>
+<li>
+<code><a href="../reference/applications_clean.html">applications_clean()</a></code> standardizes columns via codebook column maps (one per kind per cycle), parses currency-aware numerics, drops capacity report aggregate rows (<code>rule = "drop_capacity_aggregate"</code>), and filters Debugger Trace noise.</li>
+<li>
+<code><a href="../reference/applications_reconcile.html">applications_reconcile()</a></code> partitions every input row into one of four buckets — A (renewal exact-match), B (renewal fuzzy-recovered ≥ threshold), C (new fuzzy-matched to existing classroom), D (truly new) — using Jaro-Winkler similarity blocked by county. Every fuzzy decision plus up to three runner-up candidates is logged in <code>$reconciliation_log</code> (the <strong>audit chain</strong>, with <code>decision_source</code>, <code>decision_timestamp</code>, <code>decision_seed</code>, <code>candidate_classroom_code</code>, <code>candidate_site_code</code>, <code>candidate_rank</code>, <code>score_margin</code>).</li>
+<li>
+<code><a href="../reference/applications_validate.html">applications_validate()</a></code> runs 18 base data-contract checks across the four input kinds and reconciled objects, plus linkage-specific checks for classroom joins, unmatched buckets, row-lineage retention, and diagnostic conservation. Validation uses structured ERROR / WARN / INFO severity, row-level <code>$issues</code> accumulation, and fixture-backed regression tests.</li>
+<li>
+<code><a href="../reference/applications_transform.html">applications_transform()</a></code> adds data-layer derived variables (<code>is_renewal</code>, <code>is_new</code>, <code>cycle_year_std</code>, <code>applied_this_cycle</code>, <code>tier_prev_dollars</code>, <code>tier_prev_rank</code>, <code>tier_prev_band</code>, <code>capacity_utilization</code>, <code>waitlist_ratio</code>, <code>is_oversubscribed</code>) into a new <code>alprek_applications_master</code> S3 object.</li>
+<li>
+<code><a href="../reference/applications_bind_years.html">applications_bind_years()</a></code> stacks multiple cycles into an <code>alprek_applications_panel</code> preserving both applications-grain and capacity-grain rows. <code><a href="../reference/applications_track_classrooms.html">applications_track_classrooms()</a></code> summarizes cross-cycle classroom presence.</li>
+<li>Five export functions: <code><a href="../reference/applications_export_csv.html">applications_export_csv()</a></code>, <code><a href="../reference/applications_export_parquet.html">applications_export_parquet()</a></code>, <code><a href="../reference/applications_export_excel.html">applications_export_excel()</a></code>, <code><a href="../reference/applications_export_rds.html">applications_export_rds()</a></code>, <code><a href="../reference/applications_export_stata.html">applications_export_stata()</a></code>.</li>
+<li>
+<code><a href="../reference/linkage_applications_classroom.html">linkage_applications_classroom()</a></code> joins applications context onto the existing <code>alprek_classroom_panel</code>, preserving row-level lineage, aggregating bucket C new applications at the matched site, and producing an <code>alprek_applications_linkage</code> S3 with classroom-level rows plus an <code>$unmatched_applications</code> slot for bucket D rows that need downstream geocoding.</li>
+<li>DuckDB persistence: <code><a href="../reference/db_write_applications_master.html">db_write_applications_master()</a></code>, <code><a href="../reference/db_read_applications_master.html">db_read_applications_master()</a></code>, <code><a href="../reference/db_write_applications_panel.html">db_write_applications_panel()</a></code>, <code><a href="../reference/db_read_applications_panel.html">db_read_applications_panel()</a></code>. Adds six new DuckDB tables (<code>applications_clean</code>, <code>applications_capacity</code>, <code>applications_panel</code>, <code>applications_capacity_panel</code>, <code>applications_lineage</code>, <code>applications_derived_log</code>) that share the existing <code>_alprek_column_types</code> registry.</li>
+<li>
+<code><a href="../reference/alprek_synthetic_applications.html">alprek_synthetic_applications()</a></code> generates synthetic 4-kind ADECE applications input for vignettes, examples, and tests using the same fake-code conventions as the other synthetic generators.</li>
+<li>New codebooks under <code>inst/extdata/codebooks/</code>: <code>applications_source_manifest.csv</code>, <code>applications_status_codes.csv</code> (extended in this release with <code>2026 - 2027 First Class Pre-K New Classroom Application - Round 2</code> and <code>2026-27 First Class Pre-K New Classroom</code>), <code>applications_funding_types.csv</code> (extended with <code>New Classroom Funding</code>, <code>Reduced Enrollment</code>, and <code>Classroom Funding;Supplemental Funding</code>), <code>applications_edge_cases.csv</code> (17 documented edge cases).</li>
+<li>New column-map CSVs (cycle-1) under <code>inst/extdata/mappings/</code>: <code>applications_column_map_renewals_cycle1.csv</code>, <code>applications_column_map_new_cycle1.csv</code>, <code>applications_column_map_nonrenewals_cycle1.csv</code> (positional), <code>applications_column_map_capacity_cycle1.csv</code>.</li>
+<li>New A6 vignette: <code><a href="../articles/a6-applications-intake.html">vignette("a6-applications-intake")</a></code> — end-to-end walkthrough on synthetic data.</li>
+<li>
+<code>R/utils-provenance.R</code>: <code><a href="../reference/alprek_file_hash.html">alprek_file_hash()</a></code>, <code><a href="../reference/alprek_git_sha.html">alprek_git_sha()</a></code>, <code><a href="../reference/alprek_provenance_record.html">alprek_provenance_record()</a></code>, internal <code>.alprek_lineage_id()</code> — shared provenance helpers used by the applications module.</li>
+<li>Application-specific tests cover validation, transform, panel, export, linkage, DuckDB persistence, and env-gated real-data smoke paths across seven test files (<code>test-applications-validate.R</code>, <code>test-applications-transform.R</code>, <code>test-applications-panel.R</code>, <code>test-applications-export.R</code>, <code>test-applications-linkage.R</code>, <code>test-applications-duckdb.R</code>, <code>test-realdata-integration.R</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-0-7-0">Changed<a class="anchor" aria-label="anchor" href="#changed-0-7-0"></a></h3>
+<ul><li>DESCRIPTION now imports <code>stringdist</code> (for Jaro-Winkler fuzzy matching) and <code>digest</code> (for stable per-row <code>lineage_id</code> hashes).</li>
+<li>
+<code>_pkgdown.yml</code> adds an “Applications Module (v0.7.0)” reference section and an A6 Applied Track entry.</li>
+<li>README adds Applications rows to the data-coverage and module tables, an applications quick-start, and an explicit out-of-scope declaration for geocoding, ACS, and Bayesian tier estimation.</li>
+<li>Reconciliation hardening: fuzzy matching scores normalized strings, no-panel reconciliation requires explicit degraded mode, capacity aggregate rows are dropped before the site-level layer, and stable row-level <code>lineage_id</code> values are propagated through read, clean, reconcile, transform, linkage, and DuckDB paths.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="out-of-scope-planned-downstream-packages-0-7-0">Out-of-scope (planned downstream packages)<a class="anchor" aria-label="anchor" href="#out-of-scope-planned-downstream-packages-0-7-0"></a></h3>
+<p>To keep this release focused on the data-contract layer, the following are intentionally <strong>not</strong> in v0.7.0:</p>
+<ul><li>Geocoding (three-source consensus, OSRM isochrone, ArcGIS fallback)</li>
+<li>ACS area-weighted aggregation (tidycensus, census tracts, MOE → SE)</li>
+<li>Bayesian small-area estimation of economic-need tiers</li>
+<li>Tier binning (<code>ntile(gr, 6)</code>)</li>
+<li>Posterior summary, credibility intervals</li>
+<li>Address parsing beyond text normalization, lat/lon validation</li>
+</ul><p>These are planned as separate <code>ALprek*</code> packages that will consume the applications-module output via the lineage chain (<code>lineage_id</code> → <code>application_id</code> → <code>matched_classroom_code</code> → <code>matched_site_code</code>).</p>
+</div>
+<div class="section level3">
+<h3 id="known-limitations-0-7-0">Known limitations<a class="anchor" aria-label="anchor" href="#known-limitations-0-7-0"></a></h3>
+<ul><li>Bucket D rows (truly new applications) have no <code>matched_classroom_code</code> and no <code>matched_site_code</code>. They are retained in <code><a href="../reference/linkage_applications_classroom.html">linkage_applications_classroom()</a></code> output’s <code>$unmatched_applications</code> slot for downstream geocoding to resolve.</li>
+<li>The <code>funding_type</code> and <code>process_name</code> codebooks now include cycle-1 observed variants but may need further extension as ADECE varies labels across future cycles. Unknown labels emit a WARN, not an ERROR, by design.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="alprekdb-060-2026-05-19">ALprekDB 0.6.0 (2026-05-19)<a class="anchor" aria-label="anchor" href="#alprekdb-060-2026-05-19"></a></h2>

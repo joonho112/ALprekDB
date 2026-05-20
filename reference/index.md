@@ -115,6 +115,82 @@ and exports
 - [`student_export_stata()`](https://joonho112.github.io/ALprekDB/reference/student_export_stata.md)
   : Export Student Data to Stata (.dta)
 
+## Applications Module (v0.7.0)
+
+Reading, format detection, cleaning, fuzzy 4-bucket reconciliation,
+validation (18 base checks plus linkage checks), derived variables,
+multi-cycle panel binding, and 5-format export for ADECE annual
+classroom applications workbooks. In-scope: data-contract layer only.
+Out-of-scope (planned downstream packages): geocoding, ACS integration,
+Bayesian SAE tier estimation.
+
+- [`applications_config()`](https://joonho112.github.io/ALprekDB/reference/applications_config.md)
+  : Create an Applications Processing Configuration
+- [`applications_read_renewals()`](https://joonho112.github.io/ALprekDB/reference/applications_read_renewals.md)
+  : Read ADECE Renewal Classroom Applications
+- [`applications_read_new()`](https://joonho112.github.io/ALprekDB/reference/applications_read_new.md)
+  : Read ADECE New Classroom Applications
+- [`applications_read_nonrenewal()`](https://joonho112.github.io/ALprekDB/reference/applications_read_nonrenewal.md)
+  : Read ADECE Non-Renewal Classrooms
+- [`applications_read_capacity()`](https://joonho112.github.io/ALprekDB/reference/applications_read_capacity.md)
+  : Read ADECE Site Capacity Report
+- [`applications_detect_format()`](https://joonho112.github.io/ALprekDB/reference/applications_detect_format.md)
+  : Detect ADECE Applications Data Format
+- [`applications_clean()`](https://joonho112.github.io/ALprekDB/reference/applications_clean.md)
+  : Clean ADECE Applications Data
+- [`applications_reconcile()`](https://joonho112.github.io/ALprekDB/reference/applications_reconcile.md)
+  : Reconcile ADECE Applications Against Prior Classroom Panel
+- [`applications_validate()`](https://joonho112.github.io/ALprekDB/reference/applications_validate.md)
+  : Validate Cleaned or Reconciled Applications Data
+- [`applications_transform()`](https://joonho112.github.io/ALprekDB/reference/applications_transform.md)
+  : Transform Reconciled Applications Into Master Object
+- [`applications_bind_years()`](https://joonho112.github.io/ALprekDB/reference/applications_bind_years.md)
+  : Combine Multiple Cycles into an Applications Panel
+- [`applications_track_classrooms()`](https://joonho112.github.io/ALprekDB/reference/applications_track_classrooms.md)
+  : Track Classroom Presence Across Application Cycles
+- [`applications_export_csv()`](https://joonho112.github.io/ALprekDB/reference/applications_export_csv.md)
+  : Export Applications Data to CSV
+- [`applications_export_excel()`](https://joonho112.github.io/ALprekDB/reference/applications_export_excel.md)
+  : Export Applications Data to Excel
+- [`applications_export_parquet()`](https://joonho112.github.io/ALprekDB/reference/applications_export_parquet.md)
+  : Export Applications Data to Parquet
+- [`applications_export_rds()`](https://joonho112.github.io/ALprekDB/reference/applications_export_rds.md)
+  : Export Applications Object to RDS
+- [`applications_export_stata()`](https://joonho112.github.io/ALprekDB/reference/applications_export_stata.md)
+  : Export Applications Data to Stata (.dta)
+- [`linkage_applications_classroom()`](https://joonho112.github.io/ALprekDB/reference/linkage_applications_classroom.md)
+  : Link Applications Master to Classroom Panel
+- [`db_write_applications_master()`](https://joonho112.github.io/ALprekDB/reference/db_write_applications_master.md)
+  : Write Applications Master to DuckDB
+- [`db_read_applications_master()`](https://joonho112.github.io/ALprekDB/reference/db_read_applications_master.md)
+  : Read Applications Master from DuckDB
+- [`db_write_applications_panel()`](https://joonho112.github.io/ALprekDB/reference/db_write_applications_panel.md)
+  : Write Applications Panel to DuckDB
+- [`db_read_applications_panel()`](https://joonho112.github.io/ALprekDB/reference/db_read_applications_panel.md)
+  : Read Applications Panel from DuckDB
+- [`alprek_applications_status_codes()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_status_codes.md)
+  : Load Applications Status Codes
+- [`alprek_applications_funding_types()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_funding_types.md)
+  : Load Applications Funding Types
+- [`alprek_applications_source_manifest()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_source_manifest.md)
+  : Load Applications Source Manifest
+- [`alprek_applications_renewal_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_renewal_map.md)
+  : Load Applications Renewals Column Map
+- [`alprek_applications_new_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_new_map.md)
+  : Load Applications New Classroom Column Map
+- [`alprek_applications_nonrenewal_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_nonrenewal_map.md)
+  : Load Applications Non-Renewals Column Map
+- [`alprek_applications_capacity_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_applications_capacity_map.md)
+  : Load Applications Capacity Column Map
+- [`alprek_synthetic_applications()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_applications.md)
+  : Generate Synthetic Applications Data
+- [`alprek_file_hash()`](https://joonho112.github.io/ALprekDB/reference/alprek_file_hash.md)
+  : Compute SHA-256 Hash of a File
+- [`alprek_git_sha()`](https://joonho112.github.io/ALprekDB/reference/alprek_git_sha.md)
+  : Get Current Git SHA of ALprekDB
+- [`alprek_provenance_record()`](https://joonho112.github.io/ALprekDB/reference/alprek_provenance_record.md)
+  : Construct a Provenance Record
+
 ## Linkage Construction
 
 Cross-module joins, student aggregation, and master dataset creation
@@ -228,43 +304,96 @@ Classroom code parsing and helpers
 
 Display methods for ALprekDB objects
 
+- [`print(`*`<alprek_applications_clean>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_clean.md)
+  : Print method for alprek_applications_clean
+
+- [`print(`*`<alprek_applications_config>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_config.md)
+  : Print method for alprek_applications_config
+
+- [`print(`*`<alprek_applications_linkage>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_linkage.md)
+  :
+
+  Print method for `alprek_applications_linkage`
+
+- [`print(`*`<alprek_applications_master>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_master.md)
+  :
+
+  Print method for `alprek_applications_master`
+
+- [`print(`*`<alprek_applications_panel>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_panel.md)
+  :
+
+  Print method for `alprek_applications_panel`
+
+- [`print(`*`<alprek_applications_raw>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_raw.md)
+  : Print method for alprek_applications_raw
+
+- [`print(`*`<alprek_applications_reconciled>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_reconciled.md)
+  :
+
+  Print method for `alprek_applications_reconciled`
+
+- [`print(`*`<alprek_applications_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_applications_validation.md)
+  :
+
+  Print method for `alprek_applications_validation`
+
 - [`print(`*`<alprek_budget_config>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_config.md)
   : Print method for alprek_budget_config
+
 - [`print(`*`<alprek_budget_long>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_long.md)
   : Print method for alprek_budget_long
+
 - [`print(`*`<alprek_budget_master>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_master.md)
   : Print method for alprek_budget_master
+
 - [`print(`*`<alprek_budget_panel>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_panel.md)
   : Print method for alprek_budget_panel
+
 - [`print(`*`<alprek_budget_raw>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_raw.md)
   : Print method for alprek_budget_raw
+
 - [`print(`*`<alprek_budget_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_budget_validation.md)
   : Print method for alprek_budget_validation
+
 - [`print(`*`<alprek_classroom_clean>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_clean.md)
   : Print method for alprek_classroom_clean
+
 - [`print(`*`<alprek_classroom_config>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_config.md)
   : Print method for alprek_classroom_config
+
 - [`print(`*`<alprek_classroom_panel>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_panel.md)
   : Print method for alprek_classroom_panel
+
 - [`print(`*`<alprek_classroom_raw>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_raw.md)
   : Print method for alprek_classroom_raw
+
 - [`print(`*`<alprek_classroom_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_validation.md)
   : Print method for alprek_classroom_validation
+
 - [`print(`*`<alprek_linkage_classroom>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_linkage_classroom.md)
   : Print method for alprek_linkage_classroom
+
 - [`print(`*`<alprek_linkage_master>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_linkage_master.md)
   : Print method for alprek_linkage_master
+
 - [`print(`*`<alprek_linkage_student>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_linkage_student.md)
   : Print method for alprek_linkage_student
+
 - [`print(`*`<alprek_linkage_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_linkage_validation.md)
   : Print method for alprek_linkage_validation
+
 - [`print(`*`<alprek_student_clean>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_student_clean.md)
   : Print method for alprek_student_clean
+
 - [`print(`*`<alprek_student_config>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_student_config.md)
   : Print method for alprek_student_config
+
 - [`print(`*`<alprek_student_panel>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_student_panel.md)
   : Print method for alprek_student_panel
+
 - [`print(`*`<alprek_student_raw>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_student_raw.md)
   : Print method for alprek_student_raw
+
 - [`print(`*`<alprek_student_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_student_validation.md)
   : Print method for alprek_student_validation
