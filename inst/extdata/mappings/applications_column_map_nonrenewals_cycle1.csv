@@ -1,0 +1,8 @@
+raw_column,standard_name,type,notes
+"col_1","region","categorical","Positional: Region 1-9 (sheet has no header row in cycle-1)"
+"col_2","county","categorical","Positional: county name"
+"col_3","organization_name","id","Positional: organization"
+"col_4","project_name","id","Positional: classroom name"
+"col_5","prior_funding_amount","numeric","Positional: prior cycle funding amount in dollars"
+"col_6","prior_funding_type","categorical","Positional: prior cycle funding type"
+"col_7","notes","text","Positional: ADECE annotations (often empty)"

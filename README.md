@@ -30,21 +30,23 @@ ALprekDB is built for repeatable Pre-K administrative data work:
 - support SQL-friendly DuckDB outputs for downstream analysis;
 - separate public package documentation from private real-data processing.
 
-## Data Coverage in v0.6.0
+## Data Coverage in v0.7.0
 
-The v0.6.0 real-data manifest uses asymmetric coverage because the currently
-available 2025-26 source set includes classroom and student files, but no
-canonical 2025-26 budget file.
+The v0.7.0 real-data manifest uses asymmetric coverage because the currently
+available source set spans different ranges per module.
 
 | Module | Covered school years | Current release notes |
 |--------|----------------------|-----------------------|
 | Budget | 2021-22 through 2024-25 | The 2025-26 budget is structurally unavailable and is not inferred, zero-filled, or copied from another source. |
 | Classroom | 2021-22 through 2025-26 | Classroom-code validation uses six-digit program codes. |
 | Student | 2021-22 through 2025-26 | Student PII is excluded by default in private workflows. |
+| **Applications** (new in v0.7.0) | **Cycle-1 (2026-2027)** | Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook. **Out-of-scope this release:** geocoding, ACS integration, Bayesian tier estimation — those are planned as separate downstream packages. |
 
 Aggregate real-data smoke tests currently cover 5,867 budget classroom-year
-records, 7,409 classroom-year records, and 116,689 student-year records. These
-are aggregate processing counts, not row-level data.
+records, 7,409 classroom-year records, 116,689 student-year records, and
+1,617 cycle-1 application rows (1,495 renewals + 122 new) plus 819
+site-level capacity rows. These are aggregate processing counts, not
+row-level data.
 
 ## Installation
 
@@ -86,6 +88,41 @@ master <- linkage_create_master(budget, classroom, student)
 linkage_validate(master)
 linkage_summary_stats(master)
 ```
+
+## Quick Start: Applications Module
+
+The applications module starts from ADECE's annual classroom-applications
+workbook and keeps geocoding / ACS / Bayesian tier estimation outside this
+package. For a private cycle-1 run, pair the applications workbook with an
+existing classroom panel:
+
+```r
+path <- Sys.getenv("ALPREKDB_APPLICATIONS_FILE")
+
+ren <- applications_clean(
+  applications_read_renewals(path, cycle_year = "2026-2027",
+                             receipt_date = "2026-04-20")
+)
+new <- applications_clean(
+  applications_read_new(path, cycle_year = "2026-2027",
+                        receipt_date = "2026-04-20")
+)
+cap <- applications_clean(
+  applications_read_capacity(path, cycle_year = "2026-2027",
+                             receipt_date = "2026-04-20")
+)
+
+rec <- applications_reconcile(ren, new, prior_classroom_panel = classroom_panel)
+applications_validate(rec)
+
+mst <- applications_transform(rec, capacity_clean = cap)
+lk <- linkage_applications_classroom(mst, classroom_panel,
+                                     target_school_year = rec$meta$prior_school_year)
+applications_validate(lk)
+```
+
+For a public synthetic walkthrough that does not require ADECE files, see
+`vignette("a6-applications-intake", package = "ALprekDB")`.
 
 ## Private Real-Data Workflow
 
@@ -137,6 +174,7 @@ export ALPREKDB_WRITE_OUTPUTS=1
 | Budget | Read, clean, validate, reshape, and bind per-classroom funding records. | Long budget records and multi-year budget panels. |
 | Classroom | Read, clean, validate, and bind classroom characteristics, geography, and staffing records. | Multi-year classroom panels. |
 | Student | Read, clean, validate, and bind child-level enrollment, demographics, assessment, attendance, and service records. | Multi-year student panels with PII excluded by default. |
+| Applications | Read, detect, clean, reconcile, validate, transform, export, and persist annual ADECE classroom applications. | Application-grain master data, capacity-grain data, reconciliation audit logs, linkage outputs, and DuckDB tables. |
 | Transform | Derive analytic student measures such as gains, readiness, chronic absence, and risk indicators. | Enriched student panels. |
 | Linkage | Join budget, classroom, and student panels with explicit orphan and coverage diagnostics. | Classroom-level and student-level master datasets. |
 | Database | Persist panels and master datasets in DuckDB for SQL analysis. | Local DuckDB databases and query results. |
@@ -225,6 +263,9 @@ Delivery type codes are defined by `alprek_delivery_types()`:
   budget coverage.
 - Validation checks are advisory diagnostics, not a substitute for substantive
   review of analysis choices.
+- Bucket D applications are retained without `matched_classroom_code` /
+  `matched_site_code` so downstream geocoding packages can resolve them from
+  organization, project, and county fields.
 - Real-data processing depends on local file access and the canonical source
   manifest; paths and outputs should remain outside public repositories.
 

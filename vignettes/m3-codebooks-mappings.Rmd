@@ -35,7 +35,8 @@ library(ALprekDB)
 
 ## Installed CSV Inventory
 
-The package ships 14 public CSV files: 8 codebooks and 6 column mappings.
+The package ships 22 public CSV files in v0.7.0: 12 codebooks and 10 column
+mappings. Eight of those files support the new Applications module.
 
 ```{r inventory}
 ext_dir <- system.file("extdata", package = "ALprekDB", mustWork = TRUE)
@@ -116,7 +117,15 @@ helpers <- list(
   classroom_race = alprek_race_mapping(),
   classroom_language = alprek_language_mapping(),
   student_race = alprek_student_race_mapping(),
-  student_delivery = alprek_student_delivery_mapping()
+  student_delivery = alprek_student_delivery_mapping(),
+  applications_status = alprek_applications_status_codes(),
+  applications_funding = alprek_applications_funding_types(),
+  applications_manifest = alprek_applications_source_manifest(),
+  applications_edge_cases = utils::read.csv(
+    file.path(ext_dir, "codebooks", "applications_edge_cases.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
 )
 
 data.frame(
@@ -172,7 +181,9 @@ For example:
 - classroom cleaning uses classroom mappings, degree patterns, race mappings,
   language mappings, and delivery-type codes;
 - student cleaning uses student mappings, student race mappings, and student
-  delivery-type mappings.
+  delivery-type mappings;
+- applications cleaning uses four cycle-1 column maps plus status-code,
+  funding-type, source-manifest, and edge-case codebooks.
 
 The public mappings describe how raw field names are standardized; they should
 not contain row-level examples from real source data.
@@ -227,11 +238,28 @@ data.frame(
 Format detection is deliberately conservative. If a source export is too narrow
 or contains incompatible markers, the package stops rather than guessing.
 
+## Applications Codebooks and Mappings
+
+The v0.7.0 Applications module adds four public codebooks and four cycle-1
+column maps:
+
+```{r applications-extdata}
+csv_inventory[
+  grepl("^codebooks/applications_|^mappings/applications_", csv_inventory$file),
+  c("file", "role", "rows", "fields")
+]
+```
+
+The non-renewal source sheet in cycle-1 is headerless, so
+`applications_column_map_nonrenewals_cycle1.csv` maps positional `col_1`,
+`col_2`, ... fields. Future cycles should add new cycle-specific mapping files
+rather than editing old maps in place.
+
 ## Mapping Contracts
 
 The tests enforce these contracts:
 
-- all 14 expected CSV files are present;
+- all 22 expected CSV files are present;
 - mapping files use `raw_column`, `standard_name`, `type`, and `notes`;
 - mapping keys are nonblank and unique within each file;
 - `standard_name` values are unique and use snake case;
@@ -293,11 +321,11 @@ field mappings. They should not document individual records.
 ## Hidden Contract Checks
 
 ```{r contract-checks, include = FALSE}
-stopifnot(nrow(csv_inventory) == 14L)
-stopifnot(sum(csv_inventory$role == "codebook") == 8L)
-stopifnot(sum(csv_inventory$role == "mapping") == 6L)
-stopifnot(sum(csv_inventory$rows[csv_inventory$role == "codebook"]) == 225L)
-stopifnot(sum(csv_inventory$rows[csv_inventory$role == "mapping"]) == 715L)
+stopifnot(nrow(csv_inventory) == 22L)
+stopifnot(sum(csv_inventory$role == "codebook") == 12L)
+stopifnot(sum(csv_inventory$role == "mapping") == 10L)
+stopifnot(sum(csv_inventory$rows[csv_inventory$role == "codebook"]) == 267L)
+stopifnot(sum(csv_inventory$rows[csv_inventory$role == "mapping"]) == 755L)
 stopifnot(all(c("code", "name", "name_short") %in% names(alprek_delivery_types())))
 stopifnot(setequal(alprek_delivery_types()$code, c("P", "C", "H", "O", "F", "U", "S")))
 stopifnot(all(vapply(all_mappings, function(x) {

@@ -1,0 +1,7 @@
+process_name,kind_inferred,cycle_year,notes
+2026 - 2027 First Class Pre-K Classroom Renewal,renewal,2026-2027,Renewal of existing classroom from prior cycle
+2026 - 2027 First Class Pre-K New Classroom Application,new_app,2026-2027,Application for new classroom (not previously funded)
+2026-27 First Class Pre-K New Classroom,new_app,2026-2027,Observed short process label in cycle-1 ADECE export
+2026 - 2027 First Class Pre-K New Classroom Application - Round 2,new_app,2026-2027,Observed/planned Round 2 new-classroom variant
+2026 - 2027 First Class Pre-K Classroom Non-Renewal,non_renewal,2026-2027,Site declining renewal
+Show the Debugger Trace Report,noise,NA,"Junk row from ADECE export; should be filtered out at read"

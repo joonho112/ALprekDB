@@ -1,5 +1,144 @@
 # ALprekDB (development version)
 
+# ALprekDB 0.7.0 (2026-05-19)
+
+## Added — Applications module (new)
+
+This release adds a new **applications module** for processing the
+ADECE annual classroom-applications workbook (renewals, new
+applications, non-renewals, and per-site capacity). The module follows
+the same architecture as the existing budget, classroom, and student
+modules.
+
+* New read functions for the four input kinds:
+  `applications_read_renewals()`, `applications_read_new()`,
+  `applications_read_nonrenewal()`, `applications_read_capacity()`.
+  Each captures file SHA-256, git SHA, receipt date, sheet,
+  per-row `raw_row_index`, and a stable per-row `lineage_id` for
+  downstream tracing.
+* `applications_detect_format()` distinguishes cycle-1 (2026-2027) and
+  cycle-0 (2025-2026) formats by marker columns.
+* `applications_clean()` standardizes columns via codebook column
+  maps (one per kind per cycle), parses currency-aware numerics,
+  drops capacity report aggregate rows
+  (`rule = "drop_capacity_aggregate"`), and filters Debugger Trace
+  noise.
+* `applications_reconcile()` partitions every input row into one of
+  four buckets — A (renewal exact-match), B (renewal fuzzy-recovered
+  ≥ threshold), C (new fuzzy-matched to existing classroom), D
+  (truly new) — using Jaro-Winkler similarity blocked by county.
+  Every fuzzy decision plus up to three runner-up candidates is
+  logged in `$reconciliation_log` (the **audit chain**, with
+  `decision_source`, `decision_timestamp`, `decision_seed`,
+  `candidate_classroom_code`, `candidate_site_code`, `candidate_rank`,
+  `score_margin`).
+* `applications_validate()` runs 18 base data-contract checks across
+  the four input kinds and reconciled objects, plus linkage-specific
+  checks for classroom joins, unmatched buckets, row-lineage retention,
+  and diagnostic conservation. Validation uses structured ERROR / WARN
+  / INFO severity, row-level `$issues` accumulation, and fixture-backed
+  regression tests.
+* `applications_transform()` adds data-layer derived variables
+  (`is_renewal`, `is_new`, `cycle_year_std`, `applied_this_cycle`,
+  `tier_prev_dollars`, `tier_prev_rank`, `tier_prev_band`,
+  `capacity_utilization`, `waitlist_ratio`, `is_oversubscribed`) into
+  a new `alprek_applications_master` S3 object.
+* `applications_bind_years()` stacks multiple cycles into an
+  `alprek_applications_panel` preserving both applications-grain and
+  capacity-grain rows. `applications_track_classrooms()` summarizes
+  cross-cycle classroom presence.
+* Five export functions: `applications_export_csv()`,
+  `applications_export_parquet()`, `applications_export_excel()`,
+  `applications_export_rds()`, `applications_export_stata()`.
+* `linkage_applications_classroom()` joins applications context onto
+  the existing `alprek_classroom_panel`, preserving row-level lineage,
+  aggregating bucket C new applications at the matched site, and
+  producing an `alprek_applications_linkage` S3 with classroom-level
+  rows plus an `$unmatched_applications` slot for bucket D rows that
+  need downstream geocoding.
+* DuckDB persistence: `db_write_applications_master()`,
+  `db_read_applications_master()`, `db_write_applications_panel()`,
+  `db_read_applications_panel()`. Adds six new DuckDB tables
+  (`applications_clean`, `applications_capacity`,
+  `applications_panel`, `applications_capacity_panel`,
+  `applications_lineage`, `applications_derived_log`) that share the existing
+  `_alprek_column_types` registry.
+* `alprek_synthetic_applications()` generates synthetic 4-kind ADECE
+  applications input for vignettes, examples, and tests using the
+  same fake-code conventions as the other synthetic generators.
+* New codebooks under `inst/extdata/codebooks/`:
+  `applications_source_manifest.csv`, `applications_status_codes.csv`
+  (extended in this release with `2026 - 2027 First Class Pre-K New
+  Classroom Application - Round 2` and `2026-27 First Class Pre-K
+  New Classroom`), `applications_funding_types.csv` (extended with
+  `New Classroom Funding`, `Reduced Enrollment`, and
+  `Classroom Funding;Supplemental Funding`),
+  `applications_edge_cases.csv` (17 documented edge cases).
+* New column-map CSVs (cycle-1) under `inst/extdata/mappings/`:
+  `applications_column_map_renewals_cycle1.csv`,
+  `applications_column_map_new_cycle1.csv`,
+  `applications_column_map_nonrenewals_cycle1.csv` (positional),
+  `applications_column_map_capacity_cycle1.csv`.
+* New A6 vignette: `vignette("a6-applications-intake")` — end-to-end
+  walkthrough on synthetic data.
+* `R/utils-provenance.R`: `alprek_file_hash()`, `alprek_git_sha()`,
+  `alprek_provenance_record()`, internal `.alprek_lineage_id()` —
+  shared provenance helpers used by the applications module.
+* Application-specific tests cover validation, transform, panel,
+  export, linkage, DuckDB persistence, and env-gated real-data smoke
+  paths across seven test files
+  (`test-applications-validate.R`,
+  `test-applications-transform.R`,
+  `test-applications-panel.R`,
+  `test-applications-export.R`,
+  `test-applications-linkage.R`,
+  `test-applications-duckdb.R`,
+  `test-realdata-integration.R`).
+
+## Changed
+
+* DESCRIPTION now imports `stringdist` (for Jaro-Winkler fuzzy
+  matching) and `digest` (for stable per-row `lineage_id` hashes).
+* `_pkgdown.yml` adds an "Applications Module (v0.7.0)" reference
+  section and an A6 Applied Track entry.
+* README adds Applications rows to the data-coverage and module tables,
+  an applications quick-start, and an explicit out-of-scope declaration
+  for geocoding, ACS, and Bayesian tier estimation.
+* Reconciliation hardening: fuzzy matching scores normalized strings,
+  no-panel reconciliation requires explicit degraded mode, capacity
+  aggregate rows are dropped before the site-level layer, and stable
+  row-level `lineage_id` values are propagated through read, clean,
+  reconcile, transform, linkage, and DuckDB paths.
+
+## Out-of-scope (planned downstream packages)
+
+To keep this release focused on the data-contract layer, the
+following are intentionally **not** in v0.7.0:
+
+* Geocoding (three-source consensus, OSRM isochrone, ArcGIS fallback)
+* ACS area-weighted aggregation (tidycensus, census tracts, MOE → SE)
+* Bayesian small-area estimation of economic-need tiers
+* Tier binning (`ntile(gr, 6)`)
+* Posterior summary, credibility intervals
+* Address parsing beyond text normalization, lat/lon validation
+
+These are planned as separate `ALprek*` packages that will consume
+the applications-module output via the lineage chain
+(`lineage_id` → `application_id` → `matched_classroom_code` →
+`matched_site_code`).
+
+## Known limitations
+
+* Bucket D rows (truly new applications) have no
+  `matched_classroom_code` and no `matched_site_code`. They are
+  retained in `linkage_applications_classroom()` output's
+  `$unmatched_applications` slot for downstream geocoding to
+  resolve.
+* The `funding_type` and `process_name` codebooks now include
+  cycle-1 observed variants but may need further extension as
+  ADECE varies labels across future cycles. Unknown labels emit a
+  WARN, not an ERROR, by design.
+
 # ALprekDB 0.6.0 (2026-05-19)
 
 ## Major changes

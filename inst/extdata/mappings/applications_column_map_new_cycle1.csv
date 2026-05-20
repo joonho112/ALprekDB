@@ -1,0 +1,12 @@
+raw_column,standard_name,type,notes
+"Process Name","process_name","id","Cycle-1 added; categorizes application kind"
+"Region of Classroom","region","categorical","Region 1-9"
+"County of Classroom","county","categorical","Alabama county name"
+"Organization Name","organization_name","id","No cycle-year prefix in cycle-1 new sheet"
+"Project Name","project_name","id","Proposed classroom name"
+"Funding","funding_type","categorical","Funding category"
+"Type of Program","program_type","categorical","Public/Private/Head Start/etc"
+"Total Funding Request","total_funding_request","numeric","Requested funding in dollars"
+"26-27 Awards","award_other","numeric","Other-source award amount"
+"New Classroom Award","new_classroom_award","numeric","New classroom award amount"
+"TOTAL 26-27 Awards","total_award","numeric","Total awards for new classroom"

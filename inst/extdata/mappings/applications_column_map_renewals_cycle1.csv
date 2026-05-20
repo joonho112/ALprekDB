@@ -1,0 +1,16 @@
+raw_column,standard_name,type,notes
+Process Name,process_name,id,"Cycle-1 added; categorizes application kind (e.g. 2026-2027 First Class Pre-K Classroom Renewal)"
+Region of Classroom,region,categorical,Region 1-9
+County of Classroom,county,categorical,Alabama county name
+26/27 Organization Name,organization_name,id,Cycle year prefix; varies per cycle (e.g., 27/28 in next cycle)
+26/27 Project Name,project_name,id,Classroom name for current cycle
+26/27 Funding,funding_type,categorical,"Funding category (Classroom Funding / Supplemental / Reduced Capacity)"
+Type of Program,program_type,categorical,Public School / Private Child Care / Head Start / etc.
+25/26 Project Name,project_name_prior,id,Prior cycle classroom name (for linkage)
+25/26 Funding Type,funding_type_prior,categorical,Prior cycle funding type
+25/26 Award,award_prior,numeric,Prior cycle award amount in dollars
+Total 26/27 Funding Request,total_funding_request,numeric,Current cycle total funding request in dollars
+26-27 **DRAFT** Base Award,draft_base_award,numeric,ADECE draft base award (subject to adjustment)
+Tier-Adjustment,tier_adjustment,numeric,Adjustment based on prior cycle's economic-need tier (downstream Bayesian package output)
+26/27**DRAFT** AWARD,draft_award,numeric,Final draft award (base + adjustment)
+NOTES,notes,text,ADECE annotations

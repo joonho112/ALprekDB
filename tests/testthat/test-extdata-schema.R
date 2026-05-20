@@ -5,6 +5,16 @@ test_that("all expected extdata CSV files are present", {
                                     recursive = TRUE, full.names = TRUE)))
 
   expected <- sort(c(
+    # Applications module (v0.7.0)
+    "codebooks/applications_edge_cases.csv",
+    "codebooks/applications_funding_types.csv",
+    "codebooks/applications_source_manifest.csv",
+    "codebooks/applications_status_codes.csv",
+    "mappings/applications_column_map_capacity_cycle1.csv",
+    "mappings/applications_column_map_new_cycle1.csv",
+    "mappings/applications_column_map_nonrenewals_cycle1.csv",
+    "mappings/applications_column_map_renewals_cycle1.csv",
+    # Pre-existing modules (v0.6.0)
     "codebooks/budget_category_groups.csv",
     "codebooks/classroom_degree_patterns.csv",
     "codebooks/classroom_language_mapping.csv",

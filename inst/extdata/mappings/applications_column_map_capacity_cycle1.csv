@@ -1,0 +1,8 @@
+raw_column,standard_name,type,notes
+"Site Code","site_code","id","ADECE 10-character site code"
+"Site Name","site_name","id","Site name"
+"# of Classrooms At Site","n_classrooms","integer","Count of classrooms at site"
+"Current Site Enrollment","enrollment","integer","Currently enrolled children"
+"# Children Site Can Serve","capacity","integer","Maximum capacity (children site can serve)"
+"# Children Waitlisted, Pre-Registered, or Pending at Site","waitlist","integer","Children waitlisted/pre-registered/pending"
+"# Spaces Available at Site (and Children are waiting)","spaces_available_with_waitlist","integer","Spaces available even though children waiting"

@@ -1,0 +1,14 @@
+kind,filename_pattern,sheet,cycle_year,canonical_status,known_issues
+renewals,*Classroom Applications_tw*.xlsx,26-27 requests_TW,2026-2027,canonical,1496 rows; sheet name includes reviewer initials (TW) which may change between deliveries
+new_apps,*Classroom Applications_tw*.xlsx,26-27 new,2026-2027,canonical,122 rows; lowercase 'new' in sheet name; cycle-1 introduces combined-file layout
+non_renewals,*Classroom Applications_tw*.xlsx,Non-Renew,2026-2027,canonical,19 rows; new kind introduced in cycle-1 not present in cycle-0
+capacity,*Classroom Applications_tw*.xlsx,rptSite_ClassroomsWithAvailabil,2026-2027,canonical,830 rows; sheet name truncated at 31 chars (Excel limit); access report export
+regional_summary,*Classroom Applications_tw*.xlsx,Sheet1,2026-2027,supplementary,Regional aggregations only; derived from canonical sheets; not for module ingestion
+all_classrooms,*Classroom requests.xlsx,All Classrooms,2026-2027,supplementary,1617 rows = renewals + new_apps + non_renewals consolidated; redundant with canonical sources
+ask_summary,*Classroom requests.xlsx,Total Ask and Average,2026-2027,supplementary,Funding summary; aggregate financial view derived from All Classrooms
+prior_deliverable,*2025-2026 full application list_Added_Economic Needs.xlsx,Sheet1,2025-2026,reference,1589 rows; cycle-0 final deliverable bundled with cycle-1 drop; format template + YoY comparison
+renewals,2025-26 Application List.xlsx,NA,2025-2026,canonical,Cycle-0 separate-file pattern; deprecated in cycle-1 in favor of combined xlsx
+new_apps,2025-26 New Classroom Applications with Address2.xlsx,NA,2025-2026,canonical,Cycle-0; Alison-updated version supersedes original
+new_apps,2025-26 New Classroom Applications with Address.xlsx,NA,2025-2026,deprecated,Cycle-0; original superseded by Address2 (Alison manual updates)
+all_classrooms,2025-2026 full application list.xlsx,NA,2025-2026,supplementary,Cycle-0 raw consolidated list prior to economic-needs enrichment
+prior_deliverable,2025-2026 full application list_Added_Economic Needs.xlsx,NA,2025-2026,canonical,Cycle-0 final deliverable with economic needs columns

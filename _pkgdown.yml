@@ -47,6 +47,8 @@ navbar:
         href: articles/a4-duckdb-sql.html
       - text: A5 - Targets workflow
         href: articles/a5-targets-workflow.html
+      - text: A6 - Applications intake
+        href: articles/a6-applications-intake.html
       - text: '--- Methodological Track ---'
       - text: M1 - Architecture trilemma
         href: articles/m1-architecture-trilemma.html
@@ -87,6 +89,7 @@ articles:
     - a3-linkage-analysis
     - a4-duckdb-sql
     - a5-targets-workflow
+    - a6-applications-intake
 
   - title: Methodological Track
     desc: >
@@ -161,6 +164,49 @@ reference:
     - student_export_parquet
     - student_export_rds
     - student_export_stata
+
+  - title: Applications Module (v0.7.0)
+    desc: >
+      Reading, format detection, cleaning, fuzzy 4-bucket reconciliation,
+      validation (18 base checks plus linkage checks), derived variables, multi-cycle panel
+      binding, and 5-format export for ADECE annual classroom
+      applications workbooks. In-scope: data-contract layer only.
+      Out-of-scope (planned downstream packages): geocoding, ACS
+      integration, Bayesian SAE tier estimation.
+    contents:
+    - applications_config
+    - applications_read_renewals
+    - applications_read_new
+    - applications_read_nonrenewal
+    - applications_read_capacity
+    - applications_detect_format
+    - applications_clean
+    - applications_reconcile
+    - applications_validate
+    - applications_transform
+    - applications_bind_years
+    - applications_track_classrooms
+    - applications_export_csv
+    - applications_export_excel
+    - applications_export_parquet
+    - applications_export_rds
+    - applications_export_stata
+    - linkage_applications_classroom
+    - db_write_applications_master
+    - db_read_applications_master
+    - db_write_applications_panel
+    - db_read_applications_panel
+    - alprek_applications_status_codes
+    - alprek_applications_funding_types
+    - alprek_applications_source_manifest
+    - alprek_applications_renewal_map
+    - alprek_applications_new_map
+    - alprek_applications_nonrenewal_map
+    - alprek_applications_capacity_map
+    - alprek_synthetic_applications
+    - alprek_file_hash
+    - alprek_git_sha
+    - alprek_provenance_record
 
   - title: Linkage Construction
     desc: Cross-module joins, student aggregation, and master dataset creation

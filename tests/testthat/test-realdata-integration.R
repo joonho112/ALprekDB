@@ -71,6 +71,32 @@ alprek_realdata_template_functions <- function() {
   path
 }
 
+alprek_realdata_applications_file <- function() {
+  explicit <- Sys.getenv("ALPREKDB_APPLICATIONS_FILE", unset = "")
+  data_dir <- alprek_realdata_data_dir()
+  candidates <- character()
+  if (nzchar(explicit)) {
+    candidates <- c(candidates, explicit)
+    if (nzchar(data_dir)) {
+      candidates <- c(candidates, file.path(data_dir, explicit))
+    }
+  }
+  if (nzchar(data_dir)) {
+    candidates <- c(
+      candidates,
+      list.files(
+        data_dir,
+        pattern = "Classroom Applications.*[.]xlsx$",
+        recursive = TRUE,
+        full.names = TRUE
+      )
+    )
+  }
+  candidates <- candidates[file.exists(candidates)]
+  if (length(candidates) == 0L) return("")
+  normalizePath(candidates[[1]], mustWork = TRUE)
+}
+
 .alprek_realdata_cache <- new.env(parent = emptyenv())
 
 alprek_realdata_build <- function() {
@@ -332,4 +358,53 @@ test_that("env-gated real-data DuckDB round-trip preserves aggregate counts", {
   expect_equal(roundtrip_validation$n_warnings, 1L)
   expect_equal(roundtrip_validation$n_info, 4L)
   expect_true("2025-2026" %in% roundtrip$meta$coverage$missing_budget_years)
+})
+
+test_that("env-gated applications cycle-1 smoke passes aggregate contract", {
+  skip_if_not_alprek_realdata()
+  app_path <- alprek_realdata_applications_file()
+  skip_if(!nzchar(app_path),
+          "Set ALPREKDB_APPLICATIONS_FILE or place the applications workbook under ALPREKDB_DATA_DIR")
+
+  smoke <- alprek_realdata_build()
+
+  ren_raw <- applications_read_renewals(
+    app_path,
+    cycle_year = "2026-2027",
+    receipt_date = "2026-04-20"
+  )
+  new_raw <- applications_read_new(
+    app_path,
+    cycle_year = "2026-2027",
+    receipt_date = "2026-04-20"
+  )
+  cap_raw <- applications_read_capacity(
+    app_path,
+    cycle_year = "2026-2027",
+    receipt_date = "2026-04-20"
+  )
+
+  ren <- applications_clean(ren_raw)
+  new <- applications_clean(new_raw)
+  cap <- applications_clean(cap_raw)
+  rec <- applications_reconcile(
+    ren,
+    new,
+    prior_classroom_panel = smoke$classroom$panel,
+    fuzzy_threshold = 0.85,
+    seed = 20260519L
+  )
+  mst <- applications_transform(rec, capacity_clean = cap)
+  lk <- linkage_applications_classroom(
+    mst,
+    smoke$classroom$panel,
+    target_school_year = rec$meta$prior_school_year
+  )
+
+  expect_s3_class(mst, "alprek_applications_master")
+  expect_s3_class(lk, "alprek_applications_linkage")
+  expect_equal(nrow(mst$data), nrow(ren$data) + nrow(new$data))
+  expect_true(all(c("application_id", "lineage_id", "bucket") %in% names(mst$data)))
+  expect_equal(applications_validate(rec)$n_errors, 0L)
+  expect_equal(applications_validate(lk)$n_errors, 0L)
 })

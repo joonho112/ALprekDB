@@ -1,0 +1,7 @@
+funding_type,funding_category,notes
+Classroom Funding,classroom,Standard per-classroom funding (most common)
+Supplemental Funding,supplemental,Additional funding beyond base classroom
+Reduced Capacity Funding,reduced,"Funding adjusted for classrooms with reduced enrollment capacity"
+New Classroom Funding,classroom,Observed cycle-1 label for new classroom award funding
+Reduced Enrollment,reduced,Observed cycle-1 abbreviated reduced-enrollment funding label
+Classroom Funding;Supplemental Funding,combined,Observed combined ADECE annotation; preserve as codebook-valid but audit analytically downstream
