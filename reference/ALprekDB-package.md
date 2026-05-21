@@ -2,8 +2,9 @@
 
 A modular toolkit for processing, cleaning, validating, and managing
 Alabama First Class Pre-K (FCPK) administrative records. This package
-standardizes annual data processing workflows for budget, classroom, and
-student data files received from ADECE.
+standardizes annual data processing workflows for budget, classroom,
+student, applications, and geocode data files received from ADECE and
+from commercial-grade Melissa.com address-geocoding deliveries.
 
 ## Budget Module
 
@@ -148,6 +149,48 @@ The linkage module connects budget, classroom, and student data:
   [`linkage_export_parquet()`](https://joonho112.github.io/ALprekDB/reference/linkage_export_parquet.md):
   Multiple export formats
 
+## Geocode Module
+
+The geocode module integrates commercial-grade Melissa.com
+address-geocoding deliveries with the existing classroom and
+applications modules:
+
+- [`geocode_read()`](https://joonho112.github.io/ALprekDB/reference/geocode_read.md):
+  Import Melissa delivery workbooks with provenance capture
+
+- [`geocode_detect_format()`](https://joonho112.github.io/ALprekDB/reference/geocode_detect_format.md),
+  [`geocode_compare_deliveries()`](https://joonho112.github.io/ALprekDB/reference/geocode_compare_deliveries.md):
+  Identify Melissa delivery format and diff against a prior delivery
+
+- [`geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/geocode_clean.md):
+  Standardize columns and parse RESULTCODE / STATUSCODE
+
+- [`geocode_validate()`](https://joonho112.github.io/ALprekDB/reference/geocode_validate.md):
+  Codebook-driven data quality checks (15 checks)
+
+- [`geocode_reconcile()`](https://joonho112.github.io/ALprekDB/reference/geocode_reconcile.md),
+  [`geocode_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_followup_queue.md):
+  Reconcile Melissa against ADECE coordinates with a documented decision
+  matrix
+
+- [`geocode_transform()`](https://joonho112.github.io/ALprekDB/reference/geocode_transform.md):
+  Derived variables including `coord_model_status`
+
+- [`geocode_bind_years()`](https://joonho112.github.io/ALprekDB/reference/geocode_bind_years.md):
+  Multi-run geocode panels
+
+- [`geocode_export_csv()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_csv.md),
+  [`geocode_export_parquet()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_parquet.md),
+  [`geocode_export_excel()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_excel.md),
+  [`geocode_export_rds()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_rds.md),
+  [`geocode_export_stata()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_stata.md),
+  [`geocode_export_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_followup_queue.md):
+  Multiple export formats plus a dedicated PII-aware follow-up exporter
+
+- [`linkage_geocode_classroom()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_classroom.md),
+  [`linkage_geocode_applications()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_applications.md):
+  Cross-module linkage paths
+
 ## Database Module
 
 DuckDB-based persistent storage for processed panel data:
@@ -195,8 +238,14 @@ Generate realistic synthetic datasets for examples and vignettes:
 - [`alprek_synthetic_student()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_student.md):
   Synthetic student panel data (with derived variables)
 
-All three generators share classroom codes (via seed) enabling
-cross-module linkage with
+- [`alprek_synthetic_applications()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_applications.md):
+  Synthetic 4-kind applications data
+
+- [`alprek_synthetic_geocode()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_geocode.md):
+  Synthetic Melissa-shaped geocode data
+
+All generators share classroom codes (via seed) enabling cross-module
+linkage with
 [`linkage_create_master()`](https://joonho112.github.io/ALprekDB/reference/linkage_create_master.md).
 
 ## Codebooks
@@ -224,6 +273,24 @@ cross-module linkage with
 
 - [`alprek_student_delivery_mapping()`](https://joonho112.github.io/ALprekDB/reference/alprek_student_delivery_mapping.md):
   Student delivery type standardization
+
+- [`alprek_geocode_column_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_column_map.md):
+  Melissa column-name standardization
+
+- [`alprek_geocode_resultcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_resultcode_meaning.md):
+  Melissa RESULTCODE meanings
+
+- [`alprek_geocode_statuscode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_statuscode_meaning.md):
+  Melissa STATUSCODE meanings
+
+- [`alprek_geocode_errorcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_errorcode_meaning.md):
+  Melissa ERRORCODE meanings
+
+- [`alprek_geocode_al_fips_counties()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_al_fips_counties.md):
+  Alabama FIPS county codes
+
+- [`alprek_geocode_source_manifest()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_source_manifest.md):
+  Geocode delivery source manifest
 
 ## Utilities
 

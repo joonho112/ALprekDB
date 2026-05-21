@@ -8,11 +8,12 @@ articles:
   a4-duckdb-sql: a4-duckdb-sql.html
   a5-targets-workflow: a5-targets-workflow.html
   a6-applications-intake: a6-applications-intake.html
+  a7-geocoding-quality: a7-geocoding-quality.html
   m1-architecture-trilemma: m1-architecture-trilemma.html
   m2-validation-framework: m2-validation-framework.html
   m3-codebooks-mappings: m3-codebooks-mappings.html
   m4-privacy-provenance: m4-privacy-provenance.html
-last_built: 2026-05-20T12:43Z
+last_built: 2026-05-21T18:45Z
 urls:
   reference: https://joonho112.github.io/ALprekDB/reference
   article: https://joonho112.github.io/ALprekDB/articles

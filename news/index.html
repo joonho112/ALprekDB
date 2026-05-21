@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@
     <li><a class="dropdown-item" href="../articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="../articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
     <li><a class="dropdown-item" href="../articles/a6-applications-intake.html">A6 - Applications intake</a></li>
+    <li><a class="dropdown-item" href="../articles/a7-geocoding-quality.html">A7 - Geocoding quality</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="../articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="../articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -51,6 +52,75 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="alprekdb-development-version">ALprekDB (development version)<a class="anchor" aria-label="anchor" href="#alprekdb-development-version"></a></h2>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.0" id="alprekdb-080-2026-05-20">ALprekDB 0.8.0 (2026-05-20)<a class="anchor" aria-label="anchor" href="#alprekdb-080-2026-05-20"></a></h2>
+<div class="section level3">
+<h3 id="added--geocode-module-new-0-8-0">Added — Geocode module (new)<a class="anchor" aria-label="anchor" href="#added--geocode-module-new-0-8-0"></a></h3>
+<p>This release adds a new <strong>geocode module</strong> for integrating commercial-grade Melissa.com address-geocoding deliveries with the existing classroom and applications modules. The module follows the same architecture as the budget, classroom, student, and applications modules.</p>
+<ul><li>New R source files implement the full pipeline: <code>R/geocode-config.R</code>, <code>R/geocode-codebooks.R</code>, <code>R/geocode-read.R</code>, <code>R/geocode-detect.R</code>, <code>R/geocode-clean.R</code>, <code>R/geocode-validate.R</code>, <code>R/geocode-reconcile.R</code>, <code>R/geocode-transform.R</code>, <code>R/geocode-panel.R</code>, <code>R/geocode-export.R</code>, <code>R/utils-geo.R</code>, <code>R/linkage-geocode.R</code>, <code>R/db-geocode.R</code>, <code>R/data-synthetic-geocode.R</code> (14 files total).</li>
+<li>
+<code><a href="../reference/geocode_read.html">geocode_read()</a></code> ingests Melissa delivery workbooks and captures file SHA-256, git SHA, receipt date, sheet, per-row <code>raw_row_index</code>, and a stable per-row <code>lineage_id</code>.</li>
+<li>
+<code><a href="../reference/geocode_detect_format.html">geocode_detect_format()</a></code> distinguishes Melissa delivery variants by marker columns. <code><a href="../reference/geocode_compare_deliveries.html">geocode_compare_deliveries()</a></code> produces a delivery-to-delivery diff (row count, column drift, coordinate movement) so future Melissa runs can be reviewed against a documented baseline.</li>
+<li>
+<code><a href="../reference/geocode_clean.html">geocode_clean()</a></code> standardizes columns via the <code>geocode_column_map_melissa_v1</code> codebook and parses the Melissa RESULTCODE / STATUSCODE / ERRORCODE multi-value strings into validated character vectors.</li>
+<li>
+<code><a href="../reference/geocode_validate.html">geocode_validate()</a></code> runs 15 base data-contract checks including codebook-driven RESULTCODE and STATUSCODE membership, Alabama FIPS-county membership, and coordinate ranges. Validation uses structured ERROR / WARN / INFO severity, row-level <code>$issues</code> accumulation, and fixture-backed regression tests.</li>
+<li>
+<code><a href="../reference/geocode_reconcile.html">geocode_reconcile()</a></code> partitions every Melissa row against the ADECE classroom coordinates using a documented decision matrix (<code>Decision §11.x</code>): accept Melissa, retain ADECE, retain both, or flag for follow-up. <code><a href="../reference/geocode_followup_queue.html">geocode_followup_queue()</a></code> extracts rows for manual review and attaches privacy attributes because <code>site_street</code> contains full PII-sensitive addresses.</li>
+<li>
+<code><a href="../reference/geocode_transform.html">geocode_transform()</a></code> derives <code>coord_model_status</code> (a model-readiness gate) and other run-level variables on a new <code>alprek_geocode_master</code> S3 object.</li>
+<li>
+<code><a href="../reference/geocode_bind_years.html">geocode_bind_years()</a></code> stacks multiple Melissa runs into an <code>alprek_geocode_panel</code>.</li>
+<li>Six export functions: <code><a href="../reference/geocode_export_csv.html">geocode_export_csv()</a></code>, <code><a href="../reference/geocode_export_parquet.html">geocode_export_parquet()</a></code>, <code><a href="../reference/geocode_export_excel.html">geocode_export_excel()</a></code>, <code><a href="../reference/geocode_export_rds.html">geocode_export_rds()</a></code>, <code><a href="../reference/geocode_export_stata.html">geocode_export_stata()</a></code>, and <code><a href="../reference/geocode_export_followup_queue.html">geocode_export_followup_queue()</a></code> (dedicated PII-aware exporter for the manual-review queue).</li>
+<li>
+<code><a href="../reference/linkage_geocode_classroom.html">linkage_geocode_classroom()</a></code> joins reconciled geocode columns onto the existing <code>alprek_classroom_panel</code>, preserving row-level lineage and producing an <code>alprek_geocode_linkage_classroom</code> S3. <code><a href="../reference/linkage_geocode_applications.html">linkage_geocode_applications()</a></code> joins reconciled coordinates onto applications-master rows, enabling bucket-D follow-up paths.</li>
+<li>DuckDB persistence: <code><a href="../reference/db_write_geocode_clean.html">db_write_geocode_clean()</a></code>, <code><a href="../reference/db_read_geocode_clean.html">db_read_geocode_clean()</a></code>, <code><a href="../reference/db_write_geocode_reconciled.html">db_write_geocode_reconciled()</a></code>, <code><a href="../reference/db_read_geocode_reconciled.html">db_read_geocode_reconciled()</a></code>, <code><a href="../reference/db_write_geocode_panel.html">db_write_geocode_panel()</a></code>, <code><a href="../reference/db_read_geocode_panel.html">db_read_geocode_panel()</a></code>, <code><a href="../reference/db_write_geocode_lineage.html">db_write_geocode_lineage()</a></code>, <code><a href="../reference/db_read_geocode_lineage.html">db_read_geocode_lineage()</a></code>. Adds four new DuckDB tables that share the existing <code>_alprek_column_types</code> registry.</li>
+<li>
+<code><a href="../reference/alprek_synthetic_geocode.html">alprek_synthetic_geocode()</a></code> generates synthetic Melissa-shaped geocode rows for vignettes, examples, and tests using the same fake-code conventions as the other synthetic generators.</li>
+<li>
+<code><a href="../reference/alprek_haversine_m.html">alprek_haversine_m()</a></code> computes great-circle distances in meters between coordinate pairs (used by reconciliation and tests).</li>
+<li>Seven new codebooks under <code>inst/extdata/codebooks/</code>: <code>geocode_column_map_melissa_v1.csv</code>, <code>melissa_resultcode_codes.csv</code>, <code>melissa_statuscode_codes.csv</code>, <code>melissa_errorcode_codes.csv</code>, <code>geocode_al_fips_counties.csv</code>, <code>geocode_source_manifest.csv</code>, and <code>geocode_edge_cases.csv</code> (18 documented edge cases). The six public reference codebooks are paired with loaders: <code><a href="../reference/alprek_geocode_column_map.html">alprek_geocode_column_map()</a></code>, <code><a href="../reference/alprek_geocode_resultcode_meaning.html">alprek_geocode_resultcode_meaning()</a></code>, <code><a href="../reference/alprek_geocode_statuscode_meaning.html">alprek_geocode_statuscode_meaning()</a></code>, <code><a href="../reference/alprek_geocode_errorcode_meaning.html">alprek_geocode_errorcode_meaning()</a></code>, <code><a href="../reference/alprek_geocode_al_fips_counties.html">alprek_geocode_al_fips_counties()</a></code>, <code><a href="../reference/alprek_geocode_source_manifest.html">alprek_geocode_source_manifest()</a></code>. <code>geocode_edge_cases.csv</code> documents validation/reconciliation fixtures and is covered by extdata schema tests.</li>
+<li>New A7 vignette: <code><a href="../articles/a7-geocoding-quality.html">vignette("a7-geocoding-quality")</a></code> — end-to-end walkthrough on synthetic data, including delivery comparison, validation, reconciliation, follow-up queue export, and classroom-linkage diagnostics.</li>
+<li>Approximately 1,052 additional package test results relative to v0.7.0 cover read, format detection, cleaning, validation, reconciliation, transform, panel, export, linkage, DuckDB persistence, and end-to-end smoke paths.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-0-8-0">Changed<a class="anchor" aria-label="anchor" href="#changed-0-8-0"></a></h3>
+<ul><li>
+<code><a href="../reference/linkage_create_master.html">linkage_create_master()</a></code> signature is extended with two new optional arguments — <code>geocode = NULL</code> and <code>applications = NULL</code>. The change is <strong>backward compatible</strong>: calling with only the three v0.7.0 required panels produces output identical to v0.7.0.</li>
+<li>When <code>geocode</code> is supplied, <code>classroom_level</code> gains 12 prefixed <code>geocode_*</code> columns (the authoritative reconcile columns plus <code>geocode_run_id</code> and <code>geocode_lineage_id</code>). ADECE <code>latitude</code> / <code>longitude</code> columns are intentionally preserved alongside as an inspection escape-hatch.</li>
+<li>DESCRIPTION declares <code>geosphere</code> under <code>Suggests</code> (used by tests and by the haversine utility’s optional fallback path).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="out-of-scope-planned-downstream-releases-0-8-0">Out-of-scope (planned downstream releases)<a class="anchor" aria-label="anchor" href="#out-of-scope-planned-downstream-releases-0-8-0"></a></h3>
+<p>To keep this release focused on integrating a single commercial geocoding delivery into the data-contract layer, the following are intentionally <strong>not</strong> in v0.8.0:</p>
+<ul><li>Multi-source geocoding consensus</li>
+<li>ACS area-weighted aggregation (tidycensus, census tracts, MOE -&gt; SE)</li>
+<li>OSRM isochrone and travel-time analysis</li>
+<li>Bayesian small-area estimation of economic-need tiers</li>
+<li>Live geocoding API calls from R</li>
+</ul></div>
+<div class="section level3">
+<h3 id="scope-correction-from-v070-0-8-0">Scope correction (from v0.7.0)<a class="anchor" aria-label="anchor" href="#scope-correction-from-v070-0-8-0"></a></h3>
+<p>The v0.7.0 release notes declared geocoding “Out-of-scope (planned downstream packages)” with three sub-bullets: “three-source consensus, OSRM isochrone, ArcGIS fallback.” With the arrival of commercial-grade Melissa.com geocode coverage (delivery dated 2026-03-04), three-source consensus is no longer required for the data-contract layer. v0.8.0 integrates the Melissa delivery directly into ALprekDB as the geocode module. OSRM isochrone and multi-source consensus remain out-of-scope and are deferred to downstream releases.</p>
+</div>
+<div class="section level3">
+<h3 id="known-limitations-0-8-0">Known limitations<a class="anchor" aria-label="anchor" href="#known-limitations-0-8-0"></a></h3>
+<ul><li>The current release reconciles against a <strong>single</strong> Melissa delivery. Multi-source consensus is not implemented; rows where Melissa and ADECE disagree are routed through the follow-up queue rather than resolved by a third source.</li>
+<li>Melissa rows whose <code>RESULTCODE</code> includes <code>GS03</code> (Postal-level geocode rather than rooftop) are always flagged for follow-up. Empirical median ADECE-Melissa disagreement at <code>GS03</code> rows is approximately 4 km, well above the configured rooftop threshold.</li>
+<li>
+<code>site_street</code> is the full street address and is PII-sensitive. <code><a href="../reference/geocode_followup_queue.html">geocode_followup_queue()</a></code> returns an in-memory queue with privacy attributes; the dedicated <code><a href="../reference/geocode_export_followup_queue.html">geocode_export_followup_queue()</a></code> exporter writes the internal-use CSV header and defaults to <code>internal_use = TRUE</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="empirical-findings-0-8-0">Empirical findings<a class="anchor" aria-label="anchor" href="#empirical-findings-0-8-0"></a></h3>
+<ul><li>Median ADECE-Melissa distance across reconciled rows is approximately 102 m; 95% of rows are within approximately 3.66 km; 33 rows fall above the 10 km gross-disagreement cutoff and are routed to the follow-up queue.</li>
+<li>Site-year geocode rows are 80.1% <code>model_ready</code> on the v1 Melissa delivery. Classroom-year master rows are 63.3% <code>model_ready</code> after linkage because the classroom panel includes rows without a matched Melissa site-year record; this triggers the default model-ready validation warning by design.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="external-review-0-8-0">External review<a class="anchor" aria-label="anchor" href="#external-review-0-8-0"></a></h3>
+<ul><li>Incorporated findings from an external review of the v0.8.0 preview: added <code>coord_model_status</code> for downstream model-readiness gating; propagated row-level <code>lineage_id</code> across read, clean, reconcile, transform, panel, linkage, and DuckDB paths; switched RESULTCODE / STATUSCODE validation to codebook-driven membership rather than hard-coded lists; and tightened the follow-up queue’s PII defaults.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="alprekdb-070-2026-05-19">ALprekDB 0.7.0 (2026-05-19)<a class="anchor" aria-label="anchor" href="#alprekdb-070-2026-05-19"></a></h2>
@@ -89,7 +159,7 @@
 <li>
 <code>_pkgdown.yml</code> adds an “Applications Module (v0.7.0)” reference section and an A6 Applied Track entry.</li>
 <li>README adds Applications rows to the data-coverage and module tables, an applications quick-start, and an explicit out-of-scope declaration for geocoding, ACS, and Bayesian tier estimation.</li>
-<li>Reconciliation hardening: fuzzy matching scores normalized strings, no-panel reconciliation requires explicit degraded mode, capacity aggregate rows are dropped before the site-level layer, and stable row-level <code>lineage_id</code> values are propagated through read, clean, reconcile, transform, linkage, and DuckDB paths.</li>
+<li>External review remediation is reflected in code and tests: fuzzy matching scores normalized strings, no-panel reconciliation requires explicit degraded mode, capacity aggregate rows are dropped before the site-level layer, and stable row-level <code>lineage_id</code> values are propagated through read, clean, reconcile, transform, linkage, and DuckDB paths.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="out-of-scope-planned-downstream-packages-0-7-0">Out-of-scope (planned downstream packages)<a class="anchor" aria-label="anchor" href="#out-of-scope-planned-downstream-packages-0-7-0"></a></h3>

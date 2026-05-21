@@ -21,9 +21,10 @@ library(ALprekDB)
 
 ## Installed CSV Inventory
 
-The package ships 22 public CSV files in v0.7.0: 12 codebooks and 10
-column mappings. Eight of those files support the new Applications
-module.
+The package ships 29 public CSV files in v0.8.0: 19 codebooks and 10
+column mappings. Eight of those files support the Applications module
+(introduced in v0.7.0) and seven support the Geocode module (introduced
+in v0.8.0).
 
 ``` r
 
@@ -64,18 +65,25 @@ csv_inventory[order(csv_inventory$role, csv_inventory$file), ]
 #> 8                     codebooks/classroom_race_mapping.csv codebook   16      3
 #> 9                               codebooks/county_codes.csv codebook   67      3
 #> 10                       codebooks/delivery_type_codes.csv codebook    7      3
-#> 11             codebooks/student_delivery_type_mapping.csv codebook   16      2
-#> 12                      codebooks/student_race_mapping.csv codebook   15      3
-#> 13    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
-#> 14         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
-#> 15 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
-#> 16    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
-#> 17                   mappings/budget_column_map_legacy.csv  mapping    6      4
-#> 18                      mappings/budget_column_map_new.csv  mapping   12      4
-#> 19                mappings/classroom_column_map_legacy.csv  mapping  100      4
-#> 20                   mappings/classroom_column_map_new.csv  mapping  125      4
-#> 21                  mappings/student_column_map_legacy.csv  mapping  202      4
-#> 22                     mappings/student_column_map_new.csv  mapping  270      4
+#> 11                  codebooks/geocode_al_fips_counties.csv codebook   67      6
+#> 12             codebooks/geocode_column_map_melissa_v1.csv codebook   29      8
+#> 13                        codebooks/geocode_edge_cases.csv codebook   18     10
+#> 14                   codebooks/geocode_source_manifest.csv codebook    1     10
+#> 15                   codebooks/melissa_errorcode_codes.csv codebook   17      8
+#> 16                  codebooks/melissa_resultcode_codes.csv codebook    8     10
+#> 17                  codebooks/melissa_statuscode_codes.csv codebook    4      7
+#> 18             codebooks/student_delivery_type_mapping.csv codebook   16      2
+#> 19                      codebooks/student_race_mapping.csv codebook   15      3
+#> 20    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
+#> 21         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
+#> 22 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
+#> 23    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
+#> 24                   mappings/budget_column_map_legacy.csv  mapping    6      4
+#> 25                      mappings/budget_column_map_new.csv  mapping   12      4
+#> 26                mappings/classroom_column_map_legacy.csv  mapping  100      4
+#> 27                   mappings/classroom_column_map_new.csv  mapping  125      4
+#> 28                  mappings/student_column_map_legacy.csv  mapping  202      4
+#> 29                     mappings/student_column_map_new.csv  mapping  270      4
 ```
 
 ``` r
@@ -86,7 +94,7 @@ aggregate(
   FUN = sum
 )
 #>       role files rows
-#> 1 codebook    12  267
+#> 1 codebook    19  411
 #> 2  mapping    10  755
 ```
 
@@ -164,6 +172,17 @@ helpers <- list(
     file.path(ext_dir, "codebooks", "applications_edge_cases.csv"),
     stringsAsFactors = FALSE,
     check.names = FALSE
+  ),
+  geocode_column_map = alprek_geocode_column_map(),
+  geocode_resultcode = alprek_geocode_resultcode_meaning(),
+  geocode_statuscode = alprek_geocode_statuscode_meaning(),
+  geocode_errorcode = alprek_geocode_errorcode_meaning(),
+  geocode_al_fips = alprek_geocode_al_fips_counties(),
+  geocode_manifest = alprek_geocode_source_manifest(),
+  geocode_edge_cases = utils::read.csv(
+    file.path(ext_dir, "codebooks", "geocode_edge_cases.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
   )
 )
 
@@ -186,19 +205,33 @@ data.frame(
 #> 10    applications_funding    6
 #> 11   applications_manifest   13
 #> 12 applications_edge_cases   17
-#>                                                                                schema
-#> 1                                                              code, name, name_short
-#> 2                                                 county_code, county_name, fips_code
-#> 3                          pattern_type, regex, result, priority, teacher_role, notes
-#> 4                                              category_detail, category_group, notes
-#> 5                                               raw_value, standardized, factor_order
-#> 6                                                    raw_value, standardized, is_null
-#> 7                                               raw_value, standardized, factor_order
-#> 8                                                             raw_value, standardized
-#> 9                                      process_name, kind_inferred, cycle_year, notes
-#> 10                                              funding_type, funding_category, notes
-#> 11          kind, filename_pattern, sheet, cycle_year, canonical_status, known_issues
-#> 12 case_id, label, description, detection_rule, policy, severity, validate_check_name
+#> 13      geocode_column_map   29
+#> 14      geocode_resultcode    8
+#> 15      geocode_statuscode    4
+#> 16       geocode_errorcode   17
+#> 17         geocode_al_fips   67
+#> 18        geocode_manifest    1
+#> 19      geocode_edge_cases   18
+#>                                                                                                                                                                         schema
+#> 1                                                                                                                                                       code, name, name_short
+#> 2                                                                                                                                          county_code, county_name, fips_code
+#> 3                                                                                                                   pattern_type, regex, result, priority, teacher_role, notes
+#> 4                                                                                                                                       category_detail, category_group, notes
+#> 5                                                                                                                                        raw_value, standardized, factor_order
+#> 6                                                                                                                                             raw_value, standardized, is_null
+#> 7                                                                                                                                        raw_value, standardized, factor_order
+#> 8                                                                                                                                                      raw_value, standardized
+#> 9                                                                                                                               process_name, kind_inferred, cycle_year, notes
+#> 10                                                                                                                                       funding_type, funding_category, notes
+#> 11                                                                                                   kind, filename_pattern, sheet, cycle_year, canonical_status, known_issues
+#> 12                                                                                          case_id, label, description, detection_rule, policy, severity, validate_check_name
+#> 13                                                                               raw_col, std_col, dtype, source_group, is_required, observed_n_na, observed_n_distinct, notes
+#> 14            code, label, precision_tier, expected_accuracy_m, acceptable_for_master, observed_in_v080_input, observed_n_in_v080, paired_status_in_v080, source, retrieved_at
+#> 15                                                                                code, label, is_success, paired_resultcode_in_v080, observed_n_in_v080, source, retrieved_at
+#> 16                                                                            code, label, severity, meaning, observed_in_v080_input, observed_n_in_v080, source, retrieved_at
+#> 17                                                                                         fips_full, fips_state, fips_county, county_name, county_name_canonical_lower, state
+#> 18                                                             kind, filename_pattern, sheet, vendor, version, delivery_date, cycle_year, n_cols_expected, example_path, notes
+#> 19 case_id, label, description, detection_rule, expected_severity, expected_reconciler_lat_source, expected_needs_followup, fixture_name, policy_notes, observed_count_in_v080
 ```
 
 ## Codebooks as Boundary Objects
@@ -264,7 +297,11 @@ For example:
 - student cleaning uses student mappings, student race mappings, and
   student delivery-type mappings;
 - applications cleaning uses four cycle-1 column maps plus status-code,
-  funding-type, source-manifest, and edge-case codebooks.
+  funding-type, source-manifest, and edge-case codebooks;
+- geocode cleaning uses the Melissa column-map codebook together with
+  RESULTCODE / STATUSCODE / ERRORCODE meaning codebooks, the Alabama
+  FIPS county codebook, the geocode source manifest, and a geocode
+  edge-case codebook.
 
 The public mappings describe how raw field names are standardized; they
 should not contain row-level examples from real source data.
@@ -345,10 +382,10 @@ csv_inventory[
 #> 2                 codebooks/applications_funding_types.csv codebook    6      3
 #> 3               codebooks/applications_source_manifest.csv codebook   13      6
 #> 4                  codebooks/applications_status_codes.csv codebook    6      4
-#> 13    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
-#> 14         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
-#> 15 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
-#> 16    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
+#> 20    mappings/applications_column_map_capacity_cycle1.csv  mapping    7      4
+#> 21         mappings/applications_column_map_new_cycle1.csv  mapping   11      4
+#> 22 mappings/applications_column_map_nonrenewals_cycle1.csv  mapping    7      4
+#> 23    mappings/applications_column_map_renewals_cycle1.csv  mapping   15      4
 ```
 
 The non-renewal source sheet in cycle-1 is headerless, so
@@ -356,11 +393,41 @@ The non-renewal source sheet in cycle-1 is headerless, so
 `col_1`, `col_2`, … fields. Future cycles should add new cycle-specific
 mapping files rather than editing old maps in place.
 
+## Geocode Codebooks
+
+The v0.8.0 Geocode module adds seven public codebooks. All seven live in
+the `codebooks/` directory (the Melissa column map is stored as a
+codebook, not a mapping, because it has a Melissa-specific schema rather
+than the standard four-column mapping contract).
+
+``` r
+
+csv_inventory[
+  grepl("^codebooks/(geocode_|melissa_)", csv_inventory$file),
+  c("file", "role", "rows", "fields")
+]
+#>                                           file     role rows fields
+#> 11      codebooks/geocode_al_fips_counties.csv codebook   67      6
+#> 12 codebooks/geocode_column_map_melissa_v1.csv codebook   29      8
+#> 13            codebooks/geocode_edge_cases.csv codebook   18     10
+#> 14       codebooks/geocode_source_manifest.csv codebook    1     10
+#> 15       codebooks/melissa_errorcode_codes.csv codebook   17      8
+#> 16      codebooks/melissa_resultcode_codes.csv codebook    8     10
+#> 17      codebooks/melissa_statuscode_codes.csv codebook    4      7
+```
+
+The RESULTCODE / STATUSCODE / ERRORCODE codebooks drive validation.
+Rather than hard-coding valid codes,
+[`geocode_validate()`](https://joonho112.github.io/ALprekDB/reference/geocode_validate.md)
+reads the codebooks and flags any row whose parsed codes are not present
+in the corresponding codebook. This keeps validation in step with
+Melissa documentation changes without R-code edits.
+
 ## Mapping Contracts
 
 The tests enforce these contracts:
 
-- all 22 expected CSV files are present;
+- all 29 expected CSV files are present;
 - mapping files use `raw_column`, `standard_name`, `type`, and `notes`;
 - mapping keys are nonblank and unique within each file;
 - `standard_name` values are unique and use snake case;

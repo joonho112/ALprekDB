@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@
     <li><a class="dropdown-item" href="../articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="../articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
     <li><a class="dropdown-item" href="../articles/a6-applications-intake.html">A6 - Applications intake</a></li>
+    <li><a class="dropdown-item" href="../articles/a7-geocoding-quality.html">A7 - Geocoding quality</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="../articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="../articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -659,6 +660,253 @@
         </dt>
         <dd>Construct a Provenance Record</dd>
       </dl></div><div class="section level2">
+      <h2 id="geocode-module-v-">Geocode Module (v0.8.0)<a class="anchor" aria-label="anchor" href="#geocode-module-v-"></a></h2>
+
+      <div class="section-desc"><p>Reading, format detection and delivery comparison, cleaning, validation (codebook-driven RESULTCODE / STATUSCODE checks), reconciliation against ADECE coordinates with a documented decision matrix, derived variables (including <code>coord_model_status</code>), multi-run panel binding, 5-format export plus a dedicated follow-up-queue exporter, classroom and applications linkage, DuckDB persistence, and Melissa.com codebook loaders. In-scope: commercial-grade single-source geocoding integration. Out-of-scope (planned downstream releases): multi-source consensus, ACS area-weighted aggregation, OSRM isochrone, Bayesian small-area estimation, live geocoding API.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="geocode_config.html">geocode_config()</a></code>
+
+        </dt>
+        <dd>Create a Geocoding Processing Configuration</dd>
+
+        <dt>
+
+          <code><a href="geocode_read.html">geocode_read()</a></code>
+
+        </dt>
+        <dd>Read Melissa-Returned Geocoded Master File</dd>
+
+        <dt>
+
+          <code><a href="geocode_detect_format.html">geocode_detect_format()</a></code>
+
+        </dt>
+        <dd>Detect Melissa Geocode File Format</dd>
+
+        <dt>
+
+          <code><a href="geocode_compare_deliveries.html">geocode_compare_deliveries()</a></code>
+
+        </dt>
+        <dd>Compare Two Melissa Geocode Deliveries</dd>
+
+        <dt>
+
+          <code><a href="geocode_clean.html">geocode_clean()</a></code>
+
+        </dt>
+        <dd>Clean Melissa-Returned Geocoded Master Data</dd>
+
+        <dt>
+
+          <code><a href="geocode_validate.html">geocode_validate()</a></code>
+
+        </dt>
+        <dd>Validate Cleaned Geocode Data</dd>
+
+        <dt>
+
+          <code><a href="geocode_reconcile.html">geocode_reconcile()</a></code>
+
+        </dt>
+        <dd>Reconcile ADECE and Melissa Geocoded Coordinates (Step 4.3)</dd>
+
+        <dt>
+
+          <code><a href="geocode_followup_queue.html">geocode_followup_queue()</a></code>
+
+        </dt>
+        <dd>Build a Follow-Up Queue From a Reconciled Geocode Object (Step 4.4)</dd>
+
+        <dt>
+
+          <code><a href="geocode_transform.html">geocode_transform()</a></code>
+
+        </dt>
+        <dd>Transform Reconciled Geocode Data Into Master Object (Step 5.1)</dd>
+
+        <dt>
+
+          <code><a href="geocode_bind_years.html">geocode_bind_years()</a></code>
+
+        </dt>
+        <dd>Bind Multiple Geocode Master Snapshots Into a Panel (Step 5.2)</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_csv.html">geocode_export_csv()</a></code>
+
+        </dt>
+        <dd>Export Geocode Master / Panel / Reconciled Data to CSV</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_parquet.html">geocode_export_parquet()</a></code>
+
+        </dt>
+        <dd>Export Geocode Master / Panel / Reconciled Data to Parquet</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_excel.html">geocode_export_excel()</a></code>
+
+        </dt>
+        <dd>Export Geocode Master / Panel / Reconciled Data to Excel</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_rds.html">geocode_export_rds()</a></code>
+
+        </dt>
+        <dd>Export Geocode Object to RDS</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_stata.html">geocode_export_stata()</a></code>
+
+        </dt>
+        <dd>Export Geocode Master / Panel / Reconciled Data to Stata (.dta)</dd>
+
+        <dt>
+
+          <code><a href="geocode_export_followup_queue.html">geocode_export_followup_queue()</a></code>
+
+        </dt>
+        <dd>Export the Geocode Follow-Up Queue as a Production-Ready CSV</dd>
+
+        <dt>
+
+          <code><a href="linkage_geocode_classroom.html">linkage_geocode_classroom()</a></code>
+
+        </dt>
+        <dd>Link Geocode Panel to Classroom Panel (Step 6.1)</dd>
+
+        <dt>
+
+          <code><a href="linkage_geocode_applications.html">linkage_geocode_applications()</a></code>
+
+        </dt>
+        <dd>Link Geocode Panel to Applications Master (Step 6.1)</dd>
+
+        <dt>
+
+          <code><a href="db_write_geocode_clean.html">db_write_geocode_clean()</a></code>
+
+        </dt>
+        <dd>Write a cleaned geocode object to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_geocode_clean.html">db_read_geocode_clean()</a></code>
+
+        </dt>
+        <dd>Read a cleaned geocode object back from DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_write_geocode_reconciled.html">db_write_geocode_reconciled()</a></code>
+
+        </dt>
+        <dd>Write a reconciled geocode object to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_geocode_reconciled.html">db_read_geocode_reconciled()</a></code>
+
+        </dt>
+        <dd>Read a reconciled geocode object back from DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_write_geocode_panel.html">db_write_geocode_panel()</a></code>
+
+        </dt>
+        <dd>Write a geocode panel to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_geocode_panel.html">db_read_geocode_panel()</a></code>
+
+        </dt>
+        <dd>Read a geocode panel from DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_write_geocode_lineage.html">db_write_geocode_lineage()</a></code>
+
+        </dt>
+        <dd>Write a geocode lineage row to DuckDB</dd>
+
+        <dt>
+
+          <code><a href="db_read_geocode_lineage.html">db_read_geocode_lineage()</a></code>
+
+        </dt>
+        <dd>Read the geocode lineage table</dd>
+
+        <dt>
+
+          <code><a href="alprek_synthetic_geocode.html">alprek_synthetic_geocode()</a></code>
+
+        </dt>
+        <dd>Generate Synthetic Geocoded Master Data</dd>
+
+        <dt>
+
+          <code><a href="alprek_haversine_m.html">alprek_haversine_m()</a></code>
+
+        </dt>
+        <dd>Haversine Great-Circle Distance in Meters</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_column_map.html">alprek_geocode_column_map()</a></code>
+
+        </dt>
+        <dd>Load Geocode Melissa Column Map (v1)</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_resultcode_meaning.html">alprek_geocode_resultcode_meaning()</a></code>
+
+        </dt>
+        <dd>Load Melissa RESULTCODE Meaning Table</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_statuscode_meaning.html">alprek_geocode_statuscode_meaning()</a></code>
+
+        </dt>
+        <dd>Load Melissa STATUSCODE Meaning Table</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_errorcode_meaning.html">alprek_geocode_errorcode_meaning()</a></code>
+
+        </dt>
+        <dd>Load Melissa ERRORCODE Meaning Table</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_al_fips_counties.html">alprek_geocode_al_fips_counties()</a></code>
+
+        </dt>
+        <dd>Load Alabama County FIPS Reference Table</dd>
+
+        <dt>
+
+          <code><a href="alprek_geocode_source_manifest.html">alprek_geocode_source_manifest()</a></code>
+
+        </dt>
+        <dd>Load Geocode Source Manifest</dd>
+      </dl></div><div class="section level2">
       <h2 id="linkage-construction">Linkage Construction<a class="anchor" aria-label="anchor" href="#linkage-construction"></a></h2>
 
       <div class="section-desc"><p>Cross-module joins, student aggregation, and master dataset creation</p></div>
@@ -1122,6 +1370,83 @@
 
         </dt>
         <dd>Print method for alprek_classroom_validation</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_clean.html">print(<i>&lt;alprek_geocode_clean&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_geocode_clean</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_config.html">print(<i>&lt;alprek_geocode_config&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_geocode_config</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_delivery_diff.html">print(<i>&lt;alprek_geocode_delivery_diff&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_geocode_delivery_diff</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_format_detection.html">print(<i>&lt;alprek_geocode_format_detection&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_geocode_format_detection</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_linkage_applications.html">print(<i>&lt;alprek_geocode_linkage_applications&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_linkage_applications</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_linkage_classroom.html">print(<i>&lt;alprek_geocode_linkage_classroom&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_linkage_classroom</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_master.html">print(<i>&lt;alprek_geocode_master&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_master</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_panel.html">print(<i>&lt;alprek_geocode_panel&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_panel</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_raw.html">print(<i>&lt;alprek_geocode_raw&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for alprek_geocode_raw</dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_reconciled.html">print(<i>&lt;alprek_geocode_reconciled&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_reconciled</code></dd>
+
+        <dt>
+
+          <code><a href="print.alprek_geocode_validation.html">print(<i>&lt;alprek_geocode_validation&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for <code>alprek_geocode_validation</code></dd>
 
         <dt>
 

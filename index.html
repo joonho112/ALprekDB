@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ALprekDB</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
     <li><a class="dropdown-item" href="articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
     <li><a class="dropdown-item" href="articles/a6-applications-intake.html">A6 - Applications intake</a></li>
+    <li><a class="dropdown-item" href="articles/a7-geocoding-quality.html">A7 - Geocoding quality</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>--- Methodological Track ---</h6></li>
     <li><a class="dropdown-item" href="articles/m1-architecture-trilemma.html">M1 - Architecture trilemma</a></li>
     <li><a class="dropdown-item" href="articles/m2-validation-framework.html">M2 - Validation framework</a></li>
@@ -87,15 +88,16 @@
 <li>standardize annual ADECE Excel files across changing source formats;</li>
 <li>build longitudinal budget, classroom, and student panels;</li>
 <li>create classroom- and student-level linked master datasets;</li>
+<li>integrate commercial-grade geocoding via Melissa.com deliveries with documented reconciliation and follow-up queues;</li>
 <li>record validation, linkage, orphan, and coverage diagnostics;</li>
 <li>support SQL-friendly DuckDB outputs for downstream analysis;</li>
 <li>separate public package documentation from private real-data processing.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="data-coverage-in-v070">Data Coverage in v0.7.0<a class="anchor" aria-label="anchor" href="#data-coverage-in-v070"></a>
+<h2 id="data-coverage-in-v080">Data Coverage in v0.8.0<a class="anchor" aria-label="anchor" href="#data-coverage-in-v080"></a>
 </h2>
-<p>The v0.7.0 real-data manifest uses asymmetric coverage because the currently available source set spans different ranges per module.</p>
+<p>The v0.8.0 real-data manifest uses asymmetric coverage because the currently available source set spans different ranges per module.</p>
 <table class="table">
 <colgroup>
 <col width="15%">
@@ -124,10 +126,15 @@
 <td>Student PII is excluded by default in private workflows.</td>
 </tr>
 <tr>
+<td>Applications (new in v0.7.0)</td>
+<td>Cycle-1 (2026-2027)</td>
+<td>Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook.</td>
+</tr>
+<tr>
 <td>
-<strong>Applications</strong> (new in v0.7.0)</td>
-<td><strong>Cycle-1 (2026-2027)</strong></td>
-<td>Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook. <strong>Out-of-scope this release:</strong> geocoding, ACS integration, Bayesian tier estimation — those are planned as separate downstream packages.</td>
+<strong>Geocode</strong> (new in v0.8.0)</td>
+<td><strong>Melissa delivery 2026-03-04</strong></td>
+<td>Single commercial-grade Melissa.com geocoding delivery reconciled against ADECE classroom coordinates with a documented decision matrix and follow-up queue. <strong>Out-of-scope this release:</strong> multi-source consensus, ACS area-weighted aggregation, OSRM isochrone, Bayesian small-area tier estimation, and live geocoding API calls — those are deferred to downstream releases.</td>
 </tr>
 </tbody>
 </table>
@@ -173,7 +180,7 @@
 <div class="section level2">
 <h2 id="quick-start-applications-module">Quick Start: Applications Module<a class="anchor" aria-label="anchor" href="#quick-start-applications-module"></a>
 </h2>
-<p>The applications module starts from ADECE’s annual classroom-applications workbook and keeps geocoding / ACS / Bayesian tier estimation outside this package. For a private cycle-1 run, pair the applications workbook with an existing classroom panel:</p>
+<p>The applications module starts from ADECE’s annual classroom-applications workbook and keeps ACS aggregation and Bayesian tier estimation outside this package. Geocoding is handled by the v0.8.0 geocode module. For a private cycle-1 run, pair the applications workbook with an existing classroom panel:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ALPREKDB_APPLICATIONS_FILE"</span><span class="op">)</span></span>
 <span></span>
@@ -200,11 +207,44 @@
 <p>For a public synthetic walkthrough that does not require ADECE files, see <code><a href="articles/a6-applications-intake.html">vignette("a6-applications-intake", package = "ALprekDB")</a></code>.</p>
 </div>
 <div class="section level2">
+<h2 id="quick-start-geocode-module">Quick Start: Geocode Module<a class="anchor" aria-label="anchor" href="#quick-start-geocode-module"></a>
+</h2>
+<p>The geocode module can be exercised with synthetic Melissa-shaped data. This round-trips through an in-memory workbook so the public workflow uses the same <code><a href="reference/geocode_read.html">geocode_read()</a></code> entry point as a private Melissa delivery.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://joonho112.github.io/ALprekDB/">ALprekDB</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".xlsx"</span><span class="op">)</span></span>
+<span><span class="fu">openxlsx</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/openxlsx/man/write.xlsx.html" class="external-link">write.xlsx</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="reference/alprek_synthetic_geocode.html">alprek_synthetic_geocode</a></span><span class="op">(</span>n_sites <span class="op">=</span> <span class="fl">5</span>, n_years <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span>,</span>
+<span>  <span class="va">path</span>,</span>
+<span>  sheetName <span class="op">=</span> <span class="st">"Sheet1"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_read.html">geocode_read</a></span><span class="op">(</span></span>
+<span>  <span class="va">path</span>,</span>
+<span>  cycle_year <span class="op">=</span> <span class="st">"2026-2027"</span>,</span>
+<span>  receipt_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2026-03-04"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_clean.html">geocode_clean</a></span><span class="op">(</span><span class="va">raw</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/geocode_validate.html">geocode_validate</a></span><span class="op">(</span><span class="va">clean</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_config.html">geocode_config</a></span><span class="op">(</span></span>
+<span>  path <span class="op">=</span> <span class="va">path</span>,</span>
+<span>  cycle_year <span class="op">=</span> <span class="st">"2026-2027"</span>,</span>
+<span>  delivery_date <span class="op">=</span> <span class="st">"2026-03-04"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_reconcile.html">geocode_reconcile</a></span><span class="op">(</span><span class="va">clean</span>, config <span class="op">=</span> <span class="va">cfg</span><span class="op">)</span></span>
+<span><span class="va">geo_master</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_transform.html">geocode_transform</a></span><span class="op">(</span><span class="va">rec</span>, config <span class="op">=</span> <span class="va">cfg</span><span class="op">)</span></span>
+<span><span class="va">geo_panel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/geocode_bind_years.html">geocode_bind_years</a></span><span class="op">(</span><span class="va">geo_master</span><span class="op">)</span></span></code></pre></div>
+<p>For a full quality-control walkthrough, see <code><a href="articles/a7-geocoding-quality.html">vignette("a7-geocoding-quality", package = "ALprekDB")</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="private-real-data-workflow">Private Real-Data Workflow<a class="anchor" aria-label="anchor" href="#private-real-data-workflow"></a>
 </h2>
 <p>Raw ADECE files are not distributed with ALprekDB and should not be committed to GitHub, included in package builds, or rendered into public pkgdown pages. For private processing, keep raw files in a local source directory such as <code>ORIGINAL-DATA/</code> or another directory referenced by <code>ALPREKDB_DATA_DIR</code>.</p>
 <p>The package includes a <code>targets</code> workflow template:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">template_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"templates"</span>, <span class="st">"targets"</span>, package <span class="op">=</span> <span class="st">"ALprekDB"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"alprekdb-private-workflow"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -214,14 +254,14 @@
 <span>  recursive <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>From the private workflow directory, configure paths with environment variables:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_RUN_REALDATA</span><span class="op">=</span>1</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_DATA_DIR</span><span class="op">=</span><span class="st">"/path/to/local/ADECE/source/files"</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_OUTPUT_DIR</span><span class="op">=</span><span class="st">"output/alprekdb"</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_RUN_REALDATA</span><span class="op">=</span>1</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_DATA_DIR</span><span class="op">=</span><span class="st">"/path/to/local/ADECE/source/files"</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_OUTPUT_DIR</span><span class="op">=</span><span class="st">"output/alprekdb"</span></span></code></pre></div>
 <p>Then run:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">targets</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/targets/reference/tar_make.html" class="external-link">tar_make</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The private workflow keeps student PII out of processed student panels by default. Row-level RDS outputs and DuckDB writes require an explicit local opt-in:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_WRITE_OUTPUTS</span><span class="op">=</span>1</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="bu">export</span> <span class="va">ALPREKDB_WRITE_OUTPUTS</span><span class="op">=</span>1</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="modules">Modules<a class="anchor" aria-label="anchor" href="#modules"></a>
@@ -259,13 +299,18 @@
 <td>Application-grain master data, capacity-grain data, reconciliation audit logs, linkage outputs, and DuckDB tables.</td>
 </tr>
 <tr>
+<td>Geocode</td>
+<td>Read, detect, compare, clean, validate, reconcile, transform, bind, export, and persist Melissa.com commercial-grade geocoding deliveries against ADECE classroom coordinates.</td>
+<td>Reconciled site-level coordinates, follow-up queue, multi-run geocode panels, linkage outputs (classroom + applications), and DuckDB tables.</td>
+</tr>
+<tr>
 <td>Transform</td>
 <td>Derive analytic student measures such as gains, readiness, chronic absence, and risk indicators.</td>
 <td>Enriched student panels.</td>
 </tr>
 <tr>
 <td>Linkage</td>
-<td>Join budget, classroom, and student panels with explicit orphan and coverage diagnostics.</td>
+<td>Join budget, classroom, student, geocode, and applications panels with explicit orphan and coverage diagnostics.</td>
 <td>Classroom-level and student-level master datasets.</td>
 </tr>
 <tr>
@@ -286,8 +331,8 @@
 <h2 id="privacy-and-provenance-guardrails">Privacy and Provenance Guardrails<a class="anchor" aria-label="anchor" href="#privacy-and-provenance-guardrails"></a>
 </h2>
 <ul>
-<li>Do not commit raw ADECE files, <code>_targets/</code> caches, row-level exports, local DuckDB databases, or private output folders.</li>
-<li>Use <code><a href="reference/alprek_synthetic_budget.html">alprek_synthetic_budget()</a></code>, <code><a href="reference/alprek_synthetic_classroom.html">alprek_synthetic_classroom()</a></code>, and <code><a href="reference/alprek_synthetic_student.html">alprek_synthetic_student()</a></code> for public examples; these generators use fake <code>9xx</code> classroom-code prefixes and synthetic county labels.</li>
+<li>Do not commit raw ADECE files, <code>_targets/</code> caches, row-level exports, local DuckDB databases, <code>output/geocode/</code> follow-up queues, or private output folders.</li>
+<li>Use <code><a href="reference/alprek_synthetic_budget.html">alprek_synthetic_budget()</a></code>, <code><a href="reference/alprek_synthetic_classroom.html">alprek_synthetic_classroom()</a></code>, and <code><a href="reference/alprek_synthetic_student.html">alprek_synthetic_student()</a></code> for public examples; use <code><a href="reference/alprek_synthetic_geocode.html">alprek_synthetic_geocode()</a></code> for public geocode examples. These generators use fake <code>9xx</code> classroom-code prefixes or <code>999P</code> site-code prefixes and synthetic county labels.</li>
 <li>Treat all real student-level outputs as confidential, even when direct PII columns are excluded.</li>
 <li>Keep real-data paths in environment variables rather than committed scripts.</li>
 <li>Report only aggregate diagnostics, validation summaries, and non-disclosive counts in public documentation.</li>
@@ -306,6 +351,8 @@
 <li><a href="articles/a3-linkage-analysis.html">A3 - Linkage analysis</a></li>
 <li><a href="articles/a4-duckdb-sql.html">A4 - DuckDB and SQL</a></li>
 <li><a href="articles/a5-targets-workflow.html">A5 - Targets workflow</a></li>
+<li><a href="articles/a6-applications-intake.html">A6 - Applications intake</a></li>
+<li><a href="articles/a7-geocoding-quality.html">A7 - Geocoding quality</a></li>
 </ul>
 </div>
 <div class="section level3">
@@ -334,7 +381,7 @@
 <code>NN</code> = classroom number within site.</li>
 </ul>
 <p>The example below uses fake <code>9xx</code> prefixes and <code>9xxxxx</code> program codes for public documentation.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/parse_classroom_codes.html">parse_classroom_codes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"901P900001.01"</span>, <span class="st">"967H900002.02"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Delivery type codes are defined by <code><a href="reference/alprek_delivery_types.html">alprek_delivery_types()</a></code>:</p>
 <table class="table">
@@ -382,7 +429,10 @@
 <li>Synthetic data are fabricated for demonstration and testing; they should not be interpreted as Alabama program estimates.</li>
 <li>The 2025-26 budget file is not available in the current source scope, so 2025-26 classroom and student records are retained with explicit missing budget coverage.</li>
 <li>Validation checks are advisory diagnostics, not a substitute for substantive review of analysis choices.</li>
-<li>Bucket D applications are retained without <code>matched_classroom_code</code> / <code>matched_site_code</code> so downstream geocoding packages can resolve them from organization, project, and county fields.</li>
+<li>Bucket D applications are retained without <code>matched_classroom_code</code> / <code>matched_site_code</code>; the v0.8.0 geocode module is the primary downstream path for wiring these against reconciled coordinates.</li>
+<li>The v0.8.0 geocode module reconciles a <strong>single</strong> Melissa.com delivery against ADECE coordinates; multi-source consensus, ACS aggregation, OSRM isochrone, Bayesian tier estimation, and live geocoding API calls remain out-of-scope and are deferred to downstream releases.</li>
+<li>
+<code>site_street</code> is PII-sensitive; <code><a href="reference/geocode_followup_queue.html">geocode_followup_queue()</a></code> returns an in-memory queue with privacy attributes, and <code><a href="reference/geocode_export_followup_queue.html">geocode_export_followup_queue()</a></code> writes <code>output/geocode/sites_needing_geocoding_&lt;cycle&gt;.csv</code> with an internal-use header and <code>internal_use = TRUE</code> by default.</li>
 <li>Real-data processing depends on local file access and the canonical source manifest; paths and outputs should remain outside public repositories.</li>
 </ul>
 </div>

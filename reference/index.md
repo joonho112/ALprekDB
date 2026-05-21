@@ -191,6 +191,88 @@ Bayesian SAE tier estimation.
 - [`alprek_provenance_record()`](https://joonho112.github.io/ALprekDB/reference/alprek_provenance_record.md)
   : Construct a Provenance Record
 
+## Geocode Module (v0.8.0)
+
+Reading, format detection and delivery comparison, cleaning, validation
+(codebook-driven RESULTCODE / STATUSCODE checks), reconciliation against
+ADECE coordinates with a documented decision matrix, derived variables
+(including `coord_model_status`), multi-run panel binding, 5-format
+export plus a dedicated follow-up-queue exporter, classroom and
+applications linkage, DuckDB persistence, and Melissa.com codebook
+loaders. In-scope: commercial-grade single-source geocoding integration.
+Out-of-scope (planned downstream releases): multi-source consensus, ACS
+area-weighted aggregation, OSRM isochrone, Bayesian small-area
+estimation, live geocoding API.
+
+- [`geocode_config()`](https://joonho112.github.io/ALprekDB/reference/geocode_config.md)
+  : Create a Geocoding Processing Configuration
+- [`geocode_read()`](https://joonho112.github.io/ALprekDB/reference/geocode_read.md)
+  : Read Melissa-Returned Geocoded Master File
+- [`geocode_detect_format()`](https://joonho112.github.io/ALprekDB/reference/geocode_detect_format.md)
+  : Detect Melissa Geocode File Format
+- [`geocode_compare_deliveries()`](https://joonho112.github.io/ALprekDB/reference/geocode_compare_deliveries.md)
+  : Compare Two Melissa Geocode Deliveries
+- [`geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/geocode_clean.md)
+  : Clean Melissa-Returned Geocoded Master Data
+- [`geocode_validate()`](https://joonho112.github.io/ALprekDB/reference/geocode_validate.md)
+  : Validate Cleaned Geocode Data
+- [`geocode_reconcile()`](https://joonho112.github.io/ALprekDB/reference/geocode_reconcile.md)
+  : Reconcile ADECE and Melissa Geocoded Coordinates (Step 4.3)
+- [`geocode_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_followup_queue.md)
+  : Build a Follow-Up Queue From a Reconciled Geocode Object (Step 4.4)
+- [`geocode_transform()`](https://joonho112.github.io/ALprekDB/reference/geocode_transform.md)
+  : Transform Reconciled Geocode Data Into Master Object (Step 5.1)
+- [`geocode_bind_years()`](https://joonho112.github.io/ALprekDB/reference/geocode_bind_years.md)
+  : Bind Multiple Geocode Master Snapshots Into a Panel (Step 5.2)
+- [`geocode_export_csv()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_csv.md)
+  : Export Geocode Master / Panel / Reconciled Data to CSV
+- [`geocode_export_parquet()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_parquet.md)
+  : Export Geocode Master / Panel / Reconciled Data to Parquet
+- [`geocode_export_excel()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_excel.md)
+  : Export Geocode Master / Panel / Reconciled Data to Excel
+- [`geocode_export_rds()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_rds.md)
+  : Export Geocode Object to RDS
+- [`geocode_export_stata()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_stata.md)
+  : Export Geocode Master / Panel / Reconciled Data to Stata (.dta)
+- [`geocode_export_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_followup_queue.md)
+  : Export the Geocode Follow-Up Queue as a Production-Ready CSV
+- [`linkage_geocode_classroom()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_classroom.md)
+  : Link Geocode Panel to Classroom Panel (Step 6.1)
+- [`linkage_geocode_applications()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_applications.md)
+  : Link Geocode Panel to Applications Master (Step 6.1)
+- [`db_write_geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_clean.md)
+  : Write a cleaned geocode object to DuckDB
+- [`db_read_geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_clean.md)
+  : Read a cleaned geocode object back from DuckDB
+- [`db_write_geocode_reconciled()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_reconciled.md)
+  : Write a reconciled geocode object to DuckDB
+- [`db_read_geocode_reconciled()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_reconciled.md)
+  : Read a reconciled geocode object back from DuckDB
+- [`db_write_geocode_panel()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_panel.md)
+  : Write a geocode panel to DuckDB
+- [`db_read_geocode_panel()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_panel.md)
+  : Read a geocode panel from DuckDB
+- [`db_write_geocode_lineage()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_lineage.md)
+  : Write a geocode lineage row to DuckDB
+- [`db_read_geocode_lineage()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_lineage.md)
+  : Read the geocode lineage table
+- [`alprek_synthetic_geocode()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_geocode.md)
+  : Generate Synthetic Geocoded Master Data
+- [`alprek_haversine_m()`](https://joonho112.github.io/ALprekDB/reference/alprek_haversine_m.md)
+  : Haversine Great-Circle Distance in Meters
+- [`alprek_geocode_column_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_column_map.md)
+  : Load Geocode Melissa Column Map (v1)
+- [`alprek_geocode_resultcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_resultcode_meaning.md)
+  : Load Melissa RESULTCODE Meaning Table
+- [`alprek_geocode_statuscode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_statuscode_meaning.md)
+  : Load Melissa STATUSCODE Meaning Table
+- [`alprek_geocode_errorcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_errorcode_meaning.md)
+  : Load Melissa ERRORCODE Meaning Table
+- [`alprek_geocode_al_fips_counties()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_al_fips_counties.md)
+  : Load Alabama County FIPS Reference Table
+- [`alprek_geocode_source_manifest()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_source_manifest.md)
+  : Load Geocode Source Manifest
+
 ## Linkage Construction
 
 Cross-module joins, student aggregation, and master dataset creation
@@ -370,6 +452,51 @@ Display methods for ALprekDB objects
 
 - [`print(`*`<alprek_classroom_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_classroom_validation.md)
   : Print method for alprek_classroom_validation
+
+- [`print(`*`<alprek_geocode_clean>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_clean.md)
+  : Print method for alprek_geocode_clean
+
+- [`print(`*`<alprek_geocode_config>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_config.md)
+  : Print method for alprek_geocode_config
+
+- [`print(`*`<alprek_geocode_delivery_diff>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_delivery_diff.md)
+  : Print method for alprek_geocode_delivery_diff
+
+- [`print(`*`<alprek_geocode_format_detection>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_format_detection.md)
+  : Print method for alprek_geocode_format_detection
+
+- [`print(`*`<alprek_geocode_linkage_applications>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_linkage_applications.md)
+  :
+
+  Print method for `alprek_geocode_linkage_applications`
+
+- [`print(`*`<alprek_geocode_linkage_classroom>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_linkage_classroom.md)
+  :
+
+  Print method for `alprek_geocode_linkage_classroom`
+
+- [`print(`*`<alprek_geocode_master>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_master.md)
+  :
+
+  Print method for `alprek_geocode_master`
+
+- [`print(`*`<alprek_geocode_panel>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_panel.md)
+  :
+
+  Print method for `alprek_geocode_panel`
+
+- [`print(`*`<alprek_geocode_raw>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_raw.md)
+  : Print method for alprek_geocode_raw
+
+- [`print(`*`<alprek_geocode_reconciled>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_reconciled.md)
+  :
+
+  Print method for `alprek_geocode_reconciled`
+
+- [`print(`*`<alprek_geocode_validation>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_geocode_validation.md)
+  :
+
+  Print method for `alprek_geocode_validation`
 
 - [`print(`*`<alprek_linkage_classroom>`*`)`](https://joonho112.github.io/ALprekDB/reference/print.alprek_linkage_classroom.md)
   : Print method for alprek_linkage_classroom

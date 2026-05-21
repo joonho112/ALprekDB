@@ -18,6 +18,8 @@ targets workflow with synthetic examples and private real-data recipes.
   Workflow](https://joonho112.github.io/ALprekDB/articles/a5-targets-workflow.md):
 - [A6 - Applications intake (read → reconcile → validate →
   link)](https://joonho112.github.io/ALprekDB/articles/a6-applications-intake.md):
+- [A7: Geocoding
+  Quality](https://joonho112.github.io/ALprekDB/articles/a7-geocoding-quality.md):
 
 ### Methodological Track
 

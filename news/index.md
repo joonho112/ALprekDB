@@ -2,6 +2,188 @@
 
 ## ALprekDB (development version)
 
+## ALprekDB 0.8.0 (2026-05-20)
+
+### Added — Geocode module (new)
+
+This release adds a new **geocode module** for integrating
+commercial-grade Melissa.com address-geocoding deliveries with the
+existing classroom and applications modules. The module follows the same
+architecture as the budget, classroom, student, and applications
+modules.
+
+- New R source files implement the full pipeline: `R/geocode-config.R`,
+  `R/geocode-codebooks.R`, `R/geocode-read.R`, `R/geocode-detect.R`,
+  `R/geocode-clean.R`, `R/geocode-validate.R`, `R/geocode-reconcile.R`,
+  `R/geocode-transform.R`, `R/geocode-panel.R`, `R/geocode-export.R`,
+  `R/utils-geo.R`, `R/linkage-geocode.R`, `R/db-geocode.R`,
+  `R/data-synthetic-geocode.R` (14 files total).
+- [`geocode_read()`](https://joonho112.github.io/ALprekDB/reference/geocode_read.md)
+  ingests Melissa delivery workbooks and captures file SHA-256, git SHA,
+  receipt date, sheet, per-row `raw_row_index`, and a stable per-row
+  `lineage_id`.
+- [`geocode_detect_format()`](https://joonho112.github.io/ALprekDB/reference/geocode_detect_format.md)
+  distinguishes Melissa delivery variants by marker columns.
+  [`geocode_compare_deliveries()`](https://joonho112.github.io/ALprekDB/reference/geocode_compare_deliveries.md)
+  produces a delivery-to-delivery diff (row count, column drift,
+  coordinate movement) so future Melissa runs can be reviewed against a
+  documented baseline.
+- [`geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/geocode_clean.md)
+  standardizes columns via the `geocode_column_map_melissa_v1` codebook
+  and parses the Melissa RESULTCODE / STATUSCODE / ERRORCODE multi-value
+  strings into validated character vectors.
+- [`geocode_validate()`](https://joonho112.github.io/ALprekDB/reference/geocode_validate.md)
+  runs 15 base data-contract checks including codebook-driven RESULTCODE
+  and STATUSCODE membership, Alabama FIPS-county membership, and
+  coordinate ranges. Validation uses structured ERROR / WARN / INFO
+  severity, row-level `$issues` accumulation, and fixture-backed
+  regression tests.
+- [`geocode_reconcile()`](https://joonho112.github.io/ALprekDB/reference/geocode_reconcile.md)
+  partitions every Melissa row against the ADECE classroom coordinates
+  using a documented decision matrix (`Decision §11.x`): accept Melissa,
+  retain ADECE, retain both, or flag for follow-up.
+  [`geocode_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_followup_queue.md)
+  extracts rows for manual review and attaches privacy attributes
+  because `site_street` contains full PII-sensitive addresses.
+- [`geocode_transform()`](https://joonho112.github.io/ALprekDB/reference/geocode_transform.md)
+  derives `coord_model_status` (a model-readiness gate) and other
+  run-level variables on a new `alprek_geocode_master` S3 object.
+- [`geocode_bind_years()`](https://joonho112.github.io/ALprekDB/reference/geocode_bind_years.md)
+  stacks multiple Melissa runs into an `alprek_geocode_panel`.
+- Six export functions:
+  [`geocode_export_csv()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_csv.md),
+  [`geocode_export_parquet()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_parquet.md),
+  [`geocode_export_excel()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_excel.md),
+  [`geocode_export_rds()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_rds.md),
+  [`geocode_export_stata()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_stata.md),
+  and
+  [`geocode_export_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_followup_queue.md)
+  (dedicated PII-aware exporter for the manual-review queue).
+- [`linkage_geocode_classroom()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_classroom.md)
+  joins reconciled geocode columns onto the existing
+  `alprek_classroom_panel`, preserving row-level lineage and producing
+  an `alprek_geocode_linkage_classroom` S3.
+  [`linkage_geocode_applications()`](https://joonho112.github.io/ALprekDB/reference/linkage_geocode_applications.md)
+  joins reconciled coordinates onto applications-master rows, enabling
+  bucket-D follow-up paths.
+- DuckDB persistence:
+  [`db_write_geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_clean.md),
+  [`db_read_geocode_clean()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_clean.md),
+  [`db_write_geocode_reconciled()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_reconciled.md),
+  [`db_read_geocode_reconciled()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_reconciled.md),
+  [`db_write_geocode_panel()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_panel.md),
+  [`db_read_geocode_panel()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_panel.md),
+  [`db_write_geocode_lineage()`](https://joonho112.github.io/ALprekDB/reference/db_write_geocode_lineage.md),
+  [`db_read_geocode_lineage()`](https://joonho112.github.io/ALprekDB/reference/db_read_geocode_lineage.md).
+  Adds four new DuckDB tables that share the existing
+  `_alprek_column_types` registry.
+- [`alprek_synthetic_geocode()`](https://joonho112.github.io/ALprekDB/reference/alprek_synthetic_geocode.md)
+  generates synthetic Melissa-shaped geocode rows for vignettes,
+  examples, and tests using the same fake-code conventions as the other
+  synthetic generators.
+- [`alprek_haversine_m()`](https://joonho112.github.io/ALprekDB/reference/alprek_haversine_m.md)
+  computes great-circle distances in meters between coordinate pairs
+  (used by reconciliation and tests).
+- Seven new codebooks under `inst/extdata/codebooks/`:
+  `geocode_column_map_melissa_v1.csv`, `melissa_resultcode_codes.csv`,
+  `melissa_statuscode_codes.csv`, `melissa_errorcode_codes.csv`,
+  `geocode_al_fips_counties.csv`, `geocode_source_manifest.csv`, and
+  `geocode_edge_cases.csv` (18 documented edge cases). The six public
+  reference codebooks are paired with loaders:
+  [`alprek_geocode_column_map()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_column_map.md),
+  [`alprek_geocode_resultcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_resultcode_meaning.md),
+  [`alprek_geocode_statuscode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_statuscode_meaning.md),
+  [`alprek_geocode_errorcode_meaning()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_errorcode_meaning.md),
+  [`alprek_geocode_al_fips_counties()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_al_fips_counties.md),
+  [`alprek_geocode_source_manifest()`](https://joonho112.github.io/ALprekDB/reference/alprek_geocode_source_manifest.md).
+  `geocode_edge_cases.csv` documents validation/reconciliation fixtures
+  and is covered by extdata schema tests.
+- New A7 vignette:
+  [`vignette("a7-geocoding-quality")`](https://joonho112.github.io/ALprekDB/articles/a7-geocoding-quality.md)
+  — end-to-end walkthrough on synthetic data, including delivery
+  comparison, validation, reconciliation, follow-up queue export, and
+  classroom-linkage diagnostics.
+- Approximately 1,052 additional package test results relative to v0.7.0
+  cover read, format detection, cleaning, validation, reconciliation,
+  transform, panel, export, linkage, DuckDB persistence, and end-to-end
+  smoke paths.
+
+### Changed
+
+- [`linkage_create_master()`](https://joonho112.github.io/ALprekDB/reference/linkage_create_master.md)
+  signature is extended with two new optional arguments —
+  `geocode = NULL` and `applications = NULL`. The change is **backward
+  compatible**: calling with only the three v0.7.0 required panels
+  produces output identical to v0.7.0.
+- When `geocode` is supplied, `classroom_level` gains 12 prefixed
+  `geocode_*` columns (the authoritative reconcile columns plus
+  `geocode_run_id` and `geocode_lineage_id`). ADECE `latitude` /
+  `longitude` columns are intentionally preserved alongside as an
+  inspection escape-hatch.
+- DESCRIPTION declares `geosphere` under `Suggests` (used by tests and
+  by the haversine utility’s optional fallback path).
+
+### Out-of-scope (planned downstream releases)
+
+To keep this release focused on integrating a single commercial
+geocoding delivery into the data-contract layer, the following are
+intentionally **not** in v0.8.0:
+
+- Multi-source geocoding consensus
+- ACS area-weighted aggregation (tidycensus, census tracts, MOE -\> SE)
+- OSRM isochrone and travel-time analysis
+- Bayesian small-area estimation of economic-need tiers
+- Live geocoding API calls from R
+
+### Scope correction (from v0.7.0)
+
+The v0.7.0 release notes declared geocoding “Out-of-scope (planned
+downstream packages)” with three sub-bullets: “three-source consensus,
+OSRM isochrone, ArcGIS fallback.” With the arrival of commercial-grade
+Melissa.com geocode coverage (delivery dated 2026-03-04), three-source
+consensus is no longer required for the data-contract layer. v0.8.0
+integrates the Melissa delivery directly into ALprekDB as the geocode
+module. OSRM isochrone and multi-source consensus remain out-of-scope
+and are deferred to downstream releases.
+
+### Known limitations
+
+- The current release reconciles against a **single** Melissa delivery.
+  Multi-source consensus is not implemented; rows where Melissa and
+  ADECE disagree are routed through the follow-up queue rather than
+  resolved by a third source.
+- Melissa rows whose `RESULTCODE` includes `GS03` (Postal-level geocode
+  rather than rooftop) are always flagged for follow-up. Empirical
+  median ADECE-Melissa disagreement at `GS03` rows is approximately 4
+  km, well above the configured rooftop threshold.
+- `site_street` is the full street address and is PII-sensitive.
+  [`geocode_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_followup_queue.md)
+  returns an in-memory queue with privacy attributes; the dedicated
+  [`geocode_export_followup_queue()`](https://joonho112.github.io/ALprekDB/reference/geocode_export_followup_queue.md)
+  exporter writes the internal-use CSV header and defaults to
+  `internal_use = TRUE`.
+
+### Empirical findings
+
+- Median ADECE-Melissa distance across reconciled rows is approximately
+  102 m; 95% of rows are within approximately 3.66 km; 33 rows fall
+  above the 10 km gross-disagreement cutoff and are routed to the
+  follow-up queue.
+- Site-year geocode rows are 80.1% `model_ready` on the v1 Melissa
+  delivery. Classroom-year master rows are 63.3% `model_ready` after
+  linkage because the classroom panel includes rows without a matched
+  Melissa site-year record; this triggers the default model-ready
+  validation warning by design.
+
+### External review
+
+- Incorporated findings from an external review of the v0.8.0 preview:
+  added `coord_model_status` for downstream model-readiness gating;
+  propagated row-level `lineage_id` across read, clean, reconcile,
+  transform, panel, linkage, and DuckDB paths; switched RESULTCODE /
+  STATUSCODE validation to codebook-driven membership rather than
+  hard-coded lists; and tightened the follow-up queue’s PII defaults.
+
 ## ALprekDB 0.7.0 (2026-05-19)
 
 ### Added — Applications module (new)
@@ -118,11 +300,12 @@ architecture as the existing budget, classroom, and student modules.
 - README adds Applications rows to the data-coverage and module tables,
   an applications quick-start, and an explicit out-of-scope declaration
   for geocoding, ACS, and Bayesian tier estimation.
-- Reconciliation hardening: fuzzy matching scores normalized strings,
-  no-panel reconciliation requires explicit degraded mode, capacity
-  aggregate rows are dropped before the site-level layer, and stable
-  row-level `lineage_id` values are propagated through read, clean,
-  reconcile, transform, linkage, and DuckDB paths.
+- External review remediation is reflected in code and tests: fuzzy
+  matching scores normalized strings, no-panel reconciliation requires
+  explicit degraded mode, capacity aggregate rows are dropped before the
+  site-level layer, and stable row-level `lineage_id` values are
+  propagated through read, clean, reconcile, transform, linkage, and
+  DuckDB paths.
 
 ### Out-of-scope (planned downstream packages)
 
