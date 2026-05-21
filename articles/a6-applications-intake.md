@@ -151,7 +151,7 @@ ren
 #>   Cycle:       cycle1 (2026-2027)
 #>   Rows: in=12 out=12 dropped=0
 #>   Cols:         18 
-#>   Cleaned at:   2026-05-21 18:46:37
+#>   Cleaned at:   2026-05-21 18:50:07
 ```
 
 Real-data call:
@@ -267,7 +267,7 @@ mst
 #>   Capacity:     10 rows (13 cols)
 #>   Derived log:  10 entries
 #>   Tier bands:   $    0 / $2,550 / $3,570 / $4,590 / $5,610
-#>   Transformed:  2026-05-21 18:46:38 UTC
+#>   Transformed:  2026-05-21 18:50:08 UTC
 ```
 
 Applications-grain columns added: `is_renewal`, `is_new`,
