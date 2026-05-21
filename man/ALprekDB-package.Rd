@@ -9,7 +9,8 @@
 A modular toolkit for processing, cleaning, validating, and
 managing Alabama First Class Pre-K (FCPK) administrative records. This
 package standardizes annual data processing workflows for budget, classroom,
-and student data files received from ADECE.
+student, applications, and geocode data files received from ADECE and from
+commercial-grade Melissa.com address-geocoding deliveries.
 }
 \section{Budget Module}{
 
@@ -95,6 +96,29 @@ The linkage module connects budget, classroom, and student data:
 }
 }
 
+\section{Geocode Module}{
+
+The geocode module integrates commercial-grade Melissa.com address-geocoding
+deliveries with the existing classroom and applications modules:
+\itemize{
+\item \code{\link[=geocode_read]{geocode_read()}}: Import Melissa delivery workbooks with provenance capture
+\item \code{\link[=geocode_detect_format]{geocode_detect_format()}}, \code{\link[=geocode_compare_deliveries]{geocode_compare_deliveries()}}: Identify
+Melissa delivery format and diff against a prior delivery
+\item \code{\link[=geocode_clean]{geocode_clean()}}: Standardize columns and parse RESULTCODE / STATUSCODE
+\item \code{\link[=geocode_validate]{geocode_validate()}}: Codebook-driven data quality checks (15 checks)
+\item \code{\link[=geocode_reconcile]{geocode_reconcile()}}, \code{\link[=geocode_followup_queue]{geocode_followup_queue()}}: Reconcile Melissa
+against ADECE coordinates with a documented decision matrix
+\item \code{\link[=geocode_transform]{geocode_transform()}}: Derived variables including \code{coord_model_status}
+\item \code{\link[=geocode_bind_years]{geocode_bind_years()}}: Multi-run geocode panels
+\item \code{\link[=geocode_export_csv]{geocode_export_csv()}}, \code{\link[=geocode_export_parquet]{geocode_export_parquet()}},
+\code{\link[=geocode_export_excel]{geocode_export_excel()}}, \code{\link[=geocode_export_rds]{geocode_export_rds()}},
+\code{\link[=geocode_export_stata]{geocode_export_stata()}}, \code{\link[=geocode_export_followup_queue]{geocode_export_followup_queue()}}:
+Multiple export formats plus a dedicated PII-aware follow-up exporter
+\item \code{\link[=linkage_geocode_classroom]{linkage_geocode_classroom()}}, \code{\link[=linkage_geocode_applications]{linkage_geocode_applications()}}:
+Cross-module linkage paths
+}
+}
+
 \section{Database Module}{
 
 DuckDB-based persistent storage for processed panel data:
@@ -119,9 +143,11 @@ Generate realistic synthetic datasets for examples and vignettes:
 \item \code{\link[=alprek_synthetic_budget]{alprek_synthetic_budget()}}: Synthetic budget panel data
 \item \code{\link[=alprek_synthetic_classroom]{alprek_synthetic_classroom()}}: Synthetic classroom panel data
 \item \code{\link[=alprek_synthetic_student]{alprek_synthetic_student()}}: Synthetic student panel data (with derived variables)
+\item \code{\link[=alprek_synthetic_applications]{alprek_synthetic_applications()}}: Synthetic 4-kind applications data
+\item \code{\link[=alprek_synthetic_geocode]{alprek_synthetic_geocode()}}: Synthetic Melissa-shaped geocode data
 }
 
-All three generators share classroom codes (via seed) enabling cross-module
+All generators share classroom codes (via seed) enabling cross-module
 linkage with \code{\link[=linkage_create_master]{linkage_create_master()}}.
 }
 
@@ -136,6 +162,12 @@ linkage with \code{\link[=linkage_create_master]{linkage_create_master()}}.
 \item \code{\link[=alprek_language_mapping]{alprek_language_mapping()}}: Fluent language field cleaning mapping
 \item \code{\link[=alprek_student_race_mapping]{alprek_student_race_mapping()}}: Student race/ethnicity standardization
 \item \code{\link[=alprek_student_delivery_mapping]{alprek_student_delivery_mapping()}}: Student delivery type standardization
+\item \code{\link[=alprek_geocode_column_map]{alprek_geocode_column_map()}}: Melissa column-name standardization
+\item \code{\link[=alprek_geocode_resultcode_meaning]{alprek_geocode_resultcode_meaning()}}: Melissa RESULTCODE meanings
+\item \code{\link[=alprek_geocode_statuscode_meaning]{alprek_geocode_statuscode_meaning()}}: Melissa STATUSCODE meanings
+\item \code{\link[=alprek_geocode_errorcode_meaning]{alprek_geocode_errorcode_meaning()}}: Melissa ERRORCODE meanings
+\item \code{\link[=alprek_geocode_al_fips_counties]{alprek_geocode_al_fips_counties()}}: Alabama FIPS county codes
+\item \code{\link[=alprek_geocode_source_manifest]{alprek_geocode_source_manifest()}}: Geocode delivery source manifest
 }
 }
 

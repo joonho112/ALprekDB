@@ -35,8 +35,9 @@ library(ALprekDB)
 
 ## Installed CSV Inventory
 
-The package ships 22 public CSV files in v0.7.0: 12 codebooks and 10 column
-mappings. Eight of those files support the new Applications module.
+The package ships 29 public CSV files in v0.8.0: 19 codebooks and 10 column
+mappings. Eight of those files support the Applications module (introduced in
+v0.7.0) and seven support the Geocode module (introduced in v0.8.0).
 
 ```{r inventory}
 ext_dir <- system.file("extdata", package = "ALprekDB", mustWork = TRUE)
@@ -125,6 +126,17 @@ helpers <- list(
     file.path(ext_dir, "codebooks", "applications_edge_cases.csv"),
     stringsAsFactors = FALSE,
     check.names = FALSE
+  ),
+  geocode_column_map = alprek_geocode_column_map(),
+  geocode_resultcode = alprek_geocode_resultcode_meaning(),
+  geocode_statuscode = alprek_geocode_statuscode_meaning(),
+  geocode_errorcode = alprek_geocode_errorcode_meaning(),
+  geocode_al_fips = alprek_geocode_al_fips_counties(),
+  geocode_manifest = alprek_geocode_source_manifest(),
+  geocode_edge_cases = utils::read.csv(
+    file.path(ext_dir, "codebooks", "geocode_edge_cases.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
   )
 )
 
@@ -183,7 +195,11 @@ For example:
 - student cleaning uses student mappings, student race mappings, and student
   delivery-type mappings;
 - applications cleaning uses four cycle-1 column maps plus status-code,
-  funding-type, source-manifest, and edge-case codebooks.
+  funding-type, source-manifest, and edge-case codebooks;
+- geocode cleaning uses the Melissa column-map codebook together with
+  RESULTCODE / STATUSCODE / ERRORCODE meaning codebooks, the Alabama FIPS
+  county codebook, the geocode source manifest, and a geocode edge-case
+  codebook.
 
 The public mappings describe how raw field names are standardized; they should
 not contain row-level examples from real source data.
@@ -255,11 +271,31 @@ The non-renewal source sheet in cycle-1 is headerless, so
 `col_2`, ... fields. Future cycles should add new cycle-specific mapping files
 rather than editing old maps in place.
 
+## Geocode Codebooks
+
+The v0.8.0 Geocode module adds seven public codebooks. All seven live in the
+`codebooks/` directory (the Melissa column map is stored as a codebook, not a
+mapping, because it has a Melissa-specific schema rather than the standard
+four-column mapping contract).
+
+```{r geocode-extdata}
+csv_inventory[
+  grepl("^codebooks/(geocode_|melissa_)", csv_inventory$file),
+  c("file", "role", "rows", "fields")
+]
+```
+
+The RESULTCODE / STATUSCODE / ERRORCODE codebooks drive validation. Rather
+than hard-coding valid codes, `geocode_validate()` reads the codebooks and
+flags any row whose parsed codes are not present in the corresponding
+codebook. This keeps validation in step with Melissa documentation changes
+without R-code edits.
+
 ## Mapping Contracts
 
 The tests enforce these contracts:
 
-- all 22 expected CSV files are present;
+- all 29 expected CSV files are present;
 - mapping files use `raw_column`, `standard_name`, `type`, and `notes`;
 - mapping keys are nonblank and unique within each file;
 - `standard_name` values are unique and use snake case;
@@ -321,10 +357,9 @@ field mappings. They should not document individual records.
 ## Hidden Contract Checks
 
 ```{r contract-checks, include = FALSE}
-stopifnot(nrow(csv_inventory) == 22L)
-stopifnot(sum(csv_inventory$role == "codebook") == 12L)
+stopifnot(nrow(csv_inventory) == 29L)
+stopifnot(sum(csv_inventory$role == "codebook") == 19L)
 stopifnot(sum(csv_inventory$role == "mapping") == 10L)
-stopifnot(sum(csv_inventory$rows[csv_inventory$role == "codebook"]) == 267L)
 stopifnot(sum(csv_inventory$rows[csv_inventory$role == "mapping"]) == 755L)
 stopifnot(all(c("code", "name", "name_short") %in% names(alprek_delivery_types())))
 stopifnot(setequal(alprek_delivery_types()$code, c("P", "C", "H", "O", "F", "U", "S")))

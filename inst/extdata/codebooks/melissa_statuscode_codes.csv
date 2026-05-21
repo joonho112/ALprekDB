@@ -1,0 +1,5 @@
+"code","label","is_success","paired_resultcode_in_v080","observed_n_in_v080","source","retrieved_at"
+"9","Paired with GS01 (Zip+4 Street Level)",TRUE,"GS01",28,"v0.8.0 delivery (derived field; no Melissa public documentation found); RESULTCODE labels per https://wiki.melissadata.com/index.php?title=Result_Code_Details","2026-05-20"
+"5","Paired with GS03 (Zip5 Community Level)",TRUE,"GS03",253,"v0.8.0 delivery (derived field; no Melissa public documentation found); RESULTCODE labels per https://wiki.melissadata.com/index.php?title=Result_Code_Details","2026-05-20"
+"A","Paired with GS06 (Interpolated Rooftop)",TRUE,"GS06",311,"v0.8.0 delivery (derived field; no Melissa public documentation found); RESULTCODE labels per https://wiki.melissadata.com/index.php?title=Result_Code_Details","2026-05-20"
+"B","Paired with GS05 (Rooftop Level)",TRUE,"GS05",2804,"v0.8.0 delivery (derived field; no Melissa public documentation found); RESULTCODE labels per https://wiki.melissadata.com/index.php?title=Result_Code_Details","2026-05-20"

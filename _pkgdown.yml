@@ -49,6 +49,8 @@ navbar:
         href: articles/a5-targets-workflow.html
       - text: A6 - Applications intake
         href: articles/a6-applications-intake.html
+      - text: A7 - Geocoding quality
+        href: articles/a7-geocoding-quality.html
       - text: '--- Methodological Track ---'
       - text: M1 - Architecture trilemma
         href: articles/m1-architecture-trilemma.html
@@ -90,6 +92,7 @@ articles:
     - a4-duckdb-sql
     - a5-targets-workflow
     - a6-applications-intake
+    - a7-geocoding-quality
 
   - title: Methodological Track
     desc: >
@@ -207,6 +210,55 @@ reference:
     - alprek_file_hash
     - alprek_git_sha
     - alprek_provenance_record
+
+  - title: Geocode Module (v0.8.0)
+    desc: >
+      Reading, format detection and delivery comparison, cleaning,
+      validation (codebook-driven RESULTCODE / STATUSCODE checks),
+      reconciliation against ADECE coordinates with a documented
+      decision matrix, derived variables (including `coord_model_status`),
+      multi-run panel binding, 5-format export plus a dedicated
+      follow-up-queue exporter, classroom and applications linkage,
+      DuckDB persistence, and Melissa.com codebook loaders. In-scope:
+      commercial-grade single-source geocoding integration. Out-of-scope
+      (planned downstream releases): multi-source consensus, ACS
+      area-weighted aggregation, OSRM isochrone, Bayesian small-area
+      estimation, live geocoding API.
+    contents:
+    - geocode_config
+    - geocode_read
+    - geocode_detect_format
+    - geocode_compare_deliveries
+    - geocode_clean
+    - geocode_validate
+    - geocode_reconcile
+    - geocode_followup_queue
+    - geocode_transform
+    - geocode_bind_years
+    - geocode_export_csv
+    - geocode_export_parquet
+    - geocode_export_excel
+    - geocode_export_rds
+    - geocode_export_stata
+    - geocode_export_followup_queue
+    - linkage_geocode_classroom
+    - linkage_geocode_applications
+    - db_write_geocode_clean
+    - db_read_geocode_clean
+    - db_write_geocode_reconciled
+    - db_read_geocode_reconciled
+    - db_write_geocode_panel
+    - db_read_geocode_panel
+    - db_write_geocode_lineage
+    - db_read_geocode_lineage
+    - alprek_synthetic_geocode
+    - alprek_haversine_m
+    - alprek_geocode_column_map
+    - alprek_geocode_resultcode_meaning
+    - alprek_geocode_statuscode_meaning
+    - alprek_geocode_errorcode_meaning
+    - alprek_geocode_al_fips_counties
+    - alprek_geocode_source_manifest
 
   - title: Linkage Construction
     desc: Cross-module joins, student aggregation, and master dataset creation

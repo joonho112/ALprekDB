@@ -57,6 +57,11 @@ DBI::dbExecute(conn, "
   .db_upsert_meta(conn, "created_at", now)
   .db_upsert_meta(conn, "alprekdb_version", pkg_version)
   .db_upsert_meta(conn, "last_modified_at", now)
+  # v0.8.0 forward-compat signal: schema is "1", but this build of ALprekDB
+  # knows how to read the additive geocode_* tables. Decision §11.5: schema
+  # stays at "1" — additive tables only — and consumers can read this flag
+  # to gate behavior without parsing schema_version.
+  .db_upsert_meta(conn, "geocode_module_present", "TRUE")
 }
 
 
@@ -159,7 +164,10 @@ DBI::dbExecute(conn, "
 
     col <- df[[col_name]]
 
-    if (r_type == "factor" && !is.na(factor_lvls_str)) {
+    if (r_type == "ordered_factor" && !is.na(factor_lvls_str)) {
+      lvls <- .deserialize_factor_levels(factor_lvls_str)
+      df[[col_name]] <- factor(col, levels = lvls, ordered = TRUE)
+    } else if (r_type == "factor" && !is.na(factor_lvls_str)) {
       lvls <- .deserialize_factor_levels(factor_lvls_str)
       df[[col_name]] <- factor(col, levels = lvls)
     } else if (r_type == "Date") {
@@ -191,6 +199,7 @@ DBI::dbExecute(conn, "
 #' Detect R type of a column
 #' @keywords internal
 .detect_r_type <- function(x) {
+  if (is.ordered(x)) return("ordered_factor")
   if (is.factor(x)) return("factor")
   if (inherits(x, "Date")) return("Date")
   if (inherits(x, "POSIXct")) return("POSIXct")
@@ -244,14 +253,15 @@ DBI::dbExecute(conn, "
       merged <- new_levels
     }
 
-    # Update the registry
+    # Update the registry (preserve ordered-factor flag if applicable)
+    r_type_out <- if (is.ordered(df[[col_name]])) "ordered_factor" else "factor"
     DBI::dbExecute(conn,
       "DELETE FROM _alprek_column_types WHERE table_name = ? AND column_name = ?",
       params = list(table_name, col_name)
     )
     DBI::dbExecute(conn,
       "INSERT INTO _alprek_column_types (table_name, column_name, r_type, factor_levels) VALUES (?, ?, ?, ?)",
-      params = list(table_name, col_name, "factor", .serialize_factor_levels(merged))
+      params = list(table_name, col_name, r_type_out, .serialize_factor_levels(merged))
     )
   }
 }

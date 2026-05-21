@@ -26,13 +26,15 @@ ALprekDB is built for repeatable Pre-K administrative data work:
 - standardize annual ADECE Excel files across changing source formats;
 - build longitudinal budget, classroom, and student panels;
 - create classroom- and student-level linked master datasets;
+- integrate commercial-grade geocoding via Melissa.com deliveries with
+  documented reconciliation and follow-up queues;
 - record validation, linkage, orphan, and coverage diagnostics;
 - support SQL-friendly DuckDB outputs for downstream analysis;
 - separate public package documentation from private real-data processing.
 
-## Data Coverage in v0.7.0
+## Data Coverage in v0.8.0
 
-The v0.7.0 real-data manifest uses asymmetric coverage because the currently
+The v0.8.0 real-data manifest uses asymmetric coverage because the currently
 available source set spans different ranges per module.
 
 | Module | Covered school years | Current release notes |
@@ -40,7 +42,8 @@ available source set spans different ranges per module.
 | Budget | 2021-22 through 2024-25 | The 2025-26 budget is structurally unavailable and is not inferred, zero-filled, or copied from another source. |
 | Classroom | 2021-22 through 2025-26 | Classroom-code validation uses six-digit program codes. |
 | Student | 2021-22 through 2025-26 | Student PII is excluded by default in private workflows. |
-| **Applications** (new in v0.7.0) | **Cycle-1 (2026-2027)** | Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook. **Out-of-scope this release:** geocoding, ACS integration, Bayesian tier estimation — those are planned as separate downstream packages. |
+| Applications (new in v0.7.0) | Cycle-1 (2026-2027) | Reads renewals / new / non-renewals / capacity sheets from the ADECE annual workbook. |
+| **Geocode** (new in v0.8.0) | **Melissa delivery 2026-03-04** | Single commercial-grade Melissa.com geocoding delivery reconciled against ADECE classroom coordinates with a documented decision matrix and follow-up queue. **Out-of-scope this release:** multi-source consensus, ACS area-weighted aggregation, OSRM isochrone, Bayesian small-area tier estimation, and live geocoding API calls — those are deferred to downstream releases. |
 
 Aggregate real-data smoke tests currently cover 5,867 budget classroom-year
 records, 7,409 classroom-year records, 116,689 student-year records, and
@@ -92,9 +95,9 @@ linkage_summary_stats(master)
 ## Quick Start: Applications Module
 
 The applications module starts from ADECE's annual classroom-applications
-workbook and keeps geocoding / ACS / Bayesian tier estimation outside this
-package. For a private cycle-1 run, pair the applications workbook with an
-existing classroom panel:
+workbook and keeps ACS aggregation and Bayesian tier estimation outside this
+package. Geocoding is handled by the v0.8.0 geocode module. For a private
+cycle-1 run, pair the applications workbook with an existing classroom panel:
 
 ```r
 path <- Sys.getenv("ALPREKDB_APPLICATIONS_FILE")
@@ -123,6 +126,44 @@ applications_validate(lk)
 
 For a public synthetic walkthrough that does not require ADECE files, see
 `vignette("a6-applications-intake", package = "ALprekDB")`.
+
+## Quick Start: Geocode Module
+
+The geocode module can be exercised with synthetic Melissa-shaped data. This
+round-trips through an in-memory workbook so the public workflow uses the same
+`geocode_read()` entry point as a private Melissa delivery.
+
+```r
+library(ALprekDB)
+
+path <- tempfile(fileext = ".xlsx")
+openxlsx::write.xlsx(
+  alprek_synthetic_geocode(n_sites = 5, n_years = 1, seed = 42),
+  path,
+  sheetName = "Sheet1"
+)
+
+raw <- geocode_read(
+  path,
+  cycle_year = "2026-2027",
+  receipt_date = as.Date("2026-03-04")
+)
+clean <- geocode_clean(raw)
+geocode_validate(clean)
+
+cfg <- geocode_config(
+  path = path,
+  cycle_year = "2026-2027",
+  delivery_date = "2026-03-04",
+  verbose = FALSE
+)
+rec <- geocode_reconcile(clean, config = cfg)
+geo_master <- geocode_transform(rec, config = cfg)
+geo_panel <- geocode_bind_years(geo_master)
+```
+
+For a full quality-control walkthrough, see
+`vignette("a7-geocoding-quality", package = "ALprekDB")`.
 
 ## Private Real-Data Workflow
 
@@ -175,8 +216,9 @@ export ALPREKDB_WRITE_OUTPUTS=1
 | Classroom | Read, clean, validate, and bind classroom characteristics, geography, and staffing records. | Multi-year classroom panels. |
 | Student | Read, clean, validate, and bind child-level enrollment, demographics, assessment, attendance, and service records. | Multi-year student panels with PII excluded by default. |
 | Applications | Read, detect, clean, reconcile, validate, transform, export, and persist annual ADECE classroom applications. | Application-grain master data, capacity-grain data, reconciliation audit logs, linkage outputs, and DuckDB tables. |
+| Geocode | Read, detect, compare, clean, validate, reconcile, transform, bind, export, and persist Melissa.com commercial-grade geocoding deliveries against ADECE classroom coordinates. | Reconciled site-level coordinates, follow-up queue, multi-run geocode panels, linkage outputs (classroom + applications), and DuckDB tables. |
 | Transform | Derive analytic student measures such as gains, readiness, chronic absence, and risk indicators. | Enriched student panels. |
-| Linkage | Join budget, classroom, and student panels with explicit orphan and coverage diagnostics. | Classroom-level and student-level master datasets. |
+| Linkage | Join budget, classroom, student, geocode, and applications panels with explicit orphan and coverage diagnostics. | Classroom-level and student-level master datasets. |
 | Database | Persist panels and master datasets in DuckDB for SQL analysis. | Local DuckDB databases and query results. |
 
 ## Pipeline Architecture
@@ -195,10 +237,13 @@ linkage, aggregate diagnostics, exports, and optional DuckDB storage.
 ## Privacy and Provenance Guardrails
 
 - Do not commit raw ADECE files, `_targets/` caches, row-level exports, local
-  DuckDB databases, or private output folders.
+  DuckDB databases, `output/geocode/` follow-up queues, or private output
+  folders.
 - Use `alprek_synthetic_budget()`, `alprek_synthetic_classroom()`, and
-  `alprek_synthetic_student()` for public examples; these generators use fake
-  `9xx` classroom-code prefixes and synthetic county labels.
+  `alprek_synthetic_student()` for public examples; use
+  `alprek_synthetic_geocode()` for public geocode examples. These generators
+  use fake `9xx` classroom-code prefixes or `999P` site-code prefixes and
+  synthetic county labels.
 - Treat all real student-level outputs as confidential, even when direct PII
   columns are excluded.
 - Keep real-data paths in environment variables rather than committed scripts.
@@ -216,6 +261,8 @@ linkage, aggregate diagnostics, exports, and optional DuckDB storage.
 - [A3 - Linkage analysis](articles/a3-linkage-analysis.html)
 - [A4 - DuckDB and SQL](articles/a4-duckdb-sql.html)
 - [A5 - Targets workflow](articles/a5-targets-workflow.html)
+- [A6 - Applications intake](articles/a6-applications-intake.html)
+- [A7 - Geocoding quality](articles/a7-geocoding-quality.html)
 
 ### Methodological Track
 
@@ -264,8 +311,17 @@ Delivery type codes are defined by `alprek_delivery_types()`:
 - Validation checks are advisory diagnostics, not a substitute for substantive
   review of analysis choices.
 - Bucket D applications are retained without `matched_classroom_code` /
-  `matched_site_code` so downstream geocoding packages can resolve them from
-  organization, project, and county fields.
+  `matched_site_code`; the v0.8.0 geocode module is the primary downstream
+  path for wiring these against reconciled coordinates.
+- The v0.8.0 geocode module reconciles a **single** Melissa.com delivery
+  against ADECE coordinates; multi-source consensus, ACS aggregation,
+  OSRM isochrone, Bayesian tier estimation, and live geocoding API calls
+  remain out-of-scope and are deferred to downstream releases.
+- `site_street` is PII-sensitive; `geocode_followup_queue()` returns an
+  in-memory queue with privacy attributes, and
+  `geocode_export_followup_queue()` writes
+  `output/geocode/sites_needing_geocoding_<cycle>.csv` with an internal-use
+  header and `internal_use = TRUE` by default.
 - Real-data processing depends on local file access and the canonical source
   manifest; paths and outputs should remain outside public repositories.
 

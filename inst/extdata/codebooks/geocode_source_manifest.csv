@@ -1,0 +1,2 @@
+"kind","filename_pattern","sheet","vendor","version","delivery_date","cycle_year","n_cols_expected","example_path","notes"
+"melissa_v1","*_geocoding_master_*Final.xlsx","Sheet1","Melissa Data Quality Suite","2026-03","2026-03-04","2026-2027",29,"ORIGINAL-DATA/2026-03-04_Pre-K Geocoding Melissa/2026-03-04_geocoding_master_Final.xlsx","v1 contract. See data/melissa_format_diff_protocol.md for required/optional/forbidden invariants."

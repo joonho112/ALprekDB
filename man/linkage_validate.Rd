@@ -4,13 +4,31 @@
 \alias{linkage_validate}
 \title{Validate Linkage Results}
 \usage{
-linkage_validate(linkage_obj, strict = FALSE)
+linkage_validate(
+  linkage_obj,
+  strict = FALSE,
+  geocode_coverage_min = 0.95,
+  county_agreement_min = 0.95,
+  model_ready_min = 0.7
+)
 }
 \arguments{
 \item{linkage_obj}{An \code{alprek_linkage_classroom}, \code{alprek_linkage_student},
 or \code{alprek_linkage_master} object.}
 
 \item{strict}{Logical. If \code{TRUE}, treats warnings as errors. Default \code{FALSE}.}
+
+\item{geocode_coverage_min}{Numeric in \verb{[0, 1]}. Minimum acceptable
+\code{geocode_lat_final} non-NA coverage on classroom-level rows for the
+\code{geocode_coverage_classroom} check. Default \code{0.95}.}
+
+\item{county_agreement_min}{Numeric in \verb{[0, 1]}. Minimum acceptable
+Melissa-vs-classroom county agreement rate for the
+\code{county_check_agreement} check. Default \code{0.95}.}
+
+\item{model_ready_min}{Numeric in \verb{[0, 1]}. Minimum acceptable share of
+\code{model_ready} rows for the \code{model_ready_threshold} check. Default
+\code{0.70} (the real-data target is \code{0.80}).}
 }
 \value{
 An \code{alprek_linkage_validation} S3 object (list) with elements:
@@ -23,12 +41,41 @@ An \code{alprek_linkage_validation} S3 object (list) with elements:
 \description{
 Performs data quality checks on linkage results (joined data).
 Returns a validation report with pass/fail status for each check.
+
+\strong{Geocode extension (v0.8.0).} When the input is an
+\code{alprek_linkage_master} whose \code{classroom_level} carries the prefixed
+\verb{geocode_*} columns produced by \code{\link[=linkage_create_master]{linkage_create_master()}} with a
+\code{geocode} panel, the validator additionally runs five geocode-specific
+checks on the master:
+\itemize{
+\item \code{geocode_coverage_classroom} -- WARN if \code{geocode_lat_final} non-NA
+coverage falls below \code{geocode_coverage_min} (default 0.95).
+\item \code{followup_reason_completeness} -- ERROR if any row with
+\code{geocode_needs_followup_geocoding == TRUE} has NA
+\code{geocode_followup_reason}.
+\item \code{county_check_agreement} -- WARN if Melissa-vs-classroom county
+agreement rate falls below \code{county_agreement_min} (default 0.95).
+Gracefully skipped when no county join column is present.
+\item \code{new_site_followup_visibility} -- INFO count of bucket-D applications
+(NA \code{matched_classroom_code}) that need followup geocoding. Only
+fires when the master was built with an \code{applications} panel.
+\item \code{model_ready_threshold} -- WARN if \code{pct_model_ready} (from
+\code{diagnostics$geocode_coverage}) is below
+\code{model_ready_min} (default 0.70).
+}
+
+The geocode checks gracefully skip on 3-arg (no \code{geocode}) master
+objects and on non-master linkage results.
 }
 \examples{
 \dontrun{
 cb <- linkage_classroom_budget(classroom_panel, budget_panel)
 validation <- linkage_validate(cb)
 print(validation)
+
+# Master with geocode panel: extra geocode checks fire
+master <- linkage_create_master(budget, classroom, student, geocode = gp)
+linkage_validate(master)
 }
 
 }

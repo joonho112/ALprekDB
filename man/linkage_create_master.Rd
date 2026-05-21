@@ -4,7 +4,13 @@
 \alias{linkage_create_master}
 \title{Create Master Linked Dataset}
 \usage{
-linkage_create_master(budget, classroom, student)
+linkage_create_master(
+  budget,
+  classroom,
+  student,
+  geocode = NULL,
+  applications = NULL
+)
 }
 \arguments{
 \item{budget}{An \code{alprek_budget_panel} object.}
@@ -12,28 +18,90 @@ linkage_create_master(budget, classroom, student)
 \item{classroom}{An \code{alprek_classroom_panel} object.}
 
 \item{student}{An \code{alprek_student_panel} object.}
+
+\item{geocode}{Optional. An \code{alprek_geocode_panel} object (typically
+from \code{geocode_bind_years()}). When supplied, the classroom-level
+master receives the 12 prefixed \verb{geocode_*} columns described above.
+Default \code{NULL} (v0.7.0 behavior).}
+
+\item{applications}{Optional. An \code{alprek_applications_master} object
+(typically from \code{applications_transform()}). When supplied, the
+classroom-level master receives per-cycle application context for
+the applications' \code{cycle_year}. Default \code{NULL}.}
 }
 \value{
 An \code{alprek_linkage_master} S3 object (list) with elements:
 \itemize{
 \item \code{classroom_level}: tibble with 1 row per classroom-year.
 \item \code{student_level}: tibble with 1 row per student-year.
-\item \code{diagnostics}: list of all join diagnostics.
-\item \code{meta}: list with metadata.
+\item \code{diagnostics}: list of all join diagnostics. When \code{geocode} is
+supplied, includes \code{geocode_coverage} (from
+\code{linkage_coverage_geocode()}) and \code{geocode_linkage} (the diagnostic
+tibble from \code{linkage_geocode_classroom()}). When \code{applications} is
+supplied, includes \code{applications_linkage} (the diagnostic tibble
+from \code{linkage_applications_classroom()}).
+\item \code{meta}: list with metadata, including \code{geocode} and \code{applications}
+run identifiers when those branches fired.
 }
 }
 \description{
 Creates a fully linked master dataset at two levels:
 \enumerate{
-\item \strong{Classroom-level}: classroom + budget + student aggregates + derived vars
-\item \strong{Student-level}: student + classroom + budget columns
+\item \strong{Classroom-level}: classroom + budget + student aggregates + derived vars.
+Optionally augmented with reconciled-geocode columns (from
+\code{\link[=linkage_geocode_classroom]{linkage_geocode_classroom()}}) and per-cycle applications context
+(from \code{\link[=linkage_applications_classroom]{linkage_applications_classroom()}}).
+\item \strong{Student-level}: student + classroom + budget columns.
 }
+
+\strong{Backward compatibility (v0.7.0).} Calling with only the three required
+panels produces output identical to v0.7.0: no \verb{geocode_*} columns and
+no application-context columns. Passing \code{geocode} and/or \code{applications}
+activates the optional join branches without changing the row count of
+\code{classroom_level} or \code{student_level}.
+
+\strong{Geocode join (v0.8.0 critical-path).} When \code{geocode} is a
+\code{alprek_geocode_panel}, the classroom-level master inherits the 12
+prefixed \verb{geocode_*} columns produced by \code{\link[=linkage_geocode_classroom]{linkage_geocode_classroom()}}:
+the 10 authoritative reconcile columns plus \code{geocode_run_id} and
+\code{geocode_lineage_id}. The ADECE \code{latitude} / \code{longitude} columns from
+the classroom panel are left untouched (Decision §11.4: escape-hatch /
+inspection).
+
+\strong{Applications join (v0.8.0).} When \code{applications} is a
+\code{alprek_applications_master}, \code{\link[=linkage_applications_classroom]{linkage_applications_classroom()}} is
+invoked and its \code{classroom_level} rows are merged onto
+\code{classroom_level} for the applications' \code{cycle_year}. Rows outside
+that cycle year retain the master's pre-application schema with
+application-context columns left NA / FALSE.
+
+\strong{Order of operations.} budget -> student aggregates -> classroom-level
+master (with derived per-child/per-seat budget) -> optional geocode
+join -> optional applications join. The geocode join runs first so
+that bucket-D applications (no \code{site_code} yet) can be later wired
+against reconciled coordinates via the applications path.
 }
 \examples{
 \dontrun{
+# v0.7.0 (3-arg) usage -- unchanged
 master <- linkage_create_master(budget_panel, classroom_panel, student_panel)
-master$classroom_level
-master$student_level
+
+# v0.8.0 with geocode panel
+panel_g <- geocode_bind_years(geocode_master)
+master  <- linkage_create_master(
+  budget_panel, classroom_panel, student_panel,
+  geocode = panel_g
+)
+
+# Full v0.8.0 with geocode + applications
+master <- linkage_create_master(
+  budget_panel, classroom_panel, student_panel,
+  geocode      = panel_g,
+  applications = app_master
+)
 }
 
+}
+\seealso{
+\code{\link[=linkage_geocode_classroom]{linkage_geocode_classroom()}}, \code{\link[=linkage_applications_classroom]{linkage_applications_classroom()}}.
 }

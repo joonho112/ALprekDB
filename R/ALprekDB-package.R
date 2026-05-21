@@ -3,7 +3,8 @@
 #' @description A modular toolkit for processing, cleaning, validating, and
 #' managing Alabama First Class Pre-K (FCPK) administrative records. This
 #' package standardizes annual data processing workflows for budget, classroom,
-#' and student data files received from ADECE.
+#' student, applications, and geocode data files received from ADECE and from
+#' commercial-grade Melissa.com address-geocoding deliveries.
 #'
 #' @section Budget Module:
 #' The budget module provides a complete pipeline:
@@ -65,6 +66,25 @@
 #'   [linkage_export_rds()], [linkage_export_stata()],
 #'   [linkage_export_parquet()]: Multiple export formats
 #'
+#' @section Geocode Module:
+#' The geocode module integrates commercial-grade Melissa.com address-geocoding
+#' deliveries with the existing classroom and applications modules:
+#' - [geocode_read()]: Import Melissa delivery workbooks with provenance capture
+#' - [geocode_detect_format()], [geocode_compare_deliveries()]: Identify
+#'   Melissa delivery format and diff against a prior delivery
+#' - [geocode_clean()]: Standardize columns and parse RESULTCODE / STATUSCODE
+#' - [geocode_validate()]: Codebook-driven data quality checks (15 checks)
+#' - [geocode_reconcile()], [geocode_followup_queue()]: Reconcile Melissa
+#'   against ADECE coordinates with a documented decision matrix
+#' - [geocode_transform()]: Derived variables including `coord_model_status`
+#' - [geocode_bind_years()]: Multi-run geocode panels
+#' - [geocode_export_csv()], [geocode_export_parquet()],
+#'   [geocode_export_excel()], [geocode_export_rds()],
+#'   [geocode_export_stata()], [geocode_export_followup_queue()]:
+#'   Multiple export formats plus a dedicated PII-aware follow-up exporter
+#' - [linkage_geocode_classroom()], [linkage_geocode_applications()]:
+#'   Cross-module linkage paths
+#'
 #' @section Database Module:
 #' DuckDB-based persistent storage for processed panel data:
 #' - [db_init()]: Create or open a DuckDB database
@@ -83,8 +103,10 @@
 #' - [alprek_synthetic_budget()]: Synthetic budget panel data
 #' - [alprek_synthetic_classroom()]: Synthetic classroom panel data
 #' - [alprek_synthetic_student()]: Synthetic student panel data (with derived variables)
+#' - [alprek_synthetic_applications()]: Synthetic 4-kind applications data
+#' - [alprek_synthetic_geocode()]: Synthetic Melissa-shaped geocode data
 #'
-#' All three generators share classroom codes (via seed) enabling cross-module
+#' All generators share classroom codes (via seed) enabling cross-module
 #' linkage with [linkage_create_master()].
 #'
 #' @section Codebooks:
@@ -96,6 +118,12 @@
 #' - [alprek_language_mapping()]: Fluent language field cleaning mapping
 #' - [alprek_student_race_mapping()]: Student race/ethnicity standardization
 #' - [alprek_student_delivery_mapping()]: Student delivery type standardization
+#' - [alprek_geocode_column_map()]: Melissa column-name standardization
+#' - [alprek_geocode_resultcode_meaning()]: Melissa RESULTCODE meanings
+#' - [alprek_geocode_statuscode_meaning()]: Melissa STATUSCODE meanings
+#' - [alprek_geocode_errorcode_meaning()]: Melissa ERRORCODE meanings
+#' - [alprek_geocode_al_fips_counties()]: Alabama FIPS county codes
+#' - [alprek_geocode_source_manifest()]: Geocode delivery source manifest
 #'
 #' @section Utilities:
 #' - [parse_classroom_code()]: Parse classroom code components

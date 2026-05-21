@@ -41,3 +41,5 @@ run_*.R
 
 # Development files (manuscripts, logs, working docs)
 dev/
+/doc/
+/Meta/

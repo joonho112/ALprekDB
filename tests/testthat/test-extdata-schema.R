@@ -5,6 +5,14 @@ test_that("all expected extdata CSV files are present", {
                                     recursive = TRUE, full.names = TRUE)))
 
   expected <- sort(c(
+    # Geocode module (v0.8.0)
+    "codebooks/geocode_al_fips_counties.csv",
+    "codebooks/geocode_column_map_melissa_v1.csv",
+    "codebooks/geocode_edge_cases.csv",
+    "codebooks/geocode_source_manifest.csv",
+    "codebooks/melissa_errorcode_codes.csv",
+    "codebooks/melissa_resultcode_codes.csv",
+    "codebooks/melissa_statuscode_codes.csv",
     # Applications module (v0.7.0)
     "codebooks/applications_edge_cases.csv",
     "codebooks/applications_funding_types.csv",
@@ -246,6 +254,37 @@ test_that("codebook values have semantic integrity", {
                     trimws(languages$standardized[null_flag]) == ""))
   expect_false(any(is.na(languages$standardized[!null_flag]) |
                      trimws(languages$standardized[!null_flag]) == ""))
+})
+
+
+test_that("geocode codebooks have semantic integrity", {
+  rc <- alprek_geocode_resultcode_meaning()
+  tier <- stats::setNames(rc$precision_tier, rc$code)
+  expect_equal(unname(tier["GS01"]), "zip4")
+  expect_equal(unname(tier["GS03"]), "zip5")
+  expect_equal(unname(tier["GS05"]), "rooftop")
+  expect_equal(unname(tier["GS06"]), "parcel")
+
+  acceptable <- stats::setNames(rc$acceptable_for_master, rc$code)
+  expect_setequal(names(acceptable)[acceptable], c("GS01", "GS05", "GS06"))
+  expect_false(any(is.na(rc$acceptable_for_master)))
+
+  sc <- alprek_geocode_statuscode_meaning()
+  expect_false(any(duplicated(sc$code)))
+  expect_false(any(is.na(sc$paired_resultcode_in_v080) |
+                     !nzchar(sc$paired_resultcode_in_v080)))
+  expect_true(all(sc$paired_resultcode_in_v080 %in%
+                    rc$code[rc$observed_in_v080_input]))
+
+  manifest <- alprek_geocode_source_manifest()
+  expect_equal(as.character(manifest$delivery_date[1]), "2026-03-04")
+  expect_match(manifest$example_path[1], "2026-03-04")
+  expect_equal(manifest$n_cols_expected[1], 29L)
+
+  al_fips <- alprek_geocode_al_fips_counties()
+  expect_equal(nrow(al_fips), 67L)
+  expect_true(all(grepl("^01\\d{3}$", al_fips$fips_full)))
+  expect_false(any(duplicated(al_fips$fips_full)))
 })
 
 
