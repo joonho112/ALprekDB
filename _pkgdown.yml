@@ -27,7 +27,7 @@ home:
 
 navbar:
   structure:
-    left: [intro, reference, articles, news, paper]
+    left: [intro, reference, articles, news]
     right: [search, github]
   components:
     intro:
@@ -60,10 +60,6 @@ navbar:
         href: articles/m3-codebooks-mappings.html
       - text: M4 - Privacy and provenance
         href: articles/m4-privacy-provenance.html
-    paper:
-      text: "Paper"
-      icon: fa-file-pdf
-      href: manuscript.pdf
     github:
       icon: fa-github
       href: https://github.com/joonho112/ALprekDB
