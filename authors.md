@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/joonho112/ALprekDB/blob/v0.8.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/joonho112/ALprekDB/blob/main/DESCRIPTION)
 
 Lee J (2026). *ALprekDB: Alabama Pre-K Administrative Data Processing
 and Database Management*. R package version 0.8.0,

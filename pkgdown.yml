@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   a1-getting-started: a1-getting-started.html
@@ -13,7 +13,7 @@ articles:
   m2-validation-framework: m2-validation-framework.html
   m3-codebooks-mappings: m3-codebooks-mappings.html
   m4-privacy-provenance: m4-privacy-provenance.html
-last_built: 2026-05-21T18:49Z
+last_built: 2026-07-13T22:14Z
 urls:
   reference: https://joonho112.github.io/ALprekDB/reference
   article: https://joonho112.github.io/ALprekDB/articles

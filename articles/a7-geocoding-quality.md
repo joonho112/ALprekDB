@@ -164,7 +164,7 @@ raw
 #>   Receipt:      2026-03-04 
 #>   SHA-256:      aaaaaaaaaaaaaaaa ...
 #>   Rows x Cols: 90 x 29
-#>   Read at:      2026-05-21 18:50:11 UTC
+#>   Read at:      2026-07-13 22:16:08 UTC
 ```
 
 ## 4. Detect, clean, validate
@@ -211,7 +211,7 @@ clean
 #>   Cols:              31 
 #>   Cleaning log:     8 rule(s)
 #>                     severity:  INFO=8 
-#>   Cleaned at:        2026-05-21 18:50:11 UTC
+#>   Cleaned at:        2026-07-13 22:16:08 UTC
 ```
 
 The `$cleaning_log` records every rule applied, with `INFO` / `WARN` /
@@ -354,7 +354,7 @@ rec
 #>     lat_source = disputed_melissa: 9
 #>     lat_source = none:             0
 #>   needs_followup_geocoding: 12 (13.3%)
-#>   Reconciled at:           2026-05-21 18:50:12 UTC
+#>   Reconciled at:           2026-07-13 22:16:09 UTC
 #> 
 #>   Decision-cell counts:
 #>     D1   n=    0 Both present, GS01, within 50m: melissa, zip4
@@ -484,7 +484,7 @@ mst
 #>     precision_tier: rooftop=70, parcel=10, zip4=0, zip5=10, centroid=0, area=0, unknown=0, none=0
 #>     coord_model_status: missing=0, not_model_ready=10, provisional_followup=2, model_ready=78
 #>   Transform log:    5 rule(s)
-#>   Transformed at:   2026-05-21 18:50:12 UTC
+#>   Transformed at:   2026-07-13 22:16:09 UTC
 ```
 
 Derived variables:
@@ -539,7 +539,7 @@ panel
 #>   snapshot_dates: 2026-03-04 
 #>   n_rows_total:  90
 #>   rows per run:  melissa_v1_2026-03=90
-#>   bound_at:      2026-05-21 18:50:12 UTC
+#>   bound_at:      2026-07-13 22:16:10 UTC
 ```
 
 The binding log records one row per run with file SHA-256 and snapshot
